@@ -1,9 +1,10 @@
-package org.example.project
+package org.example.project.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -13,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -26,8 +29,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.example.project.ui.utils.GrayText
+import org.example.project.ui.utils.GreenText
+import org.example.project.ui.utils.PrimaryBackground
+import org.example.project.ui.utils.SecondaryCardBackground
+import org.example.project.ui.utils.WhiteText
 import org.jetbrains.compose.resources.painterResource
 import sellsystem.shared.generated.resources.Res
 import sellsystem.shared.generated.resources.woman_img
@@ -91,4 +101,29 @@ fun MainHeader() {
         HorizontalDivider(Modifier.fillMaxWidth(), thickness = 1.dp, color = WhiteText)
     }
 
+}
+
+@Composable
+fun GenericButton(text: String, icon: ImageVector? = null, onClick: () -> Unit) {
+    Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = SecondaryCardBackground)) {
+        if(icon != null) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text)
+                Icon(icon, contentDescription = null)
+            }
+        }else {
+            Text(text)
+        }
+    }
+}
+
+@Composable
+fun ScreenContainer(content: @Composable () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxSize(),
+        shape = RectangleShape,
+        colors = CardDefaults.cardColors(containerColor = PrimaryBackground)
+    ) {
+        content()
+    }
 }

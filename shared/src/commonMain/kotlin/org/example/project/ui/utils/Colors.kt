@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.ui.utils
 
 import androidx.compose.ui.graphics.Color
 
@@ -10,3 +10,4 @@ val PrimaryBackground = Color(0XFF111f22)
 val CardTitleBackground = Color(0XFF355562)
 val PrimaryCardBackground = Color(0XFF17262d)
 val SecondaryCardBackground = Color(0XFF182b31)
+val AccentColor = Color(0xFF8D1515)
