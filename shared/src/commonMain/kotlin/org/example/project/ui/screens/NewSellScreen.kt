@@ -8,18 +8,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Remove
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -28,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -39,13 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.ext.toPrice
@@ -61,17 +63,18 @@ fun NewSellScreen() {
 
         var isUsualClient by rememberSaveable { mutableStateOf(false) }
         var showClientDialog by rememberSaveable { mutableStateOf(false) }
+        var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
 
         Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Header()
+            Header { showAddItemsDialog = true }
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 border = BorderStroke(2.dp, color = GrayText),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -115,14 +118,21 @@ fun NewSellScreen() {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text("Cliente seleccionado:", fontWeight = FontWeight.SemiBold, color = Color.White)
-                                Text("Laura Cana", fontWeight = FontWeight.SemiBold, color = GreenText)
+                                Text(
+                                    "Cliente seleccionado:",
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    "Laura Cana",
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = GreenText
+                                )
                             }
                         }
                     }
                 }
             }
-            Spacer(Modifier.weight(1f))
             Column(
                 Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -142,84 +152,113 @@ fun NewSellScreen() {
                         fontWeight = FontWeight.Bold
                     )
                 }
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        GenericButton("Cancelar", color = GrayText) { }
-                        GenericButton("Aceptar") { }
-                    }
-                }
+                AcceptDeclineButtons(onDismiss = { }, onAccept = { })
             }
         }
 
         if (showClientDialog) {
-            Dialog(
-                onDismissRequest = { showClientDialog = false }
-
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth().height(500.dp),
-                    colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        IconButton(onClick = { showClientDialog = false }) {
-                            Icon(
-                                Icons.Outlined.Close,
-                                contentDescription = "close dialog",
-                                tint = Color.White
-                            )
-                        }
-                    }
+            DialogContent(
+                textFieldValue = "",
+                onTextFieldValueChange = { },
+                placeholderText = "Buscar cliente...",
+                content = {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        TextField(
-                            value = "",
-                            onValueChange = {},
-                            placeholder = { Text("Buscar cliente...") },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = SecondaryCardBackground,
-                                unfocusedContainerColor = SecondaryCardBackground,
-                                focusedIndicatorColor = GreenText,
-                                unfocusedIndicatorColor = GrayText,
-                                cursorColor = GreenText,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                unfocusedPlaceholderColor = WhiteText,
-                                focusedPlaceholderColor = Color.White
-                            )
-                        )
-                        Spacer(Modifier.size(12.dp))
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        ) {
-                            ClientItem("Leysa Asnal")
-                            ClientItem("Laura Cana")
-                            ClientItem("Florencia Medina")
-                        }
+                        ClientItem("Leysa Asnal")
+                        ClientItem("Laura Cana")
+                        ClientItem("Florencia Medina")
                     }
                 }
+            ) { showClientDialog = false }
+        }
+        if (showAddItemsDialog) {
+            DialogContent(
+                textFieldValue = "",
+                onTextFieldValueChange = { },
+                placeholderText = "Buscar productos...",
+                content = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        ProductItem(
+                            "Esmaltado semipermanente x100ml rojo",
+                            price = 4000
+                        )
+                        ProductItem(
+                            "Quitaesmaltes x250ml 'Aguita'",
+                            price = 15000
+                        )
+                        ProductItem(
+                            "Combo maquilladora iniciante",
+                            price = 150000
+                        )
+                    }
+                }
+            ) { showAddItemsDialog = false }
+        }
+    }
+}
+
+@Composable
+private fun DialogContent(
+    textFieldValue: String,
+    onTextFieldValueChange: (String) -> Unit,
+    placeholderText: String,
+    content: @Composable () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() },
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth().height(700.dp),
+            colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                IconButton(onClick = { onDismiss() }) {
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = "close dialog",
+                        tint = Color.White
+                    )
+                }
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(16.dp)
+            ) {
+                TextField(
+                    value = textFieldValue,
+                    onValueChange = { onTextFieldValueChange(it) },
+                    placeholder = { Text(placeholderText) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = SecondaryCardBackground,
+                        unfocusedContainerColor = SecondaryCardBackground,
+                        focusedIndicatorColor = GreenText,
+                        unfocusedIndicatorColor = GrayText,
+                        cursorColor = GreenText,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        unfocusedPlaceholderColor = WhiteText,
+                        focusedPlaceholderColor = Color.White
+                    )
+                )
+                Spacer(Modifier.size(12.dp))
+                content()
+                Spacer(modifier = Modifier.weight(1f))
+                AcceptDeclineButtons(onDismiss = { onDismiss() }, onAccept = { })
             }
         }
     }
-
-
-//    Dialog(
-//        onDismissRequest = { },
-//    ) {
-//        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground)) {
-//            Column(Modifier.fillMaxWidth().padding(16.dp)) {
-//                Text("Agregar Items")
-//            }
-//        }
-//    }
 }
+
+
 
 @Composable
 private fun ClientItem(name: String) {
@@ -231,18 +270,96 @@ private fun ClientItem(name: String) {
             contentColor = Color.White
         )
     ) {
-        Text(
-            name,
-            color = WhiteText,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
+                RadioButton(
+                    selected = false,
+                    onClick = { },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = GreenText,
+                        unselectedColor = GrayText
+                    )
+                )
+                Text(
+                    name,
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "Puntos:",
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "1500",
+                    color = GreenText,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+        }
     }
 }
 
 @Composable
-private fun Header() {
+private fun ProductItem(productName: String, price: Long) {
+
+    var productAdded by rememberSaveable { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = SecondaryCardBackground,
+            contentColor = Color.White
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { productAdded = !productAdded }) {
+                Checkbox(
+                    checked = productAdded,
+                    onCheckedChange = { productAdded = !productAdded },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = GreenText,
+                        uncheckedColor = GrayText
+                    )
+                )
+                Text(
+                    productName,
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Text(
+                price.toPrice(),
+                color = GreenText,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun Header(onButtonClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -261,15 +378,10 @@ private fun Header() {
                 style = MaterialTheme.typography.labelMedium
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        GenericButton(
+            text = "Agregar items"
         ) {
-            GenericButton(
-                text = "Agregar items"
-            ) {
-
-            }
+            onButtonClick()
         }
     }
 

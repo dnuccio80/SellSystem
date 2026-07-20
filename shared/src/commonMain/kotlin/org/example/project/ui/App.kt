@@ -77,6 +77,7 @@ import org.example.project.ui.utils.WhiteText
 @Preview
 fun App() {
     MaterialTheme {
+
         Box(modifier = Modifier.fillMaxSize().background(FullCard)) {
             Column(
                 modifier = Modifier

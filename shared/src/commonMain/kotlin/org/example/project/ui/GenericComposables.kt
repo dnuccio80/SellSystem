@@ -2,6 +2,7 @@ package org.example.project.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -118,6 +119,19 @@ fun GenericButton(text: String, icon: ImageVector? = null, color: Color = Second
             }
         }else {
             Text(text)
+        }
+    }
+}
+
+@Composable
+fun AcceptDeclineButtons(onDismiss: () -> Unit, onAccept: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            GenericButton("Cancelar", color = GrayText) { onDismiss() }
+            GenericButton("Aceptar") { onAccept() }
         }
     }
 }
