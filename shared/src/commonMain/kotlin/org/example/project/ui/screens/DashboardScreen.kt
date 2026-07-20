@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Loyalty
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.PendingActions
@@ -36,7 +36,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.example.project.ui.GenericButton
+import org.example.project.ui.GenericScreenTitleHeaderWithButtons
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.SummaryCard
+import org.example.project.ui.SummaryCardHeader
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GreenText
@@ -51,7 +54,13 @@ fun DashboardScreen() {
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TitleHeader()
+            GenericScreenTitleHeaderWithButtons(
+                mainTitle = "Panel General",
+                description = "Resumen de todos los datos",
+                firstButtonText = "Este mes",
+                secondButtonText = "Resetear datos",
+                buttonIcon = Icons.Default.ArrowDropDown,
+            )
             HeaderCardSummary()
             MidCardSummary(Modifier.weight(1f))
             LowCardSummary(Modifier.weight(1f))
@@ -60,37 +69,7 @@ fun DashboardScreen() {
 }
 
 @Composable
-private fun TitleHeader() {
-    Row(
-        Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(
-                "Panel General",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White
-            )
-            Text(
-                "Resumen de todos los datos",
-                color = WhiteText,
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            GenericButton("Este mes", Icons.Default.ArrowDropDown) { }
-            GenericButton("Resetear datos") { }
-        }
-    }
-}
-
-@Composable
-private fun HeaderCardSummary() {
+fun HeaderCardSummary() {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -159,91 +138,8 @@ private fun PendingOrdersSummaryCard(modifier: Modifier) {
 }
 
 
-@Composable
-private fun SummaryCard(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    amount: Long,
-    buttonText: String,
-    modifier: Modifier,
-    onClick: () -> Unit,
-) {
 
-    val amountColor = when {
-        amount == 0L -> WhiteText
-        amount > 0L -> GreenText
-        else -> AccentColor
-    }
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
-        modifier = modifier
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(16.dp)
-        ) {
-            SummaryCardHeader(icon, title, description)
-            Text(
-                amount.toPrice(),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineSmall,
-                color = amountColor
-            )
-            Button(
-                onClick = { onClick() },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                contentPadding = PaddingValues(horizontal = 0.dp),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(buttonText)
-                    Icon(
-                        Icons.AutoMirrored.Default.ArrowForwardIos,
-                        contentDescription = null,
-                        modifier = Modifier.size(12.dp)
-                    )
-                }
-            }
-        }
-    }
-}
 
-@Composable
-private fun SummaryCardHeader(icon: ImageVector, title: String, description: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Card(
-            modifier = Modifier.size(50.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = SecondaryCardBackground,
-                contentColor = Color.White
-            )
-        ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize().padding(4.dp)
-            )
-        }
-        Column {
-            Text(
-                title,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White
-            )
-            Text(description, style = MaterialTheme.typography.labelLarge, color = WhiteText)
-        }
-    }
-}
 
 @Composable
 private fun LowStockCardSummary(modifier: Modifier) {
@@ -257,9 +153,9 @@ private fun LowStockCardSummary(modifier: Modifier) {
             modifier = Modifier.padding(16.dp)
         ) {
             SummaryCardHeader(
-                Icons.Default.Inventory2,
-                "Productos con bajo stock",
-                "Productos sin stock o con poca cantidad en stock"
+                Icons.AutoMirrored.Default.List,
+                "Lista de tareas",
+                "Tareas para realizar"
             )
         }
     }

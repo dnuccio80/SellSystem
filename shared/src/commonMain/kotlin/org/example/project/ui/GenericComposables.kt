@@ -3,6 +3,7 @@ package org.example.project.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -33,9 +35,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.example.project.ui.ext.toPrice
+import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryBackground
+import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 import org.jetbrains.compose.resources.painterResource
@@ -104,8 +109,8 @@ fun MainHeader() {
 }
 
 @Composable
-fun GenericButton(text: String, icon: ImageVector? = null, onClick: () -> Unit) {
-    Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = SecondaryCardBackground)) {
+fun GenericButton(text: String, icon: ImageVector? = null, color: Color = SecondaryCardBackground, onClick: () -> Unit) {
+    Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = color)) {
         if(icon != null) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text)
@@ -116,6 +121,123 @@ fun GenericButton(text: String, icon: ImageVector? = null, onClick: () -> Unit) 
         }
     }
 }
+
+@Composable
+fun GenericScreenTitleHeaderWithButtons(mainTitle:String, description:String, firstButtonText:String, secondButtonText:String, buttonIcon: ImageVector? = null) {
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                mainTitle,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.White
+            )
+            Text(
+                description,
+                color = WhiteText,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            GenericButton(firstButtonText, buttonIcon) { }
+            GenericButton(secondButtonText) { }
+        }
+    }
+}
+
+@Composable
+fun SummaryCard(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    amount: Long,
+    buttonText: String,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+
+    val amountColor = when {
+        amount == 0L -> WhiteText
+        amount > 0L -> GreenText
+        else -> AccentColor
+    }
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+        modifier = modifier
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            SummaryCardHeader(icon, title, description)
+            Text(
+                amount.toPrice(),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall,
+                color = amountColor
+            )
+            Button(
+                onClick = { onClick() },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                contentPadding = PaddingValues(horizontal = 0.dp),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(buttonText)
+                    Icon(
+                        Icons.AutoMirrored.Default.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SummaryCardHeader(icon: ImageVector, title: String, description: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Card(
+            modifier = Modifier.size(50.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = SecondaryCardBackground,
+                contentColor = Color.White
+            )
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().padding(4.dp)
+            )
+        }
+        Column {
+            Text(
+                title,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+            Text(description, style = MaterialTheme.typography.labelLarge, color = WhiteText)
+        }
+    }
+}
+
 
 @Composable
 fun ScreenContainer(content: @Composable () -> Unit) {

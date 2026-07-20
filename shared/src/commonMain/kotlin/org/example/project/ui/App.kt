@@ -61,7 +61,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.example.project.ui.ext.toPrice
+import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
+import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.CardTitleBackground
 import org.example.project.ui.utils.FullCard
@@ -87,7 +89,7 @@ fun App() {
                             MainHeader()
                             Row {
                                 SideBar()
-                                DashboardScreen()
+                                NewSellScreen()
                             }
                         }
                     }
