@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
 import org.example.project.ui.ScreenContainer
@@ -57,148 +58,152 @@ import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 
-@Composable
-fun NewSellScreen() {
-    ScreenContainer {
 
-        var isUsualClient by rememberSaveable { mutableStateOf(false) }
-        var showClientDialog by rememberSaveable { mutableStateOf(false) }
-        var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
+class NewSellScreen: Screen {
+    @Composable
+    override fun Content() {
+        ScreenContainer {
 
-        Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Header { showAddItemsDialog = true }
-            Card(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                border = BorderStroke(2.dp, color = GrayText),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            var isUsualClient by rememberSaveable { mutableStateOf(false) }
+            var showClientDialog by rememberSaveable { mutableStateOf(false) }
+            var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
+
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(16.dp)
+                Header { showAddItemsDialog = true }
+                Card(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    border = BorderStroke(2.dp, color = GrayText),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                 ) {
-                    NewItemSell("Lima para uñas x1 unidad")
-                    NewItemSell("Quitaesmaltes x100ml Tortuguita")
-                    NewItemSell("Esmalte semipermanente x100ml marca Catunga")
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        NewItemSell("Lima para uñas x1 unidad")
+                        NewItemSell("Quitaesmaltes x100ml Tortuguita")
+                        NewItemSell("Esmalte semipermanente x100ml marca Catunga")
+                    }
                 }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(
-                    modifier = Modifier.clickable { isUsualClient = !isUsualClient },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = isUsualClient,
-                        onCheckedChange = {
-                            isUsualClient = !isUsualClient
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = GreenText,
-                            uncheckedColor = GrayText
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.clickable { isUsualClient = !isUsualClient },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = isUsualClient,
+                            onCheckedChange = {
+                                isUsualClient = !isUsualClient
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = GreenText,
+                                uncheckedColor = GrayText
+                            )
                         )
-                    )
-                    Text(
-                        "Es cliente usual",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                AnimatedContent(isUsualClient) {
-                    if (isUsualClient) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            GenericButton("Seleccionar cliente") { showClientDialog = true }
+                        Text(
+                            "Es cliente usual",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    AnimatedContent(isUsualClient) {
+                        if (isUsualClient) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                Text(
-                                    "Cliente seleccionado:",
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White
-                                )
-                                Text(
-                                    "Laura Cana",
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = GreenText
-                                )
+                                GenericButton("Seleccionar cliente") { showClientDialog = true }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        "Cliente seleccionado:",
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        "Laura Cana",
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = GreenText
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
-            Column(
-                Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "Total:",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        150000L.toPrice(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = GreenText,
-                        fontWeight = FontWeight.Bold
-                    )
+                Column(
+                    Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            "Total:",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            150000L.toPrice(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = GreenText,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    AcceptDeclineButtons(onDismiss = { }, onAccept = { })
                 }
-                AcceptDeclineButtons(onDismiss = { }, onAccept = { })
             }
-        }
 
-        if (showClientDialog) {
-            DialogContent(
-                textFieldValue = "",
-                onTextFieldValueChange = { },
-                placeholderText = "Buscar cliente...",
-                content = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        ClientItem("Leysa Asnal")
-                        ClientItem("Laura Cana")
-                        ClientItem("Florencia Medina")
+            if (showClientDialog) {
+                DialogContent(
+                    textFieldValue = "",
+                    onTextFieldValueChange = { },
+                    placeholderText = "Buscar cliente...",
+                    content = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ClientItem("Leysa Asnal")
+                            ClientItem("Laura Cana")
+                            ClientItem("Florencia Medina")
+                        }
                     }
-                }
-            ) { showClientDialog = false }
-        }
-        if (showAddItemsDialog) {
-            DialogContent(
-                textFieldValue = "",
-                onTextFieldValueChange = { },
-                placeholderText = "Buscar productos...",
-                content = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        ProductItem(
-                            "Esmaltado semipermanente x100ml rojo",
-                            price = 4000
-                        )
-                        ProductItem(
-                            "Quitaesmaltes x250ml 'Aguita'",
-                            price = 15000
-                        )
-                        ProductItem(
-                            "Combo maquilladora iniciante",
-                            price = 150000
-                        )
+                ) { showClientDialog = false }
+            }
+            if (showAddItemsDialog) {
+                DialogContent(
+                    textFieldValue = "",
+                    onTextFieldValueChange = { },
+                    placeholderText = "Buscar productos...",
+                    content = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ProductItem(
+                                "Esmaltado semipermanente x100ml rojo",
+                                price = 4000
+                            )
+                            ProductItem(
+                                "Quitaesmaltes x250ml 'Aguita'",
+                                price = 15000
+                            )
+                            ProductItem(
+                                "Combo maquilladora iniciante",
+                                price = 150000
+                            )
+                        }
                     }
-                }
-            ) { showAddItemsDialog = false }
+                ) { showAddItemsDialog = false }
+            }
         }
     }
 }
+
 
 @Composable
 private fun DialogContent(

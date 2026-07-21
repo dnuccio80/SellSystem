@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Loyalty
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.PendingActions
 import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericScreenTitleHeaderWithButtons
 import org.example.project.ui.ScreenContainer
@@ -47,25 +49,29 @@ import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 
-@Composable
-fun DashboardScreen() {
-    ScreenContainer {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            GenericScreenTitleHeaderWithButtons(
-                mainTitle = "Panel General",
-                description = "Resumen de todos los datos",
-                firstButtonText = "Este mes",
-                secondButtonText = "Resetear datos",
-                buttonIcon = Icons.Default.ArrowDropDown,
-            )
-            HeaderCardSummary()
-            MidCardSummary(Modifier.weight(1f))
-            LowCardSummary(Modifier.weight(1f))
+
+class DashboardScreen: Screen {
+    @Composable
+    override fun Content() {
+        ScreenContainer {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                GenericScreenTitleHeaderWithButtons(
+                    mainTitle = "Panel General",
+                    description = "Resumen de todos los datos",
+                    firstButtonText = "Este mes",
+                    secondButtonText = "Resetear datos",
+                    buttonIcon = Icons.Default.ArrowDropDown,
+                )
+                HeaderCardSummary()
+                MidCardSummary(Modifier.weight(1f))
+                LowCardSummary(Modifier.weight(1f))
+            }
         }
     }
+
 }
 
 @Composable
@@ -76,7 +82,7 @@ fun HeaderCardSummary() {
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SummaryCard(
-            icon = Icons.Default.AccountBalance,
+            icon = Icons.Outlined.AccountBalance,
             title = "Balance",
             description = "Ingresos menos gastos",
             amount = 20000000,

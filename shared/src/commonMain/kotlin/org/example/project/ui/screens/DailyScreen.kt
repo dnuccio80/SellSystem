@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericScreenTitleHeaderWithButtons
 import org.example.project.ui.ScreenContainer
@@ -51,25 +52,29 @@ import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 
-@Composable
-fun DailyScreen() {
-    ScreenContainer {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            GenericScreenTitleHeaderWithButtons(
-                mainTitle = "Caja diaria",
-                description = "Movimientos de dinero del día",
-                firstButtonText = "Abrir caja",
-                secondButtonText = "Cerrar caja",
-            )
-            SummaryHeader()
-            LastTransactionsCard(modifier = Modifier.weight(1f))
+class DailyScreen: Screen {
+    @Composable
+    override fun Content() {
+        ScreenContainer {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                GenericScreenTitleHeaderWithButtons(
+                    mainTitle = "Caja diaria",
+                    description = "Movimientos de dinero del día",
+                    firstButtonText = "Abrir caja",
+                    secondButtonText = "Cerrar caja",
+                )
+                SummaryHeader()
+                LastTransactionsCard(modifier = Modifier.weight(1f))
+            }
         }
     }
 }
+
+
 
 @Composable
 private fun LastTransactionsCard(modifier: Modifier) {
