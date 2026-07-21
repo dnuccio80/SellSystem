@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
 import org.example.project.ui.ScreenContainer
@@ -59,7 +60,7 @@ import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 
 
-class NewSellScreen: Screen {
+class NewSellScreen : Screen {
     @Composable
     override fun Content() {
         ScreenContainer {
@@ -67,6 +68,8 @@ class NewSellScreen: Screen {
             var isUsualClient by rememberSaveable { mutableStateOf(false) }
             var showClientDialog by rememberSaveable { mutableStateOf(false) }
             var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
+
+            val navigator = LocalNavigator.current
 
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -155,7 +158,9 @@ class NewSellScreen: Screen {
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    AcceptDeclineButtons(onDismiss = { }, onAccept = { })
+                    AcceptDeclineButtons(
+                        onDismiss = { },
+                        onAccept = { })
                 }
             }
 
@@ -264,7 +269,6 @@ private fun DialogContent(
 }
 
 
-
 @Composable
 private fun ClientItem(name: String) {
     Card(
@@ -296,7 +300,7 @@ private fun ClientItem(name: String) {
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
-            
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -337,7 +341,9 @@ private fun ProductItem(productName: String, price: Long) {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { productAdded = !productAdded }) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { productAdded = !productAdded }) {
                 Checkbox(
                     checked = productAdded,
                     onCheckedChange = { productAdded = !productAdded },

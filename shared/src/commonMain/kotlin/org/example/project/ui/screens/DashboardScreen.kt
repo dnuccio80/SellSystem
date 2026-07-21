@@ -6,22 +6,20 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Loyalty
-import androidx.compose.material.icons.filled.Money
-import androidx.compose.material.icons.filled.PendingActions
-import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Loyalty
+import androidx.compose.material.icons.outlined.Money
+import androidx.compose.material.icons.outlined.PendingActions
+import androidx.compose.material.icons.outlined.Wallet
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,26 +31,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import org.example.project.ui.GenericButton
+import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.ui.GenericScreenTitleHeaderWithButtons
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SummaryCard
 import org.example.project.ui.SummaryCardHeader
 import org.example.project.ui.ext.toPrice
-import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
-import org.example.project.ui.utils.WhiteText
 
 
 class DashboardScreen: Screen {
     @Composable
     override fun Content() {
+
+        val navigator = LocalNavigator.current
+
         ScreenContainer {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 32.dp),
@@ -63,7 +61,9 @@ class DashboardScreen: Screen {
                     description = "Resumen de todos los datos",
                     firstButtonText = "Este mes",
                     secondButtonText = "Resetear datos",
-                    buttonIcon = Icons.Default.ArrowDropDown,
+                    buttonIcon = Icons.Outlined.KeyboardArrowDown,
+                    onFirstButtonClick = {},
+                    onSecondButtonClick = { }
                 )
                 HeaderCardSummary()
                 MidCardSummary(Modifier.weight(1f))
@@ -91,7 +91,7 @@ fun HeaderCardSummary() {
             modifier = Modifier.weight(1f)
         )
         SummaryCard(
-            icon = Icons.Default.Wallet,
+            icon = Icons.Outlined.Wallet,
             title = "Ingresos",
             description = "Ingresos incluyendo transferencias y efectivo",
             amount = 20000000,
@@ -100,7 +100,7 @@ fun HeaderCardSummary() {
             modifier = Modifier.weight(1f)
         )
         SummaryCard(
-            icon = Icons.Filled.Money,
+            icon = Icons.Outlined.Money,
             title = "Gastos",
             description = "Egresos de dinero en efectivo y transferencias",
             amount = 0,
@@ -135,7 +135,7 @@ private fun PendingOrdersSummaryCard(modifier: Modifier) {
             modifier = Modifier.padding(16.dp)
         ) {
             SummaryCardHeader(
-                Icons.Default.PendingActions,
+                Icons.Outlined.PendingActions,
                 "Órdenes pendientes",
                 "Ventas a despachar"
             )
@@ -159,7 +159,7 @@ private fun LowStockCardSummary(modifier: Modifier) {
             modifier = Modifier.padding(16.dp)
         ) {
             SummaryCardHeader(
-                Icons.AutoMirrored.Default.List,
+                Icons.AutoMirrored.Outlined.List,
                 "Lista de tareas",
                 "Tareas para realizar"
             )
@@ -179,7 +179,7 @@ private fun CurrentAccountsCardSummary(modifier: Modifier){
             modifier = Modifier.padding(16.dp)
         ) {
             SummaryCardHeader(
-                Icons.Default.AccountBox,
+                Icons.Outlined.AccountBox,
                 "Cuentas corrientes",
                 "Saldos pendientes de clientes regulares"
             )
@@ -245,7 +245,7 @@ private fun CurrentAccountsCardSummary(modifier: Modifier){
                     ) {
                         Text("Ver detalles")
                         Icon(
-                            Icons.AutoMirrored.Default.ArrowForwardIos,
+                            Icons.AutoMirrored.Outlined.ArrowForwardIos,
                             contentDescription = null,
                             modifier = Modifier.size(12.dp)
                         )
@@ -268,7 +268,7 @@ private fun MostSellArticlesCardSummary(modifier: Modifier){
             modifier = Modifier.padding(16.dp)
         ) {
             SummaryCardHeader(
-                Icons.Default.Loyalty,
+                Icons.Outlined.Loyalty,
                 "Articulos mas vendidos",
                 "Top de productos mas vendidos historicamente"
             )

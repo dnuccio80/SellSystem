@@ -61,10 +61,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.transitions.CrossfadeTransition
 import cafe.adriel.voyager.transitions.FadeTransition
+import cafe.adriel.voyager.transitions.ScaleTransition
+import cafe.adriel.voyager.transitions.ScreenTransition
+import cafe.adriel.voyager.transitions.SlideTransition
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.NewSellScreen
+import org.example.project.ui.screens.ProductsScreen
 import org.example.project.ui.utils.CardTitleBackground
 import org.example.project.ui.utils.FullCard
 import org.example.project.ui.utils.GrayText
@@ -172,6 +177,10 @@ fun App() {
                                             Routes.Daily.route -> if(currentScreen !is DailyScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(DailyScreen())
+                                            }
+                                            Routes.Products.route -> if(currentScreen !is ProductsScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(ProductsScreen())
                                             }
 
                                             Routes.Sells.route -> if(currentScreen !is NewSellScreen) {

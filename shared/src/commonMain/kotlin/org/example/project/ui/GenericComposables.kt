@@ -67,29 +67,9 @@ fun MainHeader() {
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White
                 )
-                TextField(
+                SearchTextField(
                     value = "",
-                    onValueChange = { },
-                    placeholder = { Text("Buscar") },
-                    trailingIcon = {
-                        Icon(
-                            Icons.Filled.Search, contentDescription = null
-                        )
-                    },
-                    shape = RoundedCornerShape(4.dp),
-                    colors = TextFieldDefaults.colors(
-                        unfocusedTextColor = Color.White,
-                        focusedTextColor = Color.White,
-                        focusedPlaceholderColor = WhiteText,
-                        unfocusedPlaceholderColor = WhiteText,
-                        focusedTrailingIconColor = WhiteText,
-                        unfocusedTrailingIconColor = WhiteText,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = GreenText,
-                        unfocusedIndicatorColor = GrayText,
-                        cursorColor = GreenText
-                    )
+                    onValueChange = { }
                 )
             }
             Row(
@@ -107,6 +87,34 @@ fun MainHeader() {
         HorizontalDivider(Modifier.fillMaxWidth(), thickness = 1.dp, color = WhiteText)
     }
 
+}
+
+@Composable
+fun SearchTextField(value:String, onValueChange:(String) -> Unit) {
+    TextField(
+        value = value,
+        onValueChange = { onValueChange(it) },
+        placeholder = { Text("Buscar...") },
+        trailingIcon = {
+            Icon(
+                Icons.Filled.Search, contentDescription = null
+            )
+        },
+        shape = RoundedCornerShape(4.dp),
+        colors = TextFieldDefaults.colors(
+            unfocusedTextColor = Color.White,
+            focusedTextColor = Color.White,
+            focusedPlaceholderColor = WhiteText,
+            unfocusedPlaceholderColor = WhiteText,
+            focusedTrailingIconColor = WhiteText,
+            unfocusedTrailingIconColor = WhiteText,
+            unfocusedContainerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = GreenText,
+            unfocusedIndicatorColor = GrayText,
+            cursorColor = GreenText
+        )
+    )
 }
 
 @Composable
@@ -137,7 +145,7 @@ fun AcceptDeclineButtons(onDismiss: () -> Unit, onAccept: () -> Unit) {
 }
 
 @Composable
-fun GenericScreenTitleHeaderWithButtons(mainTitle:String, description:String, firstButtonText:String, secondButtonText:String, buttonIcon: ImageVector? = null) {
+fun GenericScreenTitleHeaderWithButtons(mainTitle:String, description:String, firstButtonText:String, secondButtonText:String, buttonIcon: ImageVector? = null, onFirstButtonClick:() -> Unit, onSecondButtonClick:() -> Unit) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -160,8 +168,8 @@ fun GenericScreenTitleHeaderWithButtons(mainTitle:String, description:String, fi
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            GenericButton(firstButtonText, buttonIcon) { }
-            GenericButton(secondButtonText) { }
+            GenericButton(firstButtonText, buttonIcon) { onFirstButtonClick() }
+            GenericButton(secondButtonText) { onSecondButtonClick() }
         }
     }
 }

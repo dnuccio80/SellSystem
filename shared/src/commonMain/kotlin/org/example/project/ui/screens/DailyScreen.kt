@@ -66,6 +66,8 @@ class DailyScreen: Screen {
                     description = "Movimientos de dinero del día",
                     firstButtonText = "Abrir caja",
                     secondButtonText = "Cerrar caja",
+                    onFirstButtonClick = { },
+                    onSecondButtonClick = { }
                 )
                 SummaryHeader()
                 LastTransactionsCard(modifier = Modifier.weight(1f))
