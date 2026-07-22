@@ -10,12 +10,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
@@ -23,17 +21,14 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.CreditScore
-import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Discount
 import androidx.compose.material.icons.outlined.FilterAlt
-import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.LocalGroceryStore
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Sell
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,15 +52,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.CrossfadeTransition
 import cafe.adriel.voyager.transitions.FadeTransition
-import cafe.adriel.voyager.transitions.ScaleTransition
-import cafe.adriel.voyager.transitions.ScreenTransition
-import cafe.adriel.voyager.transitions.SlideTransition
 import org.example.project.ui.di.uiModule
 import org.example.project.ui.screens.ClientsListScreen
 import org.example.project.ui.screens.CurrentAccountsListScreen
@@ -74,7 +64,6 @@ import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.ExpensesScreen
 import org.example.project.ui.screens.FinancialReportsScreen
 import org.example.project.ui.screens.LoyaltySystemScreen
-import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.screens.PendingOrdersScreen
 import org.example.project.ui.screens.ProductsScreen
 import org.example.project.ui.screens.PromotionsScreen
@@ -86,7 +75,6 @@ import org.example.project.ui.utils.FullCard
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
-import org.example.project.ui.utils.WhiteText
 import org.koin.compose.KoinApplication
 
 @Composable
@@ -314,129 +302,3 @@ private fun MenuItem(
     }
 }
 
-@Composable
-fun ContentContainer() {
-    ScreenContainer {
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                "Panel principal",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(1.dp, GrayText),
-                ) {
-                    Text("Boton prueba", style = MaterialTheme.typography.bodyLarge)
-                }
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(1.dp, GrayText),
-                ) {
-                    Text("Boton prueba", style = MaterialTheme.typography.bodyLarge)
-                }
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(1.dp, GrayText),
-                ) {
-                    Text("Boton prueba", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-        }
-        Card(shape = RoundedCornerShape(4.dp), modifier = Modifier.fillMaxWidth()) {
-            Column {
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardTitleBackground)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = false,
-                            onCheckedChange = { },
-                            colors = CheckboxDefaults.colors(
-                                uncheckedColor = GrayText,
-                                checkedColor = GreenText
-                            )
-                        )
-                        Text(
-                            "SKU",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Imagen",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Titulo",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Categoria",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Cantidad",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Precio",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Ult. modif.",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        Text(
-                            "Estado",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White
-                        )
-                        IconButton(onClick = { }) {
-                            Icon(
-                                Icons.Outlined.FilterAlt,
-                                contentDescription = "filter button",
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
