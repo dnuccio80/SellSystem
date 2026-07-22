@@ -70,6 +70,8 @@ import org.example.project.ui.screens.ClientsListScreen
 import org.example.project.ui.screens.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
+import org.example.project.ui.screens.ExpensesScreen
+import org.example.project.ui.screens.FinancialReportsScreen
 import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.screens.PendingOrdersScreen
 import org.example.project.ui.screens.ProductsScreen
@@ -203,10 +205,17 @@ fun App() {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(SellsListScreen())
                                             }
-
                                             Routes.PendingOrders.route -> if(currentScreen !is PendingOrdersScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(PendingOrdersScreen())
+                                            }
+                                            Routes.Expenses.route -> if(currentScreen !is ExpensesScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(ExpensesScreen())
+                                            }
+                                            Routes.FinancialReports.route -> if(currentScreen !is FinancialReportsScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(FinancialReportsScreen())
                                             }
                                         }
                                     }
