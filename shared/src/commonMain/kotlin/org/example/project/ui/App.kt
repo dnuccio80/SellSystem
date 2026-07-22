@@ -71,6 +71,7 @@ import org.example.project.ui.screens.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.NewSellScreen
+import org.example.project.ui.screens.PendingOrdersScreen
 import org.example.project.ui.screens.ProductsScreen
 import org.example.project.ui.screens.SellsListScreen
 import org.example.project.ui.screens.SuppliersListScreen
@@ -201,6 +202,11 @@ fun App() {
                                             Routes.Sells.route -> if(currentScreen !is SellsListScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(SellsListScreen())
+                                            }
+
+                                            Routes.PendingOrders.route -> if(currentScreen !is PendingOrdersScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(PendingOrdersScreen())
                                             }
                                         }
                                     }
