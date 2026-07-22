@@ -1,10 +1,12 @@
 package org.example.project.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,7 +48,8 @@ class ProductsScreen : Screen {
     override fun Content() {
 
         var showAddProductDialog by rememberSaveable { mutableStateOf(false) }
-        var isMultipleProduct by rememberSaveable { mutableStateOf(false) }
+        var isVariableProduct by rememberSaveable { mutableStateOf(false) }
+        var manageStock by rememberSaveable { mutableStateOf(false) }
 
         ScreenContainer {
             Column(
@@ -53,63 +57,132 @@ class ProductsScreen : Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Header { }
+                Header { showAddProductDialog = true }
             }
 
-            Dialog(onDismissRequest = { }) {
-
-                Card(
-                    modifier = Modifier.fillMaxWidth().height(550.dp),
-                    colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            Text(
-                                "Agregar nuevo producto",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.verticalScroll(
-                                rememberScrollState()
-                            )
-                        ) {
-                            GenericTextField("", "Nombre") { }
-                            GenericTextField("", "Descripción") { }
-                            GenericTextField("", "Precio de compra") { }
-                            GenericTextField("", "Precio de venta") { }
-                            GenericTextField("", "Categoría") { }
-                            GenericTextField("", "Stock") { }
-                            GenericTextField("", "Proveedor") { }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable {
-                                    isMultipleProduct = !isMultipleProduct
-                                }) {
-                                Checkbox(
-                                    checked = isMultipleProduct,
-                                    onCheckedChange = { isMultipleProduct = !isMultipleProduct },
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = GreenText,
-                                        uncheckedColor = GrayText
-                                    )
-                                )
-                                Text("Producto múltiple", color = Color.White)
-                            }
-                            AcceptDeclineButtons(onAccept = { }, onDismiss = { })
-                        }
-
-                    }
-                }
+            if(showAddProductDialog) {
+                AddProductDialog(
+                    manageStock = manageStock,
+                    isVariableProduct = isVariableProduct,
+                    onToggleManageStock = { manageStock = !manageStock },
+                    onToggleVariableProduct = { isVariableProduct = !isVariableProduct },
+                    onDismiss = { showAddProductDialog = false }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun AddProductDialog(manageStock: Boolean, isVariableProduct: Boolean, onToggleManageStock:() -> Unit, onToggleVariableProduct:() -> Unit, onDismiss:() -> Unit) {
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card(
+            modifier = Modifier.fillMaxWidth().height(550.dp),
+            colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(
+                        "Agregar nuevo producto",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                Column(
+                    modifier = Modifier.verticalScroll(
+                        rememberScrollState()
+                    )
+                ) {
+                    GenericTextField("", "Nombre") { }
+                    GenericTextField("", "Descripción") { }
+                    GenericTextField("", "Marca") { }
+                    GenericTextField("", "Precio de compra") { }
+                    GenericTextField("", "Precio de venta") { }
+                    GenericTextField("", "Categoría") { }
+                    GenericTextField("", "Proveedor") { }
+                    CheckBoxItem("Gestionar stock", manageStock) {
+                        onToggleManageStock()
+                    }
+                    AnimatedContent(manageStock) {
+                        if (manageStock) {
+                            Column {
+                                GenericTextField("", "Stock") { }
+                                GenericTextField(
+                                    "",
+                                    "Cantidad para notificar poco stock"
+                                ) { }
+                            }
+                        }
+                    }
+                    CheckBoxItem(
+                        "Producto con variantes",
+                        isVariableProduct
+                    ) { onToggleVariableProduct }
+                    AnimatedContent(isVariableProduct) {
+                        if (isVariableProduct) {
+                            Column(Modifier.padding(horizontal = 16.dp)) {
+                                CheckBoxItem(
+                                    "Gestionar color",
+                                    checked = false,
+                                    onClick = { },
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                "Margen de ganancia:",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                "54%",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = GreenText,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
+                }
+
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable {
+            onClick()
+        }) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onClick() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = GreenText,
+                uncheckedColor = GrayText
+            )
+        )
+        Text(name, color = Color.White)
     }
 }
 
