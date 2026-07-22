@@ -3,7 +3,6 @@ package org.example.project.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,13 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
-import org.example.project.ui.GenericButton
-import org.example.project.ui.GenericHeaderWithButton
+import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
-import org.example.project.ui.SearchTextField
 import org.example.project.ui.utils.PrimaryCardBackground
-import org.example.project.ui.utils.WhiteText
 
 class ClientsListScreen : Screen {
     @Composable
@@ -43,7 +39,7 @@ class ClientsListScreen : Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                GenericHeaderWithButton(
+                GenericHeaderWithButtonAndSearch(
                     title = "Agregar cliente",
                     description = "Listado de todos los clientes añadidos",
                     buttonText = "Agregar cliente"

@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
-import org.example.project.ui.GenericHeaderWithButton
+import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.utils.GrayText
@@ -48,7 +48,7 @@ class CurrentAccountsListScreen : Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                GenericHeaderWithButton(
+                GenericHeaderWithButtonAndSearch(
                     title = "Cuentas corrientes",
                     description = "Listado de cuentas corrientes abiertas",
                     buttonText = "Nueva cuenta corriente"

@@ -145,7 +145,7 @@ fun GenericTextField(value: String, labelText: String, onValueChange: (String) -
 }
 
 @Composable
-fun GenericHeaderWithButton(title:String, description:String, buttonText:String, onButtonClick: () -> Unit) {
+fun GenericHeaderWithButtonAndSearch(title:String, description:String, buttonText:String, hasSearch: Boolean = true, onButtonClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -168,7 +168,9 @@ fun GenericHeaderWithButton(title:String, description:String, buttonText:String,
                     style = MaterialTheme.typography.labelMedium
                 )
             }
-            SearchTextField("", onValueChange = { })
+            if(hasSearch) {
+                SearchTextField("", onValueChange = { })
+            }
         }
         GenericButton(
             text = buttonText

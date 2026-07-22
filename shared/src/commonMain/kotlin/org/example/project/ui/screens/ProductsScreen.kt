@@ -19,8 +19,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,22 +26,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
-import org.example.project.ui.GenericButton
-import org.example.project.ui.GenericHeaderWithButton
+import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
-import org.example.project.ui.SearchTextField
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
-import org.example.project.ui.utils.WhiteText
 
 class ProductsScreen : Screen {
     @Composable
@@ -60,7 +54,7 @@ class ProductsScreen : Screen {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                GenericHeaderWithButton(
+                GenericHeaderWithButtonAndSearch(
                     title = "Productos",
                     description = "Listado de todos los productos con y sin stock",
                     buttonText = "Agregar producto"

@@ -1,6 +1,5 @@
 package org.example.project.ui.screens
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
-import org.example.project.ui.GenericHeaderWithButton
+import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.utils.PrimaryCardBackground
@@ -40,7 +39,7 @@ class SuppliersListScreen: Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                GenericHeaderWithButton(
+                GenericHeaderWithButtonAndSearch(
                     title = "Proveedores",
                     description = "Listado de proveedores",
                     buttonText = "Nuevo proveedor"

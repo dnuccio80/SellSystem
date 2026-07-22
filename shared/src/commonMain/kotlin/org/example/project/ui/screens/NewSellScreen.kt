@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
@@ -51,6 +48,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
+import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.utils.GrayText
@@ -76,7 +74,14 @@ class NewSellScreen : Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Header { showAddItemsDialog = true }
+                GenericHeaderWithButtonAndSearch(
+                    title = "Nueva venta",
+                    description = "Detalles de nueva venta",
+                    buttonText = "Agregar items",
+                    hasSearch = false
+                ) {
+                    showAddItemsDialog = true
+                }
                 Card(
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     border = BorderStroke(2.dp, color = GrayText),
@@ -159,7 +164,7 @@ class NewSellScreen : Screen {
                         )
                     }
                     AcceptDeclineButtons(
-                        onDismiss = { },
+                        onDismiss = { navigator?.pop() },
                         onAccept = { })
                 }
             }
@@ -368,36 +373,6 @@ private fun ProductItem(productName: String, price: Long) {
         }
     }
 }
-
-@Composable
-private fun Header(onButtonClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(
-                "Nueva venta",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White
-            )
-            Text(
-                "Detalles de nueva venta",
-                color = WhiteText,
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-        GenericButton(
-            text = "Agregar items"
-        ) {
-            onButtonClick()
-        }
-    }
-
-}
-
 @Composable
 private fun NewItemSell(product: String) {
     Row(
