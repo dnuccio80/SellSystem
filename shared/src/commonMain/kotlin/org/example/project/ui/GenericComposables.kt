@@ -118,6 +118,33 @@ fun SearchTextField(value:String, onValueChange:(String) -> Unit) {
 }
 
 @Composable
+fun GenericTextField(value: String, labelText: String, onValueChange: (String) -> Unit) {
+    TextField(
+        value = value,
+        modifier = Modifier.fillMaxWidth(),
+        onValueChange = { onValueChange(it) },
+        label = { Text(labelText) },
+        shape = RoundedCornerShape(4.dp),
+        colors = TextFieldDefaults.colors(
+            unfocusedTextColor = Color.White,
+            focusedTextColor = Color.White,
+            focusedPlaceholderColor = WhiteText,
+            unfocusedPlaceholderColor = WhiteText,
+            focusedTrailingIconColor = WhiteText,
+            unfocusedTrailingIconColor = WhiteText,
+            unfocusedContainerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = GreenText,
+            unfocusedIndicatorColor = GrayText,
+            cursorColor = GreenText,
+            focusedLabelColor = GreenText,
+            unfocusedLabelColor = GrayText
+        )
+    )
+
+}
+
+@Composable
 fun GenericButton(text: String, icon: ImageVector? = null, color: Color = SecondaryCardBackground, onClick: () -> Unit) {
     Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = color)) {
         if(icon != null) {

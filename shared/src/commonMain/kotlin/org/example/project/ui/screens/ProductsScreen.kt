@@ -36,6 +36,7 @@ import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
+import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SearchTextField
 import org.example.project.ui.utils.GrayText
@@ -186,32 +187,7 @@ private fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun GenericTextField(value: String, labelText: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = value,
-        modifier = Modifier.fillMaxWidth(),
-        onValueChange = { onValueChange(it) },
-        label = { Text(labelText) },
-        shape = RoundedCornerShape(4.dp),
-        colors = TextFieldDefaults.colors(
-            unfocusedTextColor = Color.White,
-            focusedTextColor = Color.White,
-            focusedPlaceholderColor = WhiteText,
-            unfocusedPlaceholderColor = WhiteText,
-            focusedTrailingIconColor = WhiteText,
-            unfocusedTrailingIconColor = WhiteText,
-            unfocusedContainerColor = Color.Transparent,
-            focusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = GreenText,
-            unfocusedIndicatorColor = GrayText,
-            cursorColor = GreenText,
-            focusedLabelColor = GreenText,
-            unfocusedLabelColor = GrayText
-        )
-    )
 
-}
 
 @Composable
 private fun Header(onButtonClick: () -> Unit) {
