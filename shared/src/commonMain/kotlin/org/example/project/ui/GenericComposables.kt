@@ -182,6 +182,23 @@ fun GenericHeaderWithButtonAndSearch(title:String, description:String, buttonTex
 }
 
 @Composable
+fun SimpleGenericHeader(title:String, description:String) {
+    Column {
+        Text(
+            title,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color.White
+        )
+        Text(
+            description,
+            color = WhiteText,
+            style = MaterialTheme.typography.labelMedium
+        )
+    }
+}
+
+@Composable
 fun GenericButton(text: String, icon: ImageVector? = null, color: Color = SecondaryCardBackground, onClick: () -> Unit) {
     Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = color)) {
         if(icon != null) {

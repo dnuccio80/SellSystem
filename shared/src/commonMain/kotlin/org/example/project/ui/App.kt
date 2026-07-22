@@ -72,6 +72,7 @@ import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.ExpensesScreen
 import org.example.project.ui.screens.FinancialReportsScreen
+import org.example.project.ui.screens.LoyaltySystemScreen
 import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.screens.PendingOrdersScreen
 import org.example.project.ui.screens.ProductsScreen
@@ -216,6 +217,10 @@ fun App() {
                                             Routes.FinancialReports.route -> if(currentScreen !is FinancialReportsScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(FinancialReportsScreen())
+                                            }
+                                            Routes.LoyaltySystem.route -> if(currentScreen !is LoyaltySystemScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(LoyaltySystemScreen())
                                             }
                                         }
                                     }
