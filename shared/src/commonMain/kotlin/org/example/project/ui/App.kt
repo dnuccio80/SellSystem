@@ -1,6 +1,5 @@
 package org.example.project.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -11,10 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.filled.AttachMoney
@@ -22,7 +19,6 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.CreditScore
 import androidx.compose.material.icons.outlined.Discount
-import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.LocalGroceryStore
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.Payments
@@ -30,14 +26,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,13 +40,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.FadeTransition
-import org.example.project.ui.di.uiModule
-import org.example.project.ui.screens.ClientsListScreen
+import org.example.project.di.dataModule
+import org.example.project.di.domainModule
+import org.example.project.di.platformModule
+import org.example.project.di.uiModule
+import org.example.project.ui.screens.clients.ClientsListScreen
 import org.example.project.ui.screens.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
@@ -70,9 +61,7 @@ import org.example.project.ui.screens.PromotionsScreen
 import org.example.project.ui.screens.ReturnsScreen
 import org.example.project.ui.screens.SellsListScreen
 import org.example.project.ui.screens.SuppliersListScreen
-import org.example.project.ui.utils.CardTitleBackground
 import org.example.project.ui.utils.FullCard
-import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.koin.compose.KoinApplication
@@ -80,7 +69,7 @@ import org.koin.compose.KoinApplication
 @Composable
 fun App() {
     MaterialTheme {
-        KoinApplication(application = { modules(uiModule) }) {
+        KoinApplication(application = { modules(dataModule, domainModule, uiModule, platformModule()) }) {
             val menuItemList = listOf(
                 MenuItemData(
                     title = "Panel principal",

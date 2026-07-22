@@ -1,4 +1,4 @@
-package org.example.project.ui.screens
+package org.example.project.ui.screens.clients
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,10 +27,14 @@ import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.utils.PrimaryCardBackground
+import org.koin.compose.viewmodel.koinViewModel
 
 class ClientsListScreen : Screen {
     @Composable
     override fun Content() {
+
+        val viewmodel = koinViewModel<ClientsViewModel>()
+
         var showAddProductDialog by rememberSaveable { mutableStateOf(false) }
 
         ScreenContainer {
@@ -44,6 +48,13 @@ class ClientsListScreen : Screen {
                     description = "Listado de todos los clientes añadidos",
                     buttonText = "Agregar cliente"
                 ) { showAddProductDialog = true }
+                if(viewmodel.clientList.value.isEmpty()) {
+                    Text("No hay clientes, proba agregar clickeando el botón de 'Agregar cliente'", color = Color.White, style = MaterialTheme.typography.bodyLarge)
+                } else {
+                  viewmodel.clientList.value.forEach { client ->
+                      Text(client.fullName)
+                  }
+                }
             }
 
             if (showAddProductDialog) {
