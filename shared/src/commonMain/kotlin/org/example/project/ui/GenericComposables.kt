@@ -1,6 +1,7 @@
 package org.example.project.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -34,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.example.project.ui.ext.toPrice
@@ -194,6 +199,29 @@ fun SimpleGenericHeader(title:String, description:String) {
             description,
             color = WhiteText,
             style = MaterialTheme.typography.labelMedium
+        )
+    }
+}
+
+@Composable
+fun RadioButtonRowWithText(name: String, selected: String, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable { onClick() }.pointerHoverIcon(
+            PointerIcon.Hand
+        )
+    ) {
+        RadioButton(
+            selected == name, onClick = { onClick() }, colors = RadioButtonDefaults.colors(
+                selectedColor = GreenText,
+                unselectedColor = GrayText
+            )
+        )
+        Text(
+            name,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            style = MaterialTheme.typography.titleSmall
         )
     }
 }

@@ -76,6 +76,7 @@ import org.example.project.ui.screens.LoyaltySystemScreen
 import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.screens.PendingOrdersScreen
 import org.example.project.ui.screens.ProductsScreen
+import org.example.project.ui.screens.PromotionsScreen
 import org.example.project.ui.screens.SellsListScreen
 import org.example.project.ui.screens.SuppliersListScreen
 import org.example.project.ui.utils.CardTitleBackground
@@ -221,6 +222,10 @@ fun App() {
                                             Routes.LoyaltySystem.route -> if(currentScreen !is LoyaltySystemScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(LoyaltySystemScreen())
+                                            }
+                                            Routes.Promotions.route -> if(currentScreen !is PromotionsScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(PromotionsScreen())
                                             }
                                         }
                                     }

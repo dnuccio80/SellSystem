@@ -32,6 +32,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
+import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
@@ -95,7 +96,7 @@ private fun AddCurrentAccountDialog(onDismiss: () -> Unit) {
                 }
                 Column {
                     currentTypeList.forEach { type ->
-                        RadioButtonType(
+                        RadioButtonRowWithText(
                             name = type,
                             selected = typeSelected,
                             onClick = { typeSelected = type },
@@ -126,25 +127,3 @@ private fun AddCurrentAccountDialog(onDismiss: () -> Unit) {
     }
 }
 
-@Composable
-private fun RadioButtonType(name: String, selected: String, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onClick() }.pointerHoverIcon(
-            PointerIcon.Hand
-        )
-    ) {
-        RadioButton(
-            selected == name, onClick = { onClick() }, colors = RadioButtonDefaults.colors(
-                selectedColor = GreenText,
-                unselectedColor = GrayText
-            )
-        )
-        Text(
-            name,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            style = MaterialTheme.typography.titleMedium
-        )
-    }
-}
