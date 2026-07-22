@@ -72,6 +72,7 @@ import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.screens.ProductsScreen
+import org.example.project.ui.screens.SuppliersListScreen
 import org.example.project.ui.utils.CardTitleBackground
 import org.example.project.ui.utils.FullCard
 import org.example.project.ui.utils.GrayText
@@ -191,6 +192,10 @@ fun App() {
                                             Routes.CurrentAccounts.route -> if(currentScreen !is CurrentAccountsListScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(CurrentAccountsListScreen())
+                                            }
+                                            Routes.Suppliers.route -> if(currentScreen !is SuppliersListScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(SuppliersListScreen())
                                             }
 
                                             Routes.Sells.route -> if(currentScreen !is NewSellScreen) {
