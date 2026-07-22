@@ -36,6 +36,7 @@ import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
+import org.example.project.ui.GenericHeaderWithButton
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SearchTextField
@@ -58,7 +59,12 @@ class ProductsScreen : Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Header { showAddProductDialog = true }
+
+                GenericHeaderWithButton(
+                    title = "Productos",
+                    description = "Listado de todos los productos con y sin stock",
+                    buttonText = "Agregar producto"
+                ) { showAddProductDialog = true }
             }
 
             if(showAddProductDialog) {
@@ -188,38 +194,3 @@ private fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
 }
 
 
-
-@Composable
-private fun Header(onButtonClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column {
-                Text(
-                    "Productos",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White
-                )
-                Text(
-                    "Listado de todos los productos con y sin stock",
-                    color = WhiteText,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-            SearchTextField("", onValueChange = { })
-        }
-        GenericButton(
-            text = "Agregar producto"
-        ) {
-            onButtonClick()
-        }
-    }
-
-}

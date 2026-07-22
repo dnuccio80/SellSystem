@@ -1,17 +1,12 @@
 package org.example.project.ui.screens
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -30,10 +25,10 @@ import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
+import org.example.project.ui.GenericHeaderWithButton
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SearchTextField
-import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.WhiteText
 
@@ -48,7 +43,11 @@ class ClientsListScreen : Screen {
                     .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Header { showAddProductDialog = true }
+                GenericHeaderWithButton(
+                    title = "Agregar cliente",
+                    description = "Listado de todos los clientes añadidos",
+                    buttonText = "Agregar cliente"
+                ) { showAddProductDialog = true }
             }
 
             if (showAddProductDialog) {
@@ -96,37 +95,3 @@ private fun AddClientDialog(onDismiss: () -> Unit) {
     }
 }
 
-@Composable
-private fun Header(onButtonClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column {
-                Text(
-                    "Clientes",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White
-                )
-                Text(
-                    "Listado de todos los clientes añadidos",
-                    color = WhiteText,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-            SearchTextField("", onValueChange = { })
-        }
-        GenericButton(
-            text = "Agregar cliente"
-        ) {
-            onButtonClick()
-        }
-    }
-
-}

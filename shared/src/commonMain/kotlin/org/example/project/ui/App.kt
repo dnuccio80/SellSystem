@@ -67,6 +67,7 @@ import cafe.adriel.voyager.transitions.ScaleTransition
 import cafe.adriel.voyager.transitions.ScreenTransition
 import cafe.adriel.voyager.transitions.SlideTransition
 import org.example.project.ui.screens.ClientsListScreen
+import org.example.project.ui.screens.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.NewSellScreen
@@ -186,6 +187,10 @@ fun App() {
                                             Routes.Clients.route -> if(currentScreen !is ClientsListScreen) {
                                                 navigator.popUntilRoot()
                                                 navigator.replace(ClientsListScreen())
+                                            }
+                                            Routes.CurrentAccounts.route -> if(currentScreen !is CurrentAccountsListScreen) {
+                                                navigator.popUntilRoot()
+                                                navigator.replace(CurrentAccountsListScreen())
                                             }
 
                                             Routes.Sells.route -> if(currentScreen !is NewSellScreen) {

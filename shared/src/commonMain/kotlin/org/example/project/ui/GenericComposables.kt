@@ -145,6 +145,41 @@ fun GenericTextField(value: String, labelText: String, onValueChange: (String) -
 }
 
 @Composable
+fun GenericHeaderWithButton(title:String, description:String, buttonText:String, onButtonClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Column {
+                Text(
+                    title,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White
+                )
+                Text(
+                    description,
+                    color = WhiteText,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+            SearchTextField("", onValueChange = { })
+        }
+        GenericButton(
+            text = buttonText
+        ) {
+            onButtonClick()
+        }
+    }
+
+}
+
+@Composable
 fun GenericButton(text: String, icon: ImageVector? = null, color: Color = SecondaryCardBackground, onClick: () -> Unit) {
     Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = color)) {
         if(icon != null) {
