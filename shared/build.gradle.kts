@@ -53,6 +53,10 @@ kotlin {
             implementation(libs.material.icons.core)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.transitions)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel.navigation)
 
         }
         commonTest.dependencies {

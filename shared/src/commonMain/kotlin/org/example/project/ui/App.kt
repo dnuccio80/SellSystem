@@ -66,6 +66,7 @@ import cafe.adriel.voyager.transitions.FadeTransition
 import cafe.adriel.voyager.transitions.ScaleTransition
 import cafe.adriel.voyager.transitions.ScreenTransition
 import cafe.adriel.voyager.transitions.SlideTransition
+import org.example.project.ui.di.uiModule
 import org.example.project.ui.screens.ClientsListScreen
 import org.example.project.ui.screens.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
@@ -86,155 +87,171 @@ import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.WhiteText
+import org.koin.compose.KoinApplication
 
 @Composable
-@Preview
 fun App() {
     MaterialTheme {
+        KoinApplication(application = { modules(uiModule) }) {
+            val menuItemList = listOf(
+                MenuItemData(
+                    title = "Panel principal",
+                    route = Routes.Dashboard,
+                    icon = Icons.Default.Dashboard
+                ),
+                MenuItemData(
+                    title = "Caja diaria",
+                    route = Routes.Daily,
+                    icon = Icons.Default.AttachMoney
+                ),
+                MenuItemData(
+                    title = "Productos",
+                    route = Routes.Products,
+                    icon = Icons.Outlined.LocalGroceryStore
+                ),
+                MenuItemData(
+                    title = "Clientes",
+                    route = Routes.Clients,
+                    icon = Icons.Outlined.Person
+                ),
+                MenuItemData(
+                    title = "Cuentas corrientes",
+                    route = Routes.CurrentAccounts,
+                    icon = Icons.Outlined.CreditScore
+                ),
+                MenuItemData(
+                    title = "Proveedores",
+                    route = Routes.Suppliers,
+                    icon = Icons.Outlined.LocalShipping
+                ),
+                MenuItemData(
+                    title = "Ventas",
+                    route = Routes.Sells,
+                    icon = Icons.Outlined.Sell
+                ),
+                MenuItemData(
+                    title = "Órdenes pendientes",
+                    route = Routes.PendingOrders,
+                    icon = Icons.AutoMirrored.Outlined.ListAlt
+                ),
+                MenuItemData(
+                    title = "Gastos",
+                    route = Routes.Expenses,
+                    icon = Icons.Outlined.Payments
+                ),
+                MenuItemData(
+                    title = "Reportes financieros",
+                    route = Routes.FinancialReports,
+                    icon = Icons.Outlined.BarChart
+                ),
+                MenuItemData(
+                    title = "Sistema de lealtad",
+                    route = Routes.LoyaltySystem,
+                    icon = Icons.Outlined.Star
+                ),
+                MenuItemData(
+                    title = "Promociones",
+                    route = Routes.Promotions,
+                    icon = Icons.Outlined.Discount
+                ),
+                MenuItemData(
+                    title = "Devoluciones",
+                    route = Routes.Returns,
+                    icon = Icons.Outlined.Replay
+                ),
+            )
 
-        val menuItemList = listOf(
-            MenuItemData(
-                title = "Panel principal",
-                route = Routes.Dashboard,
-                icon = Icons.Default.Dashboard
-            ),
-            MenuItemData(
-                title = "Caja diaria",
-                route = Routes.Daily,
-                icon = Icons.Default.AttachMoney
-            ),
-            MenuItemData(
-                title = "Productos",
-                route = Routes.Products,
-                icon = Icons.Outlined.LocalGroceryStore
-            ),
-            MenuItemData(
-                title = "Clientes",
-                route = Routes.Clients,
-                icon = Icons.Outlined.Person
-            ),
-            MenuItemData(
-                title = "Cuentas corrientes",
-                route = Routes.CurrentAccounts,
-                icon = Icons.Outlined.CreditScore
-            ),
-            MenuItemData(
-                title = "Proveedores",
-                route = Routes.Suppliers,
-                icon = Icons.Outlined.LocalShipping
-            ),
-            MenuItemData(
-                title = "Ventas",
-                route = Routes.Sells,
-                icon = Icons.Outlined.Sell
-            ),
-            MenuItemData(
-                title = "Órdenes pendientes",
-                route = Routes.PendingOrders,
-                icon = Icons.AutoMirrored.Outlined.ListAlt
-            ),
-            MenuItemData(
-                title = "Gastos",
-                route = Routes.Expenses,
-                icon = Icons.Outlined.Payments
-            ),
-            MenuItemData(
-                title = "Reportes financieros",
-                route = Routes.FinancialReports,
-                icon = Icons.Outlined.BarChart
-            ),
-            MenuItemData(
-                title = "Sistema de lealtad",
-                route = Routes.LoyaltySystem,
-                icon = Icons.Outlined.Star
-            ),
-            MenuItemData(
-                title = "Promociones",
-                route = Routes.Promotions,
-                icon = Icons.Outlined.Discount
-            ),
-            MenuItemData(
-                title = "Devoluciones",
-                route = Routes.Returns,
-                icon = Icons.Outlined.Replay
-            ),
-        )
+            var menuItemSelected by remember { mutableStateOf(Routes.Dashboard.route) }
 
-        var menuItemSelected by remember { mutableStateOf(Routes.Dashboard.route) }
+            Navigator(screen = DashboardScreen()) { navigator ->
 
-        Navigator(screen = DashboardScreen()) { navigator ->
+                val currentScreen = navigator.lastItem
 
-            val currentScreen = navigator.lastItem
+                Box(modifier = Modifier.fillMaxSize().background(FullCard)) {
+                    Column(
+                        modifier = Modifier
+                            .safeContentPadding()
+                            .fillMaxSize(),
+                    ) {
+                        Scaffold(containerColor = FullCard) {
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                Column {
+                                    MainHeader()
+                                    Row {
+                                        SideBar(
+                                            menuItemList,
+                                            menuItemSelected
+                                        ) { newMenuItemSelected ->
+                                            menuItemSelected = newMenuItemSelected
+                                            when (menuItemSelected) {
+                                                Routes.Dashboard.route -> if (currentScreen !is DashboardScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(DashboardScreen())
+                                                }
 
-            Box(modifier = Modifier.fillMaxSize().background(FullCard)) {
-                Column(
-                    modifier = Modifier
-                        .safeContentPadding()
-                        .fillMaxSize(),
-                ) {
-                    Scaffold(containerColor = FullCard) {
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            Column {
-                                MainHeader()
-                                Row {
-                                    SideBar(menuItemList, menuItemSelected) {newMenuItemSelected ->
-                                        menuItemSelected = newMenuItemSelected
-                                        when(menuItemSelected) {
-                                            Routes.Dashboard.route -> if(currentScreen !is DashboardScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(DashboardScreen())
-                                            }
-                                            Routes.Daily.route -> if(currentScreen !is DailyScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(DailyScreen())
-                                            }
-                                            Routes.Products.route -> if(currentScreen !is ProductsScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(ProductsScreen())
-                                            }
-                                            Routes.Clients.route -> if(currentScreen !is ClientsListScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(ClientsListScreen())
-                                            }
-                                            Routes.CurrentAccounts.route -> if(currentScreen !is CurrentAccountsListScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(CurrentAccountsListScreen())
-                                            }
-                                            Routes.Suppliers.route -> if(currentScreen !is SuppliersListScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(SuppliersListScreen())
-                                            }
-                                            Routes.Sells.route -> if(currentScreen !is SellsListScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(SellsListScreen())
-                                            }
-                                            Routes.PendingOrders.route -> if(currentScreen !is PendingOrdersScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(PendingOrdersScreen())
-                                            }
-                                            Routes.Expenses.route -> if(currentScreen !is ExpensesScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(ExpensesScreen())
-                                            }
-                                            Routes.FinancialReports.route -> if(currentScreen !is FinancialReportsScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(FinancialReportsScreen())
-                                            }
-                                            Routes.LoyaltySystem.route -> if(currentScreen !is LoyaltySystemScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(LoyaltySystemScreen())
-                                            }
-                                            Routes.Promotions.route -> if(currentScreen !is PromotionsScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(PromotionsScreen())
-                                            }
-                                            Routes.Returns.route -> if(currentScreen !is ReturnsScreen) {
-                                                navigator.popUntilRoot()
-                                                navigator.replace(ReturnsScreen())
+                                                Routes.Daily.route -> if (currentScreen !is DailyScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(DailyScreen())
+                                                }
+
+                                                Routes.Products.route -> if (currentScreen !is ProductsScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(ProductsScreen())
+                                                }
+
+                                                Routes.Clients.route -> if (currentScreen !is ClientsListScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(ClientsListScreen())
+                                                }
+
+                                                Routes.CurrentAccounts.route -> if (currentScreen !is CurrentAccountsListScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(CurrentAccountsListScreen())
+                                                }
+
+                                                Routes.Suppliers.route -> if (currentScreen !is SuppliersListScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(SuppliersListScreen())
+                                                }
+
+                                                Routes.Sells.route -> if (currentScreen !is SellsListScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(SellsListScreen())
+                                                }
+
+                                                Routes.PendingOrders.route -> if (currentScreen !is PendingOrdersScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(PendingOrdersScreen())
+                                                }
+
+                                                Routes.Expenses.route -> if (currentScreen !is ExpensesScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(ExpensesScreen())
+                                                }
+
+                                                Routes.FinancialReports.route -> if (currentScreen !is FinancialReportsScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(FinancialReportsScreen())
+                                                }
+
+                                                Routes.LoyaltySystem.route -> if (currentScreen !is LoyaltySystemScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(LoyaltySystemScreen())
+                                                }
+
+                                                Routes.Promotions.route -> if (currentScreen !is PromotionsScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(PromotionsScreen())
+                                                }
+
+                                                Routes.Returns.route -> if (currentScreen !is ReturnsScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(ReturnsScreen())
+                                                }
                                             }
                                         }
+                                        FadeTransition(navigator)
                                     }
-                                    FadeTransition(navigator)
                                 }
                             }
                         }
@@ -255,7 +272,7 @@ fun SideBar(menuItemList: List<MenuItemData>, menuItemSelected: String, onClick:
             menuItemList.forEach { item ->
                 MenuItem(
                     item, menuItemSelected,
-                ) {newMenuItem ->
+                ) { newMenuItem ->
                     onClick(newMenuItem)
                 }
             }
