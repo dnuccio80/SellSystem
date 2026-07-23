@@ -1,5 +1,9 @@
 package org.example.project.ui.screens.clients
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,11 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -42,6 +49,7 @@ import org.example.project.ui.screens.clients.ClientValueChangeActions.NAME
 import org.example.project.ui.screens.clients.ClientValueChangeActions.NOTES
 import org.example.project.ui.screens.clients.ClientValueChangeActions.PHONE_NUMBER
 import org.example.project.ui.utils.CardTitleBackground
+import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.koin.compose.viewmodel.koinViewModel
@@ -51,10 +59,11 @@ class ClientsListScreen : Screen {
     override fun Content() {
 
         val viewmodel = koinViewModel<ClientsViewModel>()
-        var showAddProductDialog by rememberSaveable { mutableStateOf(false) }
+        var showAddClientDialog by rememberSaveable { mutableStateOf(false) }
         val clientData by viewmodel.clientData.collectAsStateWithLifecycle()
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
         var message by rememberSaveable { mutableStateOf("") }
+        var isModification by rememberSaveable { mutableStateOf(false) }
 
         val clientList by viewmodel.clientList.collectAsStateWithLifecycle()
 
@@ -75,7 +84,10 @@ class ClientsListScreen : Screen {
                     title = "Agregar cliente",
                     description = "Listado de todos los clientes añadidos",
                     buttonText = "Agregar cliente"
-                ) { showAddProductDialog = true }
+                ) {
+                    isModification = false
+                    showAddClientDialog = true
+                }
                 Spacer(modifier = Modifier.size(32.dp))
                 if (clientList.isEmpty()) {
                     Text(
@@ -85,12 +97,17 @@ class ClientsListScreen : Screen {
                     )
                 } else {
                     clientList.forEach { client ->
-                        ClientCard(client)
+                        ClientCard(client) {
+                            viewmodel.getClientData(client.id) {
+                                isModification = true
+                                showAddClientDialog = true
+                            }
+                        }
                     }
                 }
             }
 
-            if (showAddProductDialog) {
+            if (showAddClientDialog) {
                 AddClientDialog(
                     clientData,
                     onActionDone = { action, value ->
@@ -102,9 +119,10 @@ class ClientsListScreen : Screen {
                             NOTES -> viewmodel.updateNotes(value)
                         }
                     },
-                    onAccept = { viewmodel.addClient { showAddProductDialog = false } },
+                    isModification = isModification,
+                    onAccept = { viewmodel.addClient { showAddClientDialog = false } },
                     onDismiss = {
-                        showAddProductDialog = false
+                        showAddClientDialog = false
                         viewmodel.cleanData()
                     }
                 )
@@ -115,11 +133,22 @@ class ClientsListScreen : Screen {
 }
 
 @Composable
-private fun ClientCard(client: Client) {
+private fun ClientCard(client: Client, onClick: () -> Unit) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    val cardColor = if (isHovered) CardTitleBackground else GrayText
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource)
+            .clickable {
+                onClick()
+            },
         shape = RoundedCornerShape(4.dp),
-        colors = CardDefaults.cardColors(containerColor = CardTitleBackground)
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -162,7 +191,7 @@ private fun ClientCard(client: Client) {
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
 
-                )
+                    )
                 Text(
                     client.address,
                     fontWeight = FontWeight.SemiBold,
@@ -182,7 +211,7 @@ private fun ClientCard(client: Client) {
                 )
                 Text(
                     client.loyaltyPoints.toString(),
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = GreenText,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -223,11 +252,13 @@ fun SimpleAdviceDialog(msg: String, show: Boolean, onDismiss: () -> Unit) {
 private fun AddClientDialog(
     clientData: Client,
     onActionDone: (ClientValueChangeActions, String) -> Unit,
+    isModification: Boolean,
     onAccept: () -> Unit,
     onDismiss: () -> Unit,
 ) {
 
     val phoneNumber = if (clientData.phoneNumber == 0L) "" else clientData.phoneNumber.toString()
+    val acceptText = if (isModification) "Modificar" else "Aceptar"
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -276,7 +307,11 @@ private fun AddClientDialog(
                     ) { onActionDone(NOTES, it) }
                 }
                 Spacer(Modifier.size(0.dp))
-                AcceptDeclineButtons(onAccept = { onAccept() }, onDismiss = { onDismiss() })
+                AcceptDeclineButtons(
+                    acceptText = acceptText,
+                    acceptColor = GreenText,
+                    onAccept = { onAccept() },
+                    onDismiss = { onDismiss() })
             }
         }
 

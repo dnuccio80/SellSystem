@@ -16,6 +16,10 @@ class ClientRepositoryImpl(private val db: SystemDatabase): ClientRepository {
         }
     }
 
+    override suspend fun getClientById(id: Int): Client {
+        return db.clientDao().getClientById(id).toDomain()
+    }
+
     override suspend fun addClient(client: Client) {
         db.clientDao().addClient(client.toEntity())
     }

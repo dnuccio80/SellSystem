@@ -3,6 +3,7 @@ package org.example.project.ui.screens.clients
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.util.newStringBuilder
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,11 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.domain.models.Client
 import org.example.project.domain.usecases.clients.AddNewClient
+import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
 
 class ClientsViewModel(
     getClients: GetClients,
     private val addNewClient: AddNewClient,
+    private val getClientById: GetClientById
 ) : ViewModel() {
 
     private val _clientList =
@@ -68,18 +71,10 @@ class ClientsViewModel(
             current.copy(notes = newValue)
         }
     }
-
-    fun cleanData() {
-        _clientData.update { current ->
-            current.copy(fullName = "", phoneNumber = 0, address = "", birthday = "", notes = "")
-        }
-    }
-
     fun addClient(onDone:() -> Unit) {
         viewModelScope.launch {
             if (isAllDataCorrect()) {
                 addNewClient(_clientData.value)
-                _events.emit("Cliente agregado con éxito!")
                 onDone()
             } else {
                 _events.emit("Faltan rellenar datos!")
@@ -87,6 +82,33 @@ class ClientsViewModel(
         }
     }
 
+    fun getClientData(id:Int, onDone: () -> Unit) {
+        viewModelScope.launch {
+            val client = async {
+                getClientById(id)
+            }.await()
+
+            _clientData.update { current ->
+                current.copy(
+                    id = client.id,
+                    fullName = client.fullName,
+                    phoneNumber = client.phoneNumber,
+                    address = client.address,
+                    birthday = client.birthday,
+                    notes = client.notes,
+                    loyaltyPoints = client.loyaltyPoints,
+                    hasCurrentAccount = client.hasCurrentAccount
+                )
+            }
+            onDone()
+        }
+    }
+
+    fun cleanData() {
+        _clientData.update { current ->
+            current.copy(id = 0, fullName = "", phoneNumber = 0, address = "", birthday = "", notes = "", loyaltyPoints = 0, hasCurrentAccount = false)
+        }
+    }
     fun isAllDataCorrect(): Boolean {
         return _clientData.value.fullName.isNotBlank() &&
                 _clientData.value.phoneNumber != 0L &&

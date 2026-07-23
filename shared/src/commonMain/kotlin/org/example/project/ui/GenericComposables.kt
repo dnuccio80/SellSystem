@@ -177,7 +177,9 @@ fun GenericTextField(
             cursorColor = GreenText,
             focusedLabelColor = GreenText,
             unfocusedLabelColor = GrayText
-        )
+        ),
+        singleLine = true,
+        maxLines = 1
     )
 
 }
@@ -292,14 +294,14 @@ fun GenericButton(
 }
 
 @Composable
-fun AcceptDeclineButtons(onDismiss: () -> Unit, onAccept: () -> Unit) {
+fun AcceptDeclineButtons(acceptText: String = "Aceptar", declineText:String = "Cancelar", acceptColor:Color = PrimaryCardBackground, declineColor: Color = GrayText, onDismiss: () -> Unit, onAccept: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            GenericButton("Cancelar", color = GrayText) { onDismiss() }
-            GenericButton("Aceptar") { onAccept() }
+            GenericButton(declineText, color = declineColor) { onDismiss() }
+            GenericButton(acceptText, color = acceptColor) { onAccept() }
         }
     }
 }

@@ -13,6 +13,9 @@ interface ClientDao {
     @Query("SELECT * FROM ClientEntity ORDER BY fullName ASC ")
     fun getAllClients(): Flow<List<ClientEntity>>
 
+    @Query("SELECT * FROM ClientEntity WHERE id = :id")
+    suspend fun getClientById(id:Int):ClientEntity
+
     @Insert(onConflict = REPLACE)
     suspend fun addClient(client: ClientEntity)
 
