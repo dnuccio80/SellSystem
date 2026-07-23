@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.Capitalization
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
@@ -77,10 +78,10 @@ private fun AddNewPendingOrderDialog(onDismiss: () -> Unit) {
                     )
                 }
                 Column{
-                    GenericTextField("", "Nombre del cliente") { }
-                    GenericTextField("", "Teléfono") { }
-                    GenericTextField("", "Dirección") { }
-                    GenericTextField("", "Estado de pedido") { }
+                    GenericTextField("", "Nombre del cliente", capitalizationMethod = Capitalization.WORDS) { }
+                    GenericTextField("", "Teléfono", capitalizationMethod = Capitalization.NONE) { }
+                    GenericTextField("", "Dirección", capitalizationMethod = Capitalization.SENTENCES) { }
+                    GenericTextField("", "Estado de pedido", capitalizationMethod = Capitalization.SENTENCES) { }
                 }
                 AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
             }

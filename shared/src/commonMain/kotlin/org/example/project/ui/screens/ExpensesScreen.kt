@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.Capitalization
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
@@ -76,8 +77,8 @@ private fun AddExpenseDialog(onDismiss: () -> Unit) {
                     )
                 }
                 Column{
-                    GenericTextField("", "Título") { }
-                    GenericTextField("", "Descripción") { }
+                    GenericTextField("", "Título", capitalizationMethod = Capitalization.SENTENCES) { }
+                    GenericTextField("", "Descripción", capitalizationMethod = Capitalization.SENTENCES) { }
                 }
                 AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
             }

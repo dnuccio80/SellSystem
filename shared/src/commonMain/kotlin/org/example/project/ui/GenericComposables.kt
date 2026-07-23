@@ -41,6 +41,9 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.example.project.ui.Capitalization.*
+import org.example.project.ui.ext.capitalizeSentences
+import org.example.project.ui.ext.capitalizeWords
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
@@ -82,10 +85,18 @@ fun MainHeader() {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 IconButton(onClick = { }) {
-                    Icon(Icons.Default.Notifications, contentDescription = "notificaciones", tint = Color.White)
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = "notificaciones",
+                        tint = Color.White
+                    )
                 }
                 Card(shape = CircleShape, elevation = CardDefaults.cardElevation(4.dp)) {
-                    Image(painterResource(Res.drawable.woman_img), contentDescription = null,  modifier = Modifier.size(40.dp))
+                    Image(
+                        painterResource(Res.drawable.woman_img),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
+                    )
                 }
             }
         }
@@ -95,7 +106,7 @@ fun MainHeader() {
 }
 
 @Composable
-fun SearchTextField(value:String, onValueChange:(String) -> Unit) {
+fun SearchTextField(value: String, onValueChange: (String) -> Unit) {
     TextField(
         value = value,
         onValueChange = { onValueChange(it) },
@@ -122,12 +133,34 @@ fun SearchTextField(value:String, onValueChange:(String) -> Unit) {
     )
 }
 
+enum class Capitalization {
+    WORDS, SENTENCES, NONE
+}
+
 @Composable
-fun GenericTextField(value: String, labelText: String, onValueChange: (String) -> Unit) {
+fun GenericTextField(
+    value: String,
+    labelText: String,
+    onlyNumbers: Boolean = false,
+    capitalizationMethod:Capitalization = SENTENCES,
+    onValueChange: (String) -> Unit,
+) {
     TextField(
         value = value,
         modifier = Modifier.fillMaxWidth(),
-        onValueChange = { onValueChange(it) },
+        onValueChange = { valueChange ->
+            if (onlyNumbers) {
+                val newVal = valueChange.filter { it.isDigit() }
+                onValueChange(newVal)
+            } else {
+                val capitalized = when(capitalizationMethod) {
+                    WORDS -> valueChange.capitalizeWords()
+                    SENTENCES -> valueChange.capitalizeSentences()
+                    NONE -> valueChange
+                }
+                onValueChange(capitalized)
+            }
+        },
         label = { Text(labelText) },
         shape = RoundedCornerShape(4.dp),
         colors = TextFieldDefaults.colors(
@@ -150,7 +183,13 @@ fun GenericTextField(value: String, labelText: String, onValueChange: (String) -
 }
 
 @Composable
-fun GenericHeaderWithButtonAndSearch(title:String, description:String, buttonText:String, hasSearch: Boolean = true, onButtonClick: () -> Unit) {
+fun GenericHeaderWithButtonAndSearch(
+    title: String,
+    description: String,
+    buttonText: String,
+    hasSearch: Boolean = true,
+    onButtonClick: () -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -173,7 +212,7 @@ fun GenericHeaderWithButtonAndSearch(title:String, description:String, buttonTex
                     style = MaterialTheme.typography.labelMedium
                 )
             }
-            if(hasSearch) {
+            if (hasSearch) {
                 SearchTextField("", onValueChange = { })
             }
         }
@@ -187,7 +226,7 @@ fun GenericHeaderWithButtonAndSearch(title:String, description:String, buttonTex
 }
 
 @Composable
-fun SimpleGenericHeader(title:String, description:String) {
+fun SimpleGenericHeader(title: String, description: String) {
     Column {
         Text(
             title,
@@ -227,14 +266,26 @@ fun RadioButtonRowWithText(name: String, selected: String, onClick: () -> Unit) 
 }
 
 @Composable
-fun GenericButton(text: String, icon: ImageVector? = null, color: Color = SecondaryCardBackground, onClick: () -> Unit) {
-    Button(onClick = { onClick() }, shape = RoundedCornerShape(4.dp), colors = ButtonDefaults.buttonColors(containerColor = color)) {
-        if(icon != null) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+fun GenericButton(
+    text: String,
+    icon: ImageVector? = null,
+    color: Color = SecondaryCardBackground,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = { onClick() },
+        shape = RoundedCornerShape(4.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color)
+    ) {
+        if (icon != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(text)
                 Icon(icon, contentDescription = null)
             }
-        }else {
+        } else {
             Text(text)
         }
     }
@@ -254,7 +305,15 @@ fun AcceptDeclineButtons(onDismiss: () -> Unit, onAccept: () -> Unit) {
 }
 
 @Composable
-fun GenericScreenTitleHeaderWithButtons(mainTitle:String, description:String, firstButtonText:String, secondButtonText:String, buttonIcon: ImageVector? = null, onFirstButtonClick:() -> Unit, onSecondButtonClick:() -> Unit) {
+fun GenericScreenTitleHeaderWithButtons(
+    mainTitle: String,
+    description: String,
+    firstButtonText: String,
+    secondButtonText: String,
+    buttonIcon: ImageVector? = null,
+    onFirstButtonClick: () -> Unit,
+    onSecondButtonClick: () -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,

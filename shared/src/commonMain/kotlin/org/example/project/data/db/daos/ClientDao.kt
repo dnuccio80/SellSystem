@@ -10,7 +10,7 @@ import org.example.project.data.db.entities.ClientEntity
 @Dao
 interface ClientDao {
 
-    @Query("SELECT * FROM ClientEntity")
+    @Query("SELECT * FROM ClientEntity ORDER BY fullName ASC ")
     fun getAllClients(): Flow<List<ClientEntity>>
 
     @Insert(onConflict = REPLACE)

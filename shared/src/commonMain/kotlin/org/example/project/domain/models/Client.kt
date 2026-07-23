@@ -9,8 +9,8 @@ data class Client(
     val address:String,
     val birthday:String,
     val notes:String,
-    val loyaltyPoints:Int,
-    val hasCurrentAccount: Boolean
+    val loyaltyPoints:Int = 0,
+    val hasCurrentAccount: Boolean = false
 ) {
     fun toEntity(): ClientEntity {
         return ClientEntity(

@@ -12,7 +12,7 @@ const val DATABASE_NAME = "ss_app_database.db"
 
 expect object SystemCTor : RoomDatabaseConstructor<SystemDatabase>
 
-@Database(entities = [ClientEntity::class], version = 1)
+@Database(entities = [ClientEntity::class], version = 2)
 @ConstructedBy(SystemCTor::class)
 abstract class SystemDatabase:RoomDatabase() {
     abstract fun clientDao():ClientDao

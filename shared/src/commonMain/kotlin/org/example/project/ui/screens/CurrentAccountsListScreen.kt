@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.Capitalization
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
@@ -109,14 +110,16 @@ private fun AddCurrentAccountDialog(onDismiss: () -> Unit) {
                             GenericTextField(
                                 "",
                                 labelText = "Seleccionar proveedor",
-                                onValueChange = { }
+                                onValueChange = { },
+                                capitalizationMethod = Capitalization.NONE
                             )
                         }
                         else -> {
                             GenericTextField(
                                 "",
                                 labelText = "Seleccionar cliente",
-                                onValueChange = { }
+                                onValueChange = { },
+                                capitalizationMethod = Capitalization.NONE
                             )
                         }
                     }
