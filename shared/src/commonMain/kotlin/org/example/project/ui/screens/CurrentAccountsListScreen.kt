@@ -53,7 +53,8 @@ class CurrentAccountsListScreen : Screen {
                 GenericHeaderWithButtonAndSearch(
                     title = "Cuentas corrientes",
                     description = "Listado de cuentas corrientes abiertas",
-                    buttonText = "Nueva cuenta corriente"
+                    buttonText = "Nueva cuenta corriente",
+                    querySearchCapitalization = Capitalization.WORDS
                 ) { showNewCurrentAccountDialog = true }
             }
 

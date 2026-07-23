@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -77,6 +78,7 @@ fun MainHeader() {
                 )
                 SearchTextField(
                     value = "",
+                    onDelete = { },
                     onValueChange = { }
                 )
             }
@@ -106,15 +108,33 @@ fun MainHeader() {
 }
 
 @Composable
-fun SearchTextField(value: String, onValueChange: (String) -> Unit) {
+fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, onDelete: () -> Unit, onValueChange: (String) -> Unit) {
+
+    val capitalizedValue = when(capitalization) {
+        WORDS -> value.capitalizeWords()
+        SENTENCES -> value.capitalizeSentences()
+        NONE -> value
+    }
+
     TextField(
-        value = value,
+        value = capitalizedValue,
         onValueChange = { onValueChange(it) },
         placeholder = { Text("Buscar...") },
         trailingIcon = {
-            Icon(
-                Icons.Filled.Search, contentDescription = null
-            )
+            if (value.isBlank()) {
+                Icon(
+                    Icons.Filled.Search, contentDescription = null
+                )
+            } else {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onDelete() }.pointerHoverIcon(
+                        PointerIcon.Hand
+                    )
+                )
+            }
+
         },
         shape = RoundedCornerShape(4.dp),
         colors = TextFieldDefaults.colors(
@@ -142,7 +162,7 @@ fun GenericTextField(
     value: String,
     labelText: String,
     onlyNumbers: Boolean = false,
-    capitalizationMethod:Capitalization = SENTENCES,
+    capitalizationMethod: Capitalization = SENTENCES,
     onValueChange: (String) -> Unit,
 ) {
     TextField(
@@ -153,7 +173,7 @@ fun GenericTextField(
                 val newVal = valueChange.filter { it.isDigit() }
                 onValueChange(newVal)
             } else {
-                val capitalized = when(capitalizationMethod) {
+                val capitalized = when (capitalizationMethod) {
                     WORDS -> valueChange.capitalizeWords()
                     SENTENCES -> valueChange.capitalizeSentences()
                     NONE -> valueChange
@@ -189,7 +209,11 @@ fun GenericHeaderWithButtonAndSearch(
     title: String,
     description: String,
     buttonText: String,
+    searchValue: String = "",
+    onSearchValueChange: (String) -> Unit = {},
     hasSearch: Boolean = true,
+    querySearchCapitalization: Capitalization = SENTENCES,
+    onDeleteQuerySearch: () -> Unit = {},
     onButtonClick: () -> Unit,
 ) {
     Row(
@@ -215,7 +239,12 @@ fun GenericHeaderWithButtonAndSearch(
                 )
             }
             if (hasSearch) {
-                SearchTextField("", onValueChange = { })
+                SearchTextField(
+                    searchValue,
+                    onDelete = { onDeleteQuerySearch() },
+                    onValueChange = { onSearchValueChange(it) },
+                    capitalization = querySearchCapitalization
+                )
             }
         }
         GenericButton(
@@ -294,7 +323,14 @@ fun GenericButton(
 }
 
 @Composable
-fun AcceptDeclineButtons(acceptText: String = "Aceptar", declineText:String = "Cancelar", acceptColor:Color = PrimaryCardBackground, declineColor: Color = GrayText, onDismiss: () -> Unit, onAccept: () -> Unit) {
+fun AcceptDeclineButtons(
+    acceptText: String = "Aceptar",
+    declineText: String = "Cancelar",
+    acceptColor: Color = PrimaryCardBackground,
+    declineColor: Color = GrayText,
+    onDismiss: () -> Unit,
+    onAccept: () -> Unit,
+) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

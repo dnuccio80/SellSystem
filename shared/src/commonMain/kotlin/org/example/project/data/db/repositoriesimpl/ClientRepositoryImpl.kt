@@ -16,6 +16,14 @@ class ClientRepositoryImpl(private val db: SystemDatabase): ClientRepository {
         }
     }
 
+    override fun getClientBySearchQuery(query: String): Flow<List<Client>> {
+        return db.clientDao().getClientsByQuery(query).map { list ->
+            list.map { client ->
+                client.toDomain()
+            }
+        }
+    }
+
     override suspend fun getClientById(id: Int): Client {
         return db.clientDao().getClientById(id).toDomain()
     }
