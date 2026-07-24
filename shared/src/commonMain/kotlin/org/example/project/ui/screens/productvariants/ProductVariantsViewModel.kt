@@ -9,7 +9,6 @@ class ProductVariantsViewModel: ViewModel() {
 
     private val _variantsList = MutableStateFlow(listOf(""))
     val variants = _variantsList.asStateFlow()
-
     private val _variantTitle = MutableStateFlow("")
     val variantTitle = _variantTitle.asStateFlow()
 
