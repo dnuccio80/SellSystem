@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.CreditScore
 import androidx.compose.material.icons.outlined.Discount
 import androidx.compose.material.icons.outlined.LocalGroceryStore
@@ -56,7 +57,8 @@ import org.example.project.ui.screens.ExpensesScreen
 import org.example.project.ui.screens.FinancialReportsScreen
 import org.example.project.ui.screens.LoyaltySystemScreen
 import org.example.project.ui.screens.PendingOrdersScreen
-import org.example.project.ui.screens.ProductsScreen
+import org.example.project.ui.screens.productvariants.ProductVariantsScreen
+import org.example.project.ui.screens.products.ProductsScreen
 import org.example.project.ui.screens.PromotionsScreen
 import org.example.project.ui.screens.ReturnsScreen
 import org.example.project.ui.screens.SellsListScreen
@@ -85,6 +87,11 @@ fun App() {
                     title = "Productos",
                     route = Routes.Products,
                     icon = Icons.Outlined.LocalGroceryStore
+                ),
+                MenuItemData(
+                    title = "Variantes de productos",
+                    route = Routes.ProductVariants,
+                    icon = Icons.Outlined.Category
                 ),
                 MenuItemData(
                     title = "Clientes",
@@ -136,6 +143,8 @@ fun App() {
                     route = Routes.Returns,
                     icon = Icons.Outlined.Replay
                 ),
+
+
             )
 
             var menuItemSelected by remember { mutableStateOf(Routes.Dashboard.route) }
@@ -175,7 +184,10 @@ fun App() {
                                                     navigator.popUntilRoot()
                                                     navigator.replace(ProductsScreen())
                                                 }
-
+                                                Routes.ProductVariants.route -> if(currentScreen !is ProductVariantsScreen) {
+                                                    navigator.popUntilRoot()
+                                                    navigator.replace(ProductVariantsScreen())
+                                                }
                                                 Routes.Clients.route -> if (currentScreen !is ClientsListScreen) {
                                                     navigator.popUntilRoot()
                                                     navigator.replace(ClientsListScreen())

@@ -23,6 +23,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -162,12 +164,14 @@ fun GenericTextField(
     value: String,
     labelText: String,
     onlyNumbers: Boolean = false,
+    modifier: Modifier = Modifier,
     capitalizationMethod: Capitalization = SENTENCES,
+    trailingIcon:@Composable (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
 ) {
     TextField(
         value = value,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         onValueChange = { valueChange ->
             if (onlyNumbers) {
                 val newVal = valueChange.filter { it.isDigit() }
@@ -198,6 +202,7 @@ fun GenericTextField(
             focusedLabelColor = GreenText,
             unfocusedLabelColor = GrayText
         ),
+        trailingIcon = trailingIcon,
         singleLine = true,
         maxLines = 1
     )
@@ -254,6 +259,25 @@ fun GenericHeaderWithButtonAndSearch(
         }
     }
 
+}
+
+@Composable
+fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable {
+            onClick()
+        }) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onClick() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = GreenText,
+                uncheckedColor = GrayText
+            )
+        )
+        Text(name, color = Color.White, style = MaterialTheme.typography.bodyMedium)
+    }
 }
 
 @Composable
@@ -326,7 +350,7 @@ fun GenericButton(
 fun AcceptDeclineButtons(
     acceptText: String = "Aceptar",
     declineText: String = "Cancelar",
-    acceptColor: Color = PrimaryCardBackground,
+    acceptColor: Color = GreenText,
     declineColor: Color = GrayText,
     onDismiss: () -> Unit,
     onAccept: () -> Unit,

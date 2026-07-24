@@ -1,4 +1,4 @@
-package org.example.project.ui.screens
+package org.example.project.ui.screens.products
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.CheckBoxItem
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
@@ -103,7 +104,11 @@ private fun AddProductDialog(manageStock: Boolean, isVariableProduct: Boolean, o
                     GenericTextField("", "Descripción") { }
                     GenericTextField("", "Marca") { }
                     GenericTextField("", "Precio de compra") { }
-                    GenericTextField("", "Precio de venta") { }
+                    GenericTextField("", "Precio de lista") { }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+
+                    }
+                    GenericTextField("", "Precio en efectivo/transferencia") { }
                     GenericTextField("", "Categoría") { }
                     GenericTextField("", "Proveedor") { }
                     CheckBoxItem("Gestionar stock", manageStock) {
@@ -123,7 +128,7 @@ private fun AddProductDialog(manageStock: Boolean, isVariableProduct: Boolean, o
                     CheckBoxItem(
                         "Producto con variantes",
                         isVariableProduct
-                    ) { onToggleVariableProduct }
+                    ) { onToggleVariableProduct() }
                     AnimatedContent(isVariableProduct) {
                         if (isVariableProduct) {
                             Column(Modifier.padding(horizontal = 16.dp)) {
@@ -168,23 +173,5 @@ private fun AddProductDialog(manageStock: Boolean, isVariableProduct: Boolean, o
     }
 }
 
-@Composable
-private fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable {
-            onClick()
-        }) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = { onClick() },
-            colors = CheckboxDefaults.colors(
-                checkedColor = GreenText,
-                uncheckedColor = GrayText
-            )
-        )
-        Text(name, color = Color.White)
-    }
-}
 
 

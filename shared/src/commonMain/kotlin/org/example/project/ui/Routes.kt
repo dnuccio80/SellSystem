@@ -14,4 +14,5 @@ sealed class Routes(val route:String) {
     data object LoyaltySystem: Routes("loyaltySystem")
     data object Promotions: Routes("promotions")
     data object Returns: Routes("returns")
+    data object ProductVariants: Routes("productVariants")
 }
