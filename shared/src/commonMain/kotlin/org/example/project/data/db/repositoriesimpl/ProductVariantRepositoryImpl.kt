@@ -6,7 +6,7 @@ import org.example.project.data.db.SystemDatabase
 import org.example.project.domain.models.ProductVariant
 import org.example.project.domain.repositories.ProductVariantRepository
 
-class ProductVariantImpl(private val db: SystemDatabase): ProductVariantRepository {
+class ProductVariantRepositoryImpl(private val db: SystemDatabase): ProductVariantRepository {
     override fun getAllProductVariants(): Flow<List<ProductVariant>> {
         return db.productVariantDao().getAllProductVariants().map { list ->
             list.map { productVariant ->

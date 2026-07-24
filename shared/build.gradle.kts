@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kspCompose)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
+
 }
 
 kotlin {
@@ -65,6 +67,8 @@ kotlin {
             implementation(libs.koin.compose.viewmodel.navigation)
             implementation(libs.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.kotlinx.serialization.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

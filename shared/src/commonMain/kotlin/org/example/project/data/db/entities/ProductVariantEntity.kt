@@ -9,7 +9,7 @@ data class ProductVariantEntity(
     @PrimaryKey(autoGenerate = true)
     val id:Int,
     val name:String,
-    val variants: String
+    val variants: List<String>
 ) {
     fun toDomain(): ProductVariant {
         return ProductVariant(

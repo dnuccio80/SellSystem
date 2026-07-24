@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +23,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,15 +42,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import org.example.project.domain.models.ProductVariant
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.CardTitleBackground
 import org.example.project.ui.utils.GrayText
+import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
+import org.example.project.ui.utils.SecondaryCardBackground
+import org.example.project.ui.utils.WhiteText
 import org.koin.compose.viewmodel.koinViewModel
 
 class ProductVariantsScreen : Screen {
@@ -57,6 +65,16 @@ class ProductVariantsScreen : Screen {
         val viewModel = koinViewModel<ProductVariantsViewModel>()
         val variantList by viewModel.variants.collectAsStateWithLifecycle()
         val variantTitle by viewModel.variantTitle.collectAsStateWithLifecycle()
+        var eventMsg by rememberSaveable { mutableStateOf("") }
+        var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
+        val productVariants by viewModel.allProductVariants.collectAsStateWithLifecycle()
+
+        LaunchedEffect(viewModel.events) {
+            viewModel.events.collect { msg ->
+                eventMsg = msg
+                showAdviceDialog = true
+            }
+        }
 
         ScreenContainer {
             var showManageVariantsDialog by rememberSaveable { mutableStateOf(false) }
@@ -73,7 +91,21 @@ class ProductVariantsScreen : Screen {
                         description = "Gestión de variantes de productos como color, cantidad, etc.",
                         buttonText = "Agregar variante"
                     ) { showManageVariantsDialog = true }
+                    Spacer(Modifier.size(16.dp))
+                    if (productVariants.isNotEmpty()) {
+                        productVariants.forEach { productVariant ->
+                            ProductVariantCard(productVariant)
+                        }
+                    } else {
+                        Text(
+                            "No hay variantes de momento",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WhiteText
+                        )
+                    }
                 }
+
+
 
                 if (showManageVariantsDialog) {
                     AddProductDialog(
@@ -85,6 +117,11 @@ class ProductVariantsScreen : Screen {
                         },
                         onVariantAdd = { viewModel.addField() },
                         onVariantDelete = { viewModel.removeVariant(it) },
+                        onAccept = {
+                            viewModel.addNewProductVariant {
+                                showManageVariantsDialog = false
+                            }
+                        },
                         onDismiss = {
                             showManageVariantsDialog = false
                             viewModel.cleanData()
@@ -92,7 +129,82 @@ class ProductVariantsScreen : Screen {
                     )
                 }
             }
+            if (showAdviceDialog) {
+                SimpleAdviceDialog(
+                    msg = eventMsg,
+                    show = showAdviceDialog,
+                    onDismiss = { showAdviceDialog = false },
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun ProductVariantCard(productVariant: ProductVariant) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    val cardColor = if (isHovered) PrimaryCardBackground else SecondaryCardBackground
+
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable { }.pointerHoverIcon(PointerIcon.Hand).hoverable(interactionSource),
+        shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "Tipo de variante:",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    productVariant.name,
+                    fontWeight = FontWeight.Bold,
+                    color = GreenText,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "Variantes:",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                productVariant.variants.forEach {
+                    VariantsCard(it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VariantsCard(variant: String) {
+    Card(
+        shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(containerColor = GreenText)
+    ) {
+        Text(
+            variant,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(8.dp)
+        )
     }
 }
 
@@ -104,6 +216,7 @@ private fun AddProductDialog(
     onVariantChange: (Int, String) -> Unit,
     onVariantAdd: () -> Unit,
     onVariantDelete: (Int) -> Unit,
+    onAccept: () -> Unit,
     onDismiss: () -> Unit,
 ) {
 
@@ -167,7 +280,7 @@ private fun AddProductDialog(
                     }
                     Spacer(Modifier.size(16.dp))
                     Spacer(Modifier.weight(1f))
-                    AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
+                    AcceptDeclineButtons(onAccept = { onAccept() }, onDismiss = { onDismiss() })
                 }
 
             }

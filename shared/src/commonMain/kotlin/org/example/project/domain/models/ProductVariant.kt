@@ -8,17 +8,10 @@ data class ProductVariant(
     val variants: List<String>,
 ) {
     fun toEntity(): ProductVariantEntity {
-
-        val variantsList = StringBuilder()
-
-        variants.forEach { variant ->
-            variantsList.append(variant)
-        }
-
         return ProductVariantEntity(
             id = id,
             name = name,
-            variants = variantsList.toString()
+            variants = variants
         )
     }
 }
