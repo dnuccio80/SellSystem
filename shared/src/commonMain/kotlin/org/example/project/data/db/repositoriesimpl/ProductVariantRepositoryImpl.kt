@@ -15,6 +15,16 @@ class ProductVariantRepositoryImpl(private val db: SystemDatabase): ProductVaria
         }
     }
 
+    override fun getProductVariantsByName(query: String): Flow<List<ProductVariant>> {
+        return db.productVariantDao().getProductVariantsByName(query).map { list ->
+            list.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun getProductVariantById(id: Int): ProductVariant {
+        return db.productVariantDao().getProductVariantById(id).toDomain()
+    }
+
     override suspend fun addProductVariant(productVariant: ProductVariant) {
         db.productVariantDao().addProductVariant(productVariant.toEntity())
     }

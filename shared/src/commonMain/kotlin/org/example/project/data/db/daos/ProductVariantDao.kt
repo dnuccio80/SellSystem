@@ -14,6 +14,12 @@ interface ProductVariantDao {
     @Query("SELECT * FROM ProductVariantEntity ORDER BY name ASC")
     fun getAllProductVariants(): Flow<List<ProductVariantEntity>>
 
+    @Query("SELECT * FROM productvariantentity WHERE name LIKE '%' || :query || '%'")
+    fun getProductVariantsByName(query:String):Flow<List<ProductVariantEntity>>
+
+    @Query("SELECT * FROM productvariantentity WHERE id = :id")
+    suspend fun getProductVariantById(id:Int): ProductVariantEntity
+
     @Insert(onConflict = REPLACE)
     suspend fun addProductVariant(productVariant: ProductVariantEntity)
 

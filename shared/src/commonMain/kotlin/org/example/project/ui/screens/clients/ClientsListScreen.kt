@@ -253,6 +253,27 @@ fun SimpleAdviceDialog(msg: String, show: Boolean, onDismiss: () -> Unit) {
         }
     }
 }
+@Composable
+fun ConfirmDialog(msg:String, onAccept: () -> Unit , onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(msg, color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                AcceptDeclineButtons(
+                    onDismiss = { onDismiss() },
+                    onAccept = { onAccept() }
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun AddClientDialog(

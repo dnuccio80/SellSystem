@@ -23,7 +23,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,10 +47,9 @@ import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.utils.AccentColor
-import org.example.project.ui.utils.CardTitleBackground
-import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
@@ -65,9 +63,13 @@ class ProductVariantsScreen : Screen {
         val viewModel = koinViewModel<ProductVariantsViewModel>()
         val variantList by viewModel.variants.collectAsStateWithLifecycle()
         val variantTitle by viewModel.variantTitle.collectAsStateWithLifecycle()
+        val productVariants by viewModel.allProductVariants.collectAsStateWithLifecycle()
+        val querySearch by viewModel.querySearch.collectAsStateWithLifecycle()
+
         var eventMsg by rememberSaveable { mutableStateOf("") }
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
-        val productVariants by viewModel.allProductVariants.collectAsStateWithLifecycle()
+        var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
+        var isEdit by rememberSaveable { mutableStateOf(false) }
 
         LaunchedEffect(viewModel.events) {
             viewModel.events.collect { msg ->
@@ -89,12 +91,28 @@ class ProductVariantsScreen : Screen {
                     GenericHeaderWithButtonAndSearch(
                         title = "Variantes de productos",
                         description = "Gestión de variantes de productos como color, cantidad, etc.",
+                        searchValue = querySearch,
+                        onSearchValueChange = { viewModel.updateQuerySearch(it) },
+                        onDeleteQuerySearch = { viewModel.updateQuerySearch("") },
                         buttonText = "Agregar variante"
-                    ) { showManageVariantsDialog = true }
+                    ) {
+                        isEdit = false
+                        showManageVariantsDialog = true
+                    }
                     Spacer(Modifier.size(16.dp))
                     if (productVariants.isNotEmpty()) {
-                        productVariants.forEach { productVariant ->
-                            ProductVariantCard(productVariant)
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            productVariants.forEach { productVariant ->
+                                ProductVariantCard(productVariant) {
+                                    isEdit = true
+                                    viewModel.editProductVariant(
+                                        productVariant.id
+                                    ) { showManageVariantsDialog = true }
+                                }
+                            }
                         }
                     } else {
                         Text(
@@ -104,13 +122,11 @@ class ProductVariantsScreen : Screen {
                         )
                     }
                 }
-
-
-
                 if (showManageVariantsDialog) {
-                    AddProductDialog(
+                    ProductVariantDialog(
                         variantList,
                         variantTitle,
+                        isEdit = isEdit,
                         onTitleChange = { viewModel.updateTitle(it) },
                         onVariantChange = { index, value ->
                             viewModel.updateValue(index, value)
@@ -126,6 +142,7 @@ class ProductVariantsScreen : Screen {
                             showManageVariantsDialog = false
                             viewModel.cleanData()
                         },
+                        onDelete = { showConfirmDialog = true }
                     )
                 }
             }
@@ -136,12 +153,24 @@ class ProductVariantsScreen : Screen {
                     onDismiss = { showAdviceDialog = false },
                 )
             }
+
+            if (showConfirmDialog) {
+                ConfirmDialog(
+                    "Seguro que deseas eliminar la variante de producto?",
+                    onAccept = {
+                        showConfirmDialog = false
+                        showManageVariantsDialog = false
+                        viewModel.deleteProductVariantById()
+                    },
+                    onDismiss = { showConfirmDialog = false }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun ProductVariantCard(productVariant: ProductVariant) {
+private fun ProductVariantCard(productVariant: ProductVariant, onClick: () -> Unit) {
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -149,7 +178,9 @@ private fun ProductVariantCard(productVariant: ProductVariant) {
     val cardColor = if (isHovered) PrimaryCardBackground else SecondaryCardBackground
 
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { }.pointerHoverIcon(PointerIcon.Hand).hoverable(interactionSource),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource),
         shape = RoundedCornerShape(4.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
@@ -209,18 +240,18 @@ private fun VariantsCard(variant: String) {
 }
 
 @Composable
-private fun AddProductDialog(
+private fun ProductVariantDialog(
     variantList: List<String>,
     titleValue: String,
+    isEdit: Boolean,
     onTitleChange: (String) -> Unit,
     onVariantChange: (Int, String) -> Unit,
     onVariantAdd: () -> Unit,
     onVariantDelete: (Int) -> Unit,
     onAccept: () -> Unit,
     onDismiss: () -> Unit,
+    onDelete:() -> Unit
 ) {
-
-
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
             modifier = Modifier.fillMaxWidth().height(550.dp),
@@ -233,7 +264,7 @@ private fun AddProductDialog(
             ) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(
-                        "Agregar nueva variante de producto",
+                        "Nueva variante de producto",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -281,6 +312,11 @@ private fun AddProductDialog(
                     Spacer(Modifier.size(16.dp))
                     Spacer(Modifier.weight(1f))
                     AcceptDeclineButtons(onAccept = { onAccept() }, onDismiss = { onDismiss() })
+                    if (isEdit) {
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            GenericButton("Eliminar", color = AccentColor) { onDelete() }
+                        }
+                    }
                 }
 
             }

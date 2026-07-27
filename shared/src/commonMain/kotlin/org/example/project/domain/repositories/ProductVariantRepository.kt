@@ -6,6 +6,8 @@ import org.example.project.domain.models.ProductVariant
 interface ProductVariantRepository {
 
     fun getAllProductVariants(): Flow<List<ProductVariant>>
+    fun getProductVariantsByName(query:String): Flow<List<ProductVariant>>
+    suspend fun getProductVariantById(id:Int): ProductVariant
     suspend fun addProductVariant(productVariant: ProductVariant)
     suspend fun deleteProductVariantById(id:Int)
 }
