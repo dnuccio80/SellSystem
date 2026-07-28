@@ -116,7 +116,7 @@ class ProductVariantsScreen : Screen {
                         }
                     } else {
                         Text(
-                            "No hay variantes de momento",
+                            "No hay variantes disponibles",
                             style = MaterialTheme.typography.titleMedium,
                             color = WhiteText
                         )
@@ -253,6 +253,7 @@ private fun ProductVariantDialog(
     onDelete:() -> Unit
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
+
         Card(
             modifier = Modifier.fillMaxWidth().height(550.dp),
             colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),

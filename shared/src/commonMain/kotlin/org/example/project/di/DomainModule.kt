@@ -4,6 +4,8 @@ import org.example.project.domain.repositories.ClientRepository
 import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
+import org.example.project.domain.usecases.products.AddProduct
+import org.example.project.domain.usecases.products.GetProducts
 import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants
@@ -18,4 +20,6 @@ val domainModule = module {
     factoryOf(::AddProductVariant)
     factoryOf(::GetProductVariants)
     factoryOf(::GetProductVariantById)
+    factoryOf(::GetProducts)
+    factoryOf(::AddProduct)
 }
