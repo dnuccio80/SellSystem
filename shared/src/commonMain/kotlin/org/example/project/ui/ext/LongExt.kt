@@ -7,3 +7,11 @@ fun Long.toPrice(): String {
         .reversed()
     return "$ $number"
 }
+
+fun Long.toPercentOff():String {
+    return "$this% off"
+}
+
+fun Long.toPercentAdd():String {
+    return "+$this%"
+}

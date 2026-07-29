@@ -2,6 +2,8 @@ package org.example.project.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import org.example.project.ui.Capitalization.*
 import org.example.project.ui.ext.capitalizeSentences
 import org.example.project.ui.ext.capitalizeWords
+import org.example.project.ui.ext.toPercentAdd
+import org.example.project.ui.ext.toPercentOff
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
@@ -164,14 +171,26 @@ fun GenericTextField(
     value: String,
     labelText: String,
     onlyNumbers: Boolean = false,
-    modifier: Modifier = Modifier,
+    isPrice: Boolean = false,
+    isPercentOff: Boolean = false,
+    isPercentAdd: Boolean = false,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     capitalizationMethod: Capitalization = SENTENCES,
     trailingIcon:@Composable (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
 ) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused = interactionSource.collectIsFocusedAsState()
+
     TextField(
-        value = value,
-        modifier = modifier.fillMaxWidth(),
+        value = when {
+            isPrice && !isFocused.value && value.isNotBlank() -> value.toLong().toPrice()
+            isPercentOff && !isFocused.value && value.isNotBlank() -> value.toLong().toPercentOff()
+            isPercentAdd && !isFocused.value && value.isNotBlank() -> value.toLong().toPercentAdd()
+            else -> value
+        },
+        modifier = modifier,
         onValueChange = { valueChange ->
             if (onlyNumbers) {
                 val newVal = valueChange.filter { it.isDigit() }
@@ -185,6 +204,7 @@ fun GenericTextField(
                 onValueChange(capitalized)
             }
         },
+        interactionSource = interactionSource,
         label = { Text(labelText) },
         shape = RoundedCornerShape(4.dp),
         colors = TextFieldDefaults.colors(

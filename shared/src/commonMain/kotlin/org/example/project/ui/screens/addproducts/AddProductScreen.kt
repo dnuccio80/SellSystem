@@ -1,0 +1,477 @@
+package org.example.project.ui.screens.addproducts
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import org.example.project.domain.models.Product
+import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.CheckBoxItem
+import org.example.project.ui.GenericTextField
+import org.example.project.ui.RadioButtonRowWithText
+import org.example.project.ui.ScreenContainer
+import org.example.project.ui.SimpleGenericHeader
+import org.example.project.ui.screens.addproducts.UpdateProductAction.*
+import org.example.project.ui.screens.clients.SimpleAdviceDialog
+import org.example.project.ui.utils.GrayText
+import org.example.project.ui.utils.GreenText
+import org.example.project.ui.utils.PrimaryCardBackground
+import org.koin.compose.viewmodel.koinViewModel
+
+
+enum class UpdateProductAction {
+    NAME, DESCRIPTION, BRAND, BUY_PRICE, LIST_PRICE, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
+}
+
+class AddProductScreen : Screen {
+    @Composable
+    override fun Content() {
+
+        val navigator = LocalNavigator.current
+        val viewModel = koinViewModel<AddProductViewModel>()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        var adviceMsg by rememberSaveable { mutableStateOf("") }
+        var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
+
+        LaunchedEffect(viewModel.events) {
+            viewModel.events.collect { msg ->
+                adviceMsg = msg
+                showAdviceDialog = true
+            }
+        }
+
+        ScreenContainer {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                SimpleGenericHeader(
+                    title = "Nuevo producto",
+                    description = "Agrega información para agregar un nuevo producto"
+                )
+                Column(
+                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    DataItem(
+                        product = uiState.product,
+                        onActionDone = { action, value ->
+                            when(action) {
+                                NAME -> viewModel.updateProduct(UpdatableProductData.NAME, value)
+                                DESCRIPTION -> viewModel.updateProduct(UpdatableProductData.DESCRIPTION, value)
+                                BRAND -> viewModel.updateProduct(UpdatableProductData.BRAND, value)
+                                CATEGORY -> viewModel.updateProduct(UpdatableProductData.CATEGORY, value)
+                                else -> { }
+                            }
+                        }
+                    )
+                    StockAndVariantItem(
+                        product = uiState.product,
+                        manageStock = uiState.manageStock,
+                        isVariableProduct = uiState.hasVariants,
+                        onActionDone = { action, value ->
+                            when(action) {
+                                TOGGLE_MANAGE_STOCK -> viewModel.updateProduct(UpdatableProductData.TOGGLE_MANAGE_STOCK, value)
+                                CURRENT_STOCK -> viewModel.updateProduct(UpdatableProductData.CURRENT_STOCK, value)
+                                ADVICE_STOCK -> viewModel.updateProduct(UpdatableProductData.ADVICE_STOCK, value)
+                                TOGGLE_VARIANT_PRODUCT -> viewModel.updateProduct(UpdatableProductData.TOGGLE_HAS_VARIANTS, value)
+                                else -> {}
+                            }
+                        }
+                    )
+                    PriceItem(
+                        product = uiState.product,
+                        onActionDone = { action, value ->
+                            when(action) {
+                               BUY_PRICE -> viewModel.updateProduct(UpdatableProductData.BUY_PRICE, value)
+                               LIST_PRICE -> viewModel.updateProduct(UpdatableProductData.LIST_PRICE, value)
+                               CASH_PRICE -> viewModel.updateProduct(UpdatableProductData.CASH_PRICE, value)
+                                else -> {}
+                            }
+
+                        }
+                    )
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        AcceptDeclineButtons(
+                            onAccept = { viewModel.tryAddProduct() },
+                            onDismiss = {
+                                navigator?.pop()
+                                viewModel.cleanProductData()
+                            })
+                    }
+                }
+            }
+            SimpleAdviceDialog(
+                msg = adviceMsg,
+                show = showAdviceDialog,
+                onDismiss =  { showAdviceDialog = false }
+            )
+        }
+    }
+}
+
+@Composable
+fun StockAndVariantItem(
+    product: Product,
+    manageStock: Boolean,
+    isVariableProduct: Boolean,
+    onActionDone: (UpdateProductAction, String) -> Unit,
+) {
+
+    val currentStock = if (product.currentStock == 0) "" else product.currentStock.toString()
+    val adviceStock = if (product.adviceStock == 0) "" else product.adviceStock.toString()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.elevatedCardElevation(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    "Stock y variantes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+            CheckBoxItem("Gestionar stock", manageStock) {
+                onActionDone(TOGGLE_MANAGE_STOCK, "")
+            }
+            AnimatedContent(manageStock) {
+                if (manageStock) {
+                    Column {
+                        GenericTextField(
+                            currentStock,
+                            "Stock",
+                            onlyNumbers = true
+                        ) { onActionDone(CURRENT_STOCK, it) }
+                        GenericTextField(
+                            adviceStock,
+                            "Cantidad para notificar poco stock", onlyNumbers = true
+                        ) { onActionDone(ADVICE_STOCK, it) }
+                    }
+                }
+            }
+            CheckBoxItem(
+                "Producto con variantes",
+                isVariableProduct
+            ) { onActionDone(TOGGLE_VARIANT_PRODUCT, "") }
+            AnimatedContent(isVariableProduct) {
+                if (isVariableProduct) {
+                    Column(Modifier.padding(horizontal = 16.dp)) {
+                        CheckBoxItem(
+                            "Gestionar color",
+                            checked = false,
+                            onClick = { },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PriceItem(
+    product: Product,
+    onActionDone: (UpdateProductAction, String) -> Unit,
+) {
+
+
+    val buyPrice = if (product.buyPrice == 0L) "" else product.buyPrice.toString()
+    val listPrice = if (product.listPrice == 0L) "" else product.listPrice.toString()
+    val cashPrice = if (product.cashPrice == 0L) "" else product.cashPrice.toString()
+
+
+    val cashPriceType = listOf(
+        "Precio",
+        "Porcentaje de descuento"
+    )
+
+    val listPriceType = listOf(
+        "Precio",
+        "Porcentaje de ganancia"
+    )
+
+    var cashTypeSelected by rememberSaveable { mutableStateOf(cashPriceType.first()) }
+    var listPriceSelected by rememberSaveable { mutableStateOf(listPriceType.first()) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.elevatedCardElevation(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    "Costos y precios",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+            GenericTextField(
+                buyPrice,
+                "Precio de compra",
+                onlyNumbers = true,
+                isPrice = true,
+            ) { onActionDone(BUY_PRICE, it) }
+            Spacer(Modifier.height(16.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(32.dp),
+                modifier = Modifier.height(IntrinsicSize.Min)
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    Column {
+
+                        Text(
+                            "Precio de lista",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            RadioButtonRowWithText(
+                                name = listPriceType.first(),
+                                selected = listPriceSelected,
+                                onClick = {
+                                    listPriceSelected = listPriceType.first()
+                                    onActionDone(LIST_PRICE, "")
+                                }
+                            )
+                            RadioButtonRowWithText(
+                                name = listPriceType.last(),
+                                selected = listPriceSelected,
+                                onClick = {
+                                    listPriceSelected = listPriceType.last()
+                                    onActionDone(LIST_PRICE, "")
+                                }
+                            )
+                        }
+                        AnimatedContent(listPriceSelected) {
+                            if (listPriceSelected == listPriceType.first()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    GenericTextField(
+                                        listPrice,
+                                        "Precio de lista",
+                                        onlyNumbers = true,
+                                        modifier = Modifier.weight(1f),
+                                        isPrice = true,
+                                    ) { onActionDone(LIST_PRICE, it) }
+                                    Box(
+                                        modifier = Modifier.background(GreenText),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "54%",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    GenericTextField(
+                                        listPrice,
+                                        "Porcentaje de ganancia",
+                                        onlyNumbers = true,
+                                        modifier = Modifier.weight(1f),
+                                        isPercentAdd = true
+                                    ) { onActionDone(LIST_PRICE, it) }
+                                    Box(
+                                        modifier = Modifier.background(GreenText),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "$15.000",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+
+                                }
+                            }
+
+                        }
+                    }
+                }
+                VerticalDivider(thickness = 2.dp, color = GrayText)
+                Box(modifier = Modifier.weight(1f)) {
+                    Column {
+                        Text(
+                            "Precio en efectivo o transferencia",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            RadioButtonRowWithText(
+                                name = cashPriceType.first(),
+                                selected = cashTypeSelected,
+                                onClick = {
+                                    cashTypeSelected = cashPriceType.first()
+                                    onActionDone(CASH_PRICE, "")
+                                }
+                            )
+                            RadioButtonRowWithText(
+                                name = cashPriceType.last(),
+                                selected = cashTypeSelected,
+                                onClick = {
+                                    cashTypeSelected = cashPriceType.last()
+                                    onActionDone(CASH_PRICE, "")
+                                }
+                            )
+                        }
+                        AnimatedContent(cashTypeSelected) {
+                            if (cashTypeSelected == cashPriceType.first()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    GenericTextField(
+                                        cashPrice,
+                                        "Precio en efectivo/transferencia",
+                                        onlyNumbers = true,
+                                        modifier = Modifier.weight(1f),
+                                        isPrice = true,
+                                    ) { onActionDone(CASH_PRICE, it) }
+                                    Box(
+                                        modifier = Modifier.background(GreenText),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "54%",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+                                }
+
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    GenericTextField(
+                                        cashPrice,
+                                        "Descuento a aplicar por efectivo/transferencia",
+                                        modifier = Modifier.weight(1f),
+                                        onlyNumbers = true,
+                                        isPercentOff = true
+                                    ) { onActionDone(CASH_PRICE, it) }
+                                    Box(
+                                        modifier = Modifier.background(GreenText),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "$15.000",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DataItem(
+    product: Product,
+    onActionDone: (UpdateProductAction, String) -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.elevatedCardElevation(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    "Datos del producto",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+            Column {
+                GenericTextField(product.name, "Nombre") { onActionDone(NAME, it) }
+                GenericTextField(product.description, "Descripción") {
+                    onActionDone(
+                        DESCRIPTION,
+                        it
+                    )
+                }
+                GenericTextField(product.brand, "Marca") { onActionDone(BRAND, it) }
+                GenericTextField(product.category, "Categoría") { onActionDone(CATEGORY, it) }
+            }
+
+        }
+    }
+}
