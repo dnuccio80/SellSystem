@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.domain.models.Product
 import org.example.project.domain.usecases.products.AddProduct
+import org.example.project.domain.usecases.products.ModifyProduct
 
 enum class UpdatableProductData {
     NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, CASH_PRICE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_STOCK
@@ -20,8 +21,8 @@ enum class UpdatableProductData {
 
 class AddProductViewModel(
     private val addProduct: AddProduct,
-    private val repository: ProductRepositoryImpl
-
+    private val repository: ProductRepositoryImpl,
+    modifyProduct: ModifyProduct
     ) : ViewModel() {
 
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -30,7 +31,7 @@ class AddProductViewModel(
     private val _uiState = MutableStateFlow<AddProductUiState>(AddProductUiState.Success())
     val uiState = _uiState.asStateFlow()
 
-    fun tryAddProduct() {
+    fun tryAddProduct(onDone:(Boolean) -> Unit) {
         val state = _uiState.value as AddProductUiState.Success
 
         viewModelScope.launch {
@@ -40,6 +41,7 @@ class AddProductViewModel(
                 } else state.product
 
                 async { addProduct(product) }.await()
+                onDone(state.product.id != 0)
                 cleanProductData()
                 _events.emit("Operación exitosa!")
             } else {
@@ -58,6 +60,20 @@ class AddProductViewModel(
             onDone()
         }
 
+    }
+
+    fun changeListPriceSelection(index:String) {
+        val valueSelected = (_uiState.value as AddProductUiState.Success).priceListType[index.toInt()]
+        _uiState.update {
+            (_uiState.value as AddProductUiState.Success).copy(priceListTypeSelected = valueSelected)
+        }
+    }
+
+    fun changeCashPriceSelection(index: String) {
+        val valueSelected = (_uiState.value as AddProductUiState.Success).cashPriceType[index.toInt()]
+        _uiState.update {
+            (_uiState.value as AddProductUiState.Success).copy(cashPriceTypeSelected = valueSelected)
+        }
     }
 
     fun updateProduct(data: UpdatableProductData, value: Any) {

@@ -54,7 +54,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 enum class UpdateProductAction {
-    NAME, DESCRIPTION, BRAND, BUY_PRICE, LIST_PRICE, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
+    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
 }
 
 class AddProductScreen(val productId: Int = 0) : Screen {
@@ -182,7 +182,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                 }
                             )
                             PriceItem(
-                                product = state.product,
+                                state = state,
                                 onActionDone = { action, value ->
                                     when (action) {
                                         BUY_PRICE -> viewModel.updateProduct(
@@ -190,16 +190,29 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                             value
                                         )
 
+                                        CHANGE_LIST_PRICE_SELECTION -> {
+                                            viewModel.updateProduct(
+                                                UpdatableProductData.LIST_PRICE,
+                                                ""
+                                            )
+                                            viewModel.changeListPriceSelection(value)
+                                        }
                                         LIST_PRICE -> viewModel.updateProduct(
                                             UpdatableProductData.LIST_PRICE,
                                             value
                                         )
+                                        CHANGE_CASH_PRICE_SELECTION -> {
+                                            viewModel.updateProduct(
+                                                UpdatableProductData.CASH_PRICE,
+                                                ""
+                                            )
+                                            viewModel.changeCashPriceSelection(value)
+                                        }
 
                                         CASH_PRICE -> viewModel.updateProduct(
                                             UpdatableProductData.CASH_PRICE,
                                             value
                                         )
-
                                         else -> {}
                                     }
 
@@ -207,7 +220,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                             )
                             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 AcceptDeclineButtons(
-                                    onAccept = { viewModel.tryAddProduct() },
+                                    onAccept = { viewModel.tryAddProduct { isEdit -> if(isEdit) navigator?.pop() } },
                                     onDismiss = {
                                         navigator?.pop()
                                         viewModel.cleanProductData()
@@ -315,26 +328,15 @@ fun StockAndVariantItem(
 
 @Composable
 private fun PriceItem(
-    product: Product,
+    state: AddProductUiState.Success,
     onActionDone: (UpdateProductAction, String) -> Unit,
 ) {
+
+    val product = state.product
+
     val buyPrice = if (product.buyPrice == 0L) "" else product.buyPrice.toString()
     val listPrice = if (product.listPrice == 0L) "" else product.listPrice.toString()
     val cashPrice = if (product.cashPrice == 0L) "" else product.cashPrice.toString()
-
-
-    val cashPriceType = listOf(
-        "Precio",
-        "Porcentaje de descuento"
-    )
-
-    val listPriceType = listOf(
-        "Precio",
-        "Porcentaje de ganancia"
-    )
-
-    var cashTypeSelected by rememberSaveable { mutableStateOf(cashPriceType.first()) }
-    var listPriceSelected by rememberSaveable { mutableStateOf(listPriceType.first()) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -375,25 +377,18 @@ private fun PriceItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            RadioButtonRowWithText(
-                                name = listPriceType.first(),
-                                selected = listPriceSelected,
-                                onClick = {
-                                    listPriceSelected = listPriceType.first()
-                                    onActionDone(LIST_PRICE, "")
-                                }
-                            )
-                            RadioButtonRowWithText(
-                                name = listPriceType.last(),
-                                selected = listPriceSelected,
-                                onClick = {
-                                    listPriceSelected = listPriceType.last()
-                                    onActionDone(LIST_PRICE, "")
-                                }
-                            )
+                            state.priceListType.forEachIndexed { index, value ->
+                                RadioButtonRowWithText(
+                                    name = value,
+                                    selected = state.priceListTypeSelected,
+                                    onClick = {
+                                        onActionDone(CHANGE_LIST_PRICE_SELECTION, "$index")
+                                    }
+                                )
+                            }
                         }
-                        AnimatedContent(listPriceSelected) {
-                            if (listPriceSelected == listPriceType.first()) {
+                        AnimatedContent(state.priceListTypeSelected) {
+                            if (state.priceListTypeSelected == state.priceListType.first()) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -463,25 +458,18 @@ private fun PriceItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            RadioButtonRowWithText(
-                                name = cashPriceType.first(),
-                                selected = cashTypeSelected,
-                                onClick = {
-                                    cashTypeSelected = cashPriceType.first()
-                                    onActionDone(CASH_PRICE, "")
-                                }
-                            )
-                            RadioButtonRowWithText(
-                                name = cashPriceType.last(),
-                                selected = cashTypeSelected,
-                                onClick = {
-                                    cashTypeSelected = cashPriceType.last()
-                                    onActionDone(CASH_PRICE, "")
-                                }
-                            )
+                            state.cashPriceType.forEachIndexed { index, value ->
+                                RadioButtonRowWithText(
+                                    name = value,
+                                    selected = state.cashPriceTypeSelected,
+                                    onClick = {
+                                        onActionDone(CHANGE_CASH_PRICE_SELECTION, "$index")
+                                    }
+                                )
+                            }
                         }
-                        AnimatedContent(cashTypeSelected) {
-                            if (cashTypeSelected == cashPriceType.first()) {
+                        AnimatedContent(state.cashPriceTypeSelected) {
+                            if (state.cashPriceTypeSelected == state.cashPriceType.first()) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth(),

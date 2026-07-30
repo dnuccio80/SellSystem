@@ -4,6 +4,19 @@ import org.example.project.domain.models.Product
 
 sealed class AddProductUiState {
     data class Success(
+
+        val priceListType: List<String> = listOf<String>(
+            "Precio",
+            "Porcentaje de ganancia"
+        ),
+        val cashPriceType: List<String> = listOf(
+            "Precio",
+            "Porcentaje de descuento"
+        ),
+        val priceListTypeSelected: String = priceListType.first(),
+
+        val cashPriceTypeSelected:String = cashPriceType.first(),
+
         val product: Product = Product(
             name = "",
             category = "",
