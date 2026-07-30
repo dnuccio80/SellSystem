@@ -237,6 +237,7 @@ fun GenericHeaderWithButtonAndSearch(
     searchValue: String = "",
     onSearchValueChange: (String) -> Unit = {},
     hasSearch: Boolean = true,
+    buttonColor: Color = SecondaryCardBackground,
     querySearchCapitalization: Capitalization = SENTENCES,
     onDeleteQuerySearch: () -> Unit = {},
     onButtonClick: () -> Unit,
@@ -273,7 +274,8 @@ fun GenericHeaderWithButtonAndSearch(
             }
         }
         GenericButton(
-            text = buttonText
+            text = buttonText,
+            color = buttonColor
         ) {
             onButtonClick()
         }

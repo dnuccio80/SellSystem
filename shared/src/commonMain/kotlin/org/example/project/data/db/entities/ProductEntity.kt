@@ -16,6 +16,7 @@ data class ProductEntity(
     val cashPrice:Long,
     val currentStock:Int,
     val adviceStock:Int,
+    val manageStock: Boolean,
     val description:String,
 ) {
     fun toDomain(): Product {
@@ -30,6 +31,7 @@ data class ProductEntity(
             currentStock = currentStock,
             adviceStock = adviceStock,
             description = description,
+            manageStock = manageStock
         )
     }
 }

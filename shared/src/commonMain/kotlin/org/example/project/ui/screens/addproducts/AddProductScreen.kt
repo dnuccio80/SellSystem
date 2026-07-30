@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -36,12 +38,15 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.Product
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CheckBoxItem
+import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SimpleGenericHeader
 import org.example.project.ui.screens.addproducts.UpdateProductAction.*
+import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
+import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
@@ -52,7 +57,7 @@ enum class UpdateProductAction {
     NAME, DESCRIPTION, BRAND, BUY_PRICE, LIST_PRICE, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
 }
 
-class AddProductScreen : Screen {
+class AddProductScreen(val productId: Int = 0) : Screen {
     @Composable
     override fun Content() {
 
@@ -61,6 +66,7 @@ class AddProductScreen : Screen {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         var adviceMsg by rememberSaveable { mutableStateOf("") }
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
+        var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
 
         LaunchedEffect(viewModel.events) {
             viewModel.events.collect { msg ->
@@ -69,74 +75,175 @@ class AddProductScreen : Screen {
             }
         }
 
-        ScreenContainer {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                SimpleGenericHeader(
-                    title = "Nuevo producto",
-                    description = "Agrega información para agregar un nuevo producto"
-                )
-                Column(
-                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    DataItem(
-                        product = uiState.product,
-                        onActionDone = { action, value ->
-                            when(action) {
-                                NAME -> viewModel.updateProduct(UpdatableProductData.NAME, value)
-                                DESCRIPTION -> viewModel.updateProduct(UpdatableProductData.DESCRIPTION, value)
-                                BRAND -> viewModel.updateProduct(UpdatableProductData.BRAND, value)
-                                CATEGORY -> viewModel.updateProduct(UpdatableProductData.CATEGORY, value)
-                                else -> { }
-                            }
-                        }
-                    )
-                    StockAndVariantItem(
-                        product = uiState.product,
-                        manageStock = uiState.manageStock,
-                        isVariableProduct = uiState.hasVariants,
-                        onActionDone = { action, value ->
-                            when(action) {
-                                TOGGLE_MANAGE_STOCK -> viewModel.updateProduct(UpdatableProductData.TOGGLE_MANAGE_STOCK, value)
-                                CURRENT_STOCK -> viewModel.updateProduct(UpdatableProductData.CURRENT_STOCK, value)
-                                ADVICE_STOCK -> viewModel.updateProduct(UpdatableProductData.ADVICE_STOCK, value)
-                                TOGGLE_VARIANT_PRODUCT -> viewModel.updateProduct(UpdatableProductData.TOGGLE_HAS_VARIANTS, value)
-                                else -> {}
-                            }
-                        }
-                    )
-                    PriceItem(
-                        product = uiState.product,
-                        onActionDone = { action, value ->
-                            when(action) {
-                               BUY_PRICE -> viewModel.updateProduct(UpdatableProductData.BUY_PRICE, value)
-                               LIST_PRICE -> viewModel.updateProduct(UpdatableProductData.LIST_PRICE, value)
-                               CASH_PRICE -> viewModel.updateProduct(UpdatableProductData.CASH_PRICE, value)
-                                else -> {}
-                            }
+        LaunchedEffect(productId) {
+            if (productId != 0) {
+                viewModel.loadProduct(productId)
+            }
+        }
 
-                        }
+        when (uiState) {
+            is AddProductUiState.Error -> {
+                ScreenContainer {
+                    Text(
+                        "Ha ocurrido un error",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White
                     )
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        AcceptDeclineButtons(
-                            onAccept = { viewModel.tryAddProduct() },
-                            onDismiss = {
-                                navigator?.pop()
-                                viewModel.cleanProductData()
-                            })
-                    }
                 }
             }
-            SimpleAdviceDialog(
-                msg = adviceMsg,
-                show = showAdviceDialog,
-                onDismiss =  { showAdviceDialog = false }
-            )
+
+            is AddProductUiState.Success -> {
+
+                val state = uiState as AddProductUiState.Success
+
+                ScreenContainer {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (productId == 0) {
+                            SimpleGenericHeader(
+                                title = "Nuevo producto",
+                                description = "Agrega información para agregar un nuevo producto"
+                            )
+                        } else {
+                            GenericHeaderWithButtonAndSearch(
+                                title = "Modificar producto",
+                                buttonColor = AccentColor,
+                                description = "Modifica los datos del producto",
+                                buttonText = "Eliminar",
+                                hasSearch = false,
+                                onButtonClick = { showConfirmDialog = true }
+                            )
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            DataItem(
+                                product = state.product,
+                                onActionDone = { action, value ->
+                                    when (action) {
+                                        NAME -> viewModel.updateProduct(
+                                            UpdatableProductData.NAME,
+                                            value
+                                        )
+
+                                        DESCRIPTION -> viewModel.updateProduct(
+                                            UpdatableProductData.DESCRIPTION,
+                                            value
+                                        )
+
+                                        BRAND -> viewModel.updateProduct(
+                                            UpdatableProductData.BRAND,
+                                            value
+                                        )
+
+                                        CATEGORY -> viewModel.updateProduct(
+                                            UpdatableProductData.CATEGORY,
+                                            value
+                                        )
+
+                                        else -> {}
+                                    }
+                                }
+                            )
+                            StockAndVariantItem(
+                                product = state.product,
+                                manageStock = state.product.manageStock,
+                                isVariableProduct = state.hasVariants,
+                                onActionDone = { action, value ->
+                                    when (action) {
+                                        TOGGLE_MANAGE_STOCK -> viewModel.updateProduct(
+                                            UpdatableProductData.TOGGLE_MANAGE_STOCK,
+                                            value
+                                        )
+
+                                        CURRENT_STOCK -> viewModel.updateProduct(
+                                            UpdatableProductData.CURRENT_STOCK,
+                                            value
+                                        )
+
+                                        ADVICE_STOCK -> viewModel.updateProduct(
+                                            UpdatableProductData.ADVICE_STOCK,
+                                            value
+                                        )
+
+                                        TOGGLE_VARIANT_PRODUCT -> viewModel.updateProduct(
+                                            UpdatableProductData.TOGGLE_HAS_VARIANTS,
+                                            value
+                                        )
+
+                                        else -> {}
+                                    }
+                                }
+                            )
+                            PriceItem(
+                                product = state.product,
+                                onActionDone = { action, value ->
+                                    when (action) {
+                                        BUY_PRICE -> viewModel.updateProduct(
+                                            UpdatableProductData.BUY_PRICE,
+                                            value
+                                        )
+
+                                        LIST_PRICE -> viewModel.updateProduct(
+                                            UpdatableProductData.LIST_PRICE,
+                                            value
+                                        )
+
+                                        CASH_PRICE -> viewModel.updateProduct(
+                                            UpdatableProductData.CASH_PRICE,
+                                            value
+                                        )
+
+                                        else -> {}
+                                    }
+
+                                }
+                            )
+                            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                AcceptDeclineButtons(
+                                    onAccept = { viewModel.tryAddProduct() },
+                                    onDismiss = {
+                                        navigator?.pop()
+                                        viewModel.cleanProductData()
+                                    })
+                            }
+                        }
+                    }
+                    SimpleAdviceDialog(
+                        msg = adviceMsg,
+                        show = showAdviceDialog,
+                        onDismiss = { showAdviceDialog = false }
+                    )
+                    if (showConfirmDialog) {
+                        ConfirmDialog(
+                            msg = "Sguro que deseas eliminar el producto?",
+                            onAccept = {
+                                viewModel.deleteProduct {
+                                    showConfirmDialog = false
+                                    navigator?.pop()
+                                }
+                            },
+                            onDismiss = { showConfirmDialog = false }
+                        )
+                    }
+
+                }
+            }
+
+            is AddProductUiState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = GreenText)
+                }
+            }
         }
+
+
     }
 }
 
@@ -162,7 +269,7 @@ fun StockAndVariantItem(
         ) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    "Stock y variantes",
+                    if (product.id == 0) "Stock y variantes" else "Stock",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -186,6 +293,7 @@ fun StockAndVariantItem(
                     }
                 }
             }
+            if (product.id != 0) return@Column
             CheckBoxItem(
                 "Producto con variantes",
                 isVariableProduct
@@ -210,8 +318,6 @@ private fun PriceItem(
     product: Product,
     onActionDone: (UpdateProductAction, String) -> Unit,
 ) {
-
-
     val buyPrice = if (product.buyPrice == 0L) "" else product.buyPrice.toString()
     val listPrice = if (product.listPrice == 0L) "" else product.listPrice.toString()
     val cashPrice = if (product.cashPrice == 0L) "" else product.cashPrice.toString()

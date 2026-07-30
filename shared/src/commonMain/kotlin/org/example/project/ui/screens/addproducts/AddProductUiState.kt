@@ -13,11 +13,12 @@ sealed class AddProductUiState {
             cashPrice = 0,
             currentStock = 0,
             adviceStock = 0,
-            description = ""
+            description = "",
+            manageStock = true,
         ),
-        var hasVariants: Boolean = false,
-        var manageStock: Boolean = true,
+        val hasVariants: Boolean = false,
     ) : AddProductUiState()
 
     data class Error(val msg: Throwable) : AddProductUiState()
+    data object Loading : AddProductUiState()
 }

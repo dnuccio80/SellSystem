@@ -10,6 +10,7 @@ data class Product(
     val buyPrice: Long,
     val listPrice: Long,
     val cashPrice: Long,
+    val manageStock: Boolean,
     val currentStock: Int,
     val adviceStock: Int,
     val description: String,
@@ -26,6 +27,7 @@ data class Product(
             currentStock = currentStock,
             adviceStock = adviceStock,
             description = description,
+            manageStock = manageStock
         )
     }
 }
