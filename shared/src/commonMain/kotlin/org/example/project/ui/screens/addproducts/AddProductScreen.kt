@@ -183,6 +183,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                             )
                             PriceItem(
                                 state = state,
+                                viewModel = viewModel,
                                 onActionDone = { action, value ->
                                     when (action) {
                                         BUY_PRICE -> viewModel.updateProduct(
@@ -329,6 +330,7 @@ fun StockAndVariantItem(
 @Composable
 private fun PriceItem(
     state: AddProductUiState.Success,
+    viewModel: AddProductViewModel,
     onActionDone: (UpdateProductAction, String) -> Unit,
 ) {
 
@@ -377,7 +379,7 @@ private fun PriceItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            state.priceListType.forEachIndexed { index, value ->
+                            viewModel.priceListType.forEachIndexed { index, value ->
                                 RadioButtonRowWithText(
                                     name = value,
                                     selected = state.priceListTypeSelected,
@@ -388,7 +390,7 @@ private fun PriceItem(
                             }
                         }
                         AnimatedContent(state.priceListTypeSelected) {
-                            if (state.priceListTypeSelected == state.priceListType.first()) {
+                            if (state.priceListTypeSelected == viewModel.priceListType.first()) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -406,7 +408,7 @@ private fun PriceItem(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            "54%",
+                                            state.percentageProfit,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = Color.White,
@@ -432,7 +434,7 @@ private fun PriceItem(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            "$15.000",
+                                            state.priceProfit,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = Color.White,
@@ -458,7 +460,7 @@ private fun PriceItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            state.cashPriceType.forEachIndexed { index, value ->
+                            viewModel.cashPriceType.forEachIndexed { index, value ->
                                 RadioButtonRowWithText(
                                     name = value,
                                     selected = state.cashPriceTypeSelected,
@@ -469,7 +471,7 @@ private fun PriceItem(
                             }
                         }
                         AnimatedContent(state.cashPriceTypeSelected) {
-                            if (state.cashPriceTypeSelected == state.cashPriceType.first()) {
+                            if (state.cashPriceTypeSelected == viewModel.cashPriceType.first()) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth(),

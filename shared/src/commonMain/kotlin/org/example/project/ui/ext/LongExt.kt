@@ -13,5 +13,5 @@ fun Long.toPercentOff():String {
 }
 
 fun Long.toPercentAdd():String {
-    return "+$this%"
+    return "$this%"
 }

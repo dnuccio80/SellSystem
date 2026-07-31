@@ -10,7 +10,7 @@ import org.example.project.data.db.entities.ProductEntity
 @Dao
 interface ProductDao {
 
-    @Query("SELECT * FROM ProductEntity")
+    @Query("SELECT * FROM ProductEntity ORDER By name ASC")
     fun getAllProducts(): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM ProductEntity WHERE name LIKE '%' || :name || '%'")

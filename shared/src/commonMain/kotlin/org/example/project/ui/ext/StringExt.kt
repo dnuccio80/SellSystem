@@ -8,6 +8,15 @@ fun String.capitalizeWords(): String =
         }
     }
 
+//fun String.toPrice(): String {
+//    val number = this.toLongOrNull()?:0L
+//        number.reversed()
+//        .chunked(3)
+//        .joinToString(".")
+//        .reversed()
+//    return "$ $number"
+//}
+
 fun String.capitalizeSentences(): String {
     val result = StringBuilder()
     var capitalizeNext = true
