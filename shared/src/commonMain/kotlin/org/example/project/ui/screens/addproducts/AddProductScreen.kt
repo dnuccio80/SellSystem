@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -37,10 +38,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.Product
 import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.CardTitleCentered
 import org.example.project.ui.CheckBoxItem
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
+import org.example.project.ui.RowWithMidBodyAndDescription
+import org.example.project.ui.RowWithMidTitleAndDescription
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SimpleGenericHeader
 import org.example.project.ui.screens.addproducts.UpdateProductAction.*
@@ -198,10 +202,12 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                             )
                                             viewModel.changeListPriceSelection(value)
                                         }
+
                                         LIST_PRICE -> viewModel.updateProduct(
                                             UpdatableProductData.LIST_PRICE,
                                             value
                                         )
+
                                         CHANGE_CASH_PRICE_SELECTION -> {
                                             viewModel.updateProduct(
                                                 UpdatableProductData.CASH_PRICE,
@@ -214,14 +220,16 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                             UpdatableProductData.CASH_PRICE,
                                             value
                                         )
+
                                         else -> {}
                                     }
 
                                 }
                             )
+                            ProfitResumeItem(state)
                             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 AcceptDeclineButtons(
-                                    onAccept = { viewModel.tryAddProduct { isEdit -> if(isEdit) navigator?.pop() } },
+                                    onAccept = { viewModel.tryAddProduct { isEdit -> if (isEdit) navigator?.pop() } },
                                     onDismiss = {
                                         navigator?.pop()
                                         viewModel.cleanProductData()
@@ -281,14 +289,7 @@ fun StockAndVariantItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    if (product.id == 0) "Stock y variantes" else "Stock",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            CardTitleCentered(if (product.id == 0) "Stock y variantes" else "Stock")
             CheckBoxItem("Gestionar stock", manageStock) {
                 onActionDone(TOGGLE_MANAGE_STOCK, "")
             }
@@ -347,14 +348,8 @@ private fun PriceItem(
         elevation = CardDefaults.elevatedCardElevation(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    "Costos y precios",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            CardTitleCentered("Costos y precios")
+
             GenericTextField(
                 buyPrice,
                 "Precio de compra",
@@ -408,7 +403,7 @@ private fun PriceItem(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            state.percentageProfit,
+                                            state.percentageListProfit,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = Color.White,
@@ -434,7 +429,7 @@ private fun PriceItem(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            state.priceProfit,
+                                            state.priceListProfit,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = Color.White,
@@ -548,14 +543,7 @@ private fun DataItem(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    "Datos del producto",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            CardTitleCentered("Datos del producto")
             Column {
                 GenericTextField(product.name, "Nombre") { onActionDone(NAME, it) }
                 GenericTextField(product.description, "Descripción") {
@@ -571,3 +559,28 @@ private fun DataItem(
         }
     }
 }
+
+@Composable
+private fun ProfitResumeItem(state: AddProductUiState.Success) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.elevatedCardElevation(16.dp),
+//            modifier = Modifier.width(IntrinsicSize.Min)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                CardTitleCentered("Resumen financiero")
+                RowWithMidTitleAndDescription("Precio de compra:", "$15.000")
+                RowWithMidTitleAndDescription("Precio de lista:", "$18.000")
+                RowWithMidTitleAndDescription("Precio en efectivo/transferencia:", "$18.000")
+            }
+        }
+    }
+
+
+}
+

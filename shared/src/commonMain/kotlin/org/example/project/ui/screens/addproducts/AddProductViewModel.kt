@@ -7,14 +7,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
-import org.example.project.domain.models.Product
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice
 import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
@@ -55,24 +53,22 @@ class AddProductViewModel(
         _cashPriceSelected,
     ) { product, hasVariants, listPriceSelected, cashPriceSelected ->
 
-        print("DAMIAN: $xx")
-        print("DAMIAN 2: $xxx")
-
         AddProductUiState.Success(
             product = product,
             hasVariants = hasVariants,
             priceListTypeSelected = listPriceSelected,
             cashPriceTypeSelected = cashPriceSelected,
-            percentageProfit = calculatePercentageProfitFromSellPrice(product.buyPrice, sellPrice = product.listPrice),
-            priceProfit = calculatePriceFromPercentage(product.buyPrice, product.listPrice)
+            percentageListProfit = calculatePercentageProfitFromSellPrice(
+                product.buyPrice,
+                sellPrice = product.listPrice
+            ),
+            priceListProfit = calculatePriceFromPercentage(product.buyPrice, product.listPrice),
+//            percentageCashProfit = ,
+//            priceCashProfit = ,
         ) as AddProductUiState
     }.catch { e -> }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AddProductUiState.Loading)
     val uiState = _uiState
-
-    val xx = calculatePercentageProfitFromSellPrice(_product.value.buyPrice, sellPrice = _product.value.listPrice)
-    val xxx = calculatePriceFromPercentage(_product.value.buyPrice, _product.value.listPrice)
-
 
     fun tryAddProduct(onDone: (Boolean) -> Unit) {
         val state = _uiState.value as AddProductUiState.Success

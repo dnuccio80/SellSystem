@@ -9,8 +9,8 @@ class CalculatePercentageProfitFromSellPrice {
         if(sellPrice == 0L) return "0%"
         if(buyPrice == 0L) return "0%"
 
-        val sellInFloat = sellPrice.toFloat()
-        val percent = (sellInFloat - buyPrice) / sellInFloat * 100
+
+        val percent = (sellPrice - buyPrice).toFloat() / sellPrice * 100
 
         if(percent < 0) return "Margen negativo"
 

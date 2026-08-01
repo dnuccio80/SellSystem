@@ -1,6 +1,7 @@
 package org.example.project.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -37,8 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -343,6 +342,18 @@ fun RadioButtonRowWithText(name: String, selected: String, onClick: () -> Unit) 
 }
 
 @Composable
+fun CardTitleCentered(title: String) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
 fun GenericButton(
     text: String,
     icon: ImageVector? = null,
@@ -422,6 +433,25 @@ fun GenericScreenTitleHeaderWithButtons(
         ) {
             GenericButton(firstButtonText, buttonIcon) { onFirstButtonClick() }
             GenericButton(secondButtonText) { onSecondButtonClick() }
+        }
+    }
+}
+
+@Composable
+fun RowWithMidBodyAndDescription(title: String, description:String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(description, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = GreenText)
+    }
+}
+
+@Composable
+fun RowWithMidTitleAndDescription(title: String, description:String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(description, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GreenText)
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
+            Text("+54%",style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(8.dp))
         }
     }
 }

@@ -8,8 +8,10 @@ sealed class AddProductUiState {
         val cashPriceTypeSelected:String,
         val product: Product,
         val hasVariants: Boolean = false,
-        val percentageProfit:String,
-        val priceProfit:String,
+        val percentageListProfit:String,
+        val priceListProfit:String,
+//        val percentageCashProfit:String,
+//        val priceCashProfit:String,
     ) : AddProductUiState()
 
     data class Error(val msg: Throwable) : AddProductUiState()
