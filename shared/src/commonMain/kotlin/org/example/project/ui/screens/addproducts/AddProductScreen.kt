@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -47,6 +48,8 @@ import org.example.project.ui.RowWithMidBodyAndDescription
 import org.example.project.ui.RowWithMidTitleAndDescription
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SimpleGenericHeader
+import org.example.project.ui.ext.toPercentAdd
+import org.example.project.ui.ext.toPrice
 import org.example.project.ui.screens.addproducts.UpdateProductAction.*
 import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
@@ -58,7 +61,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 enum class UpdateProductAction {
-    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
+    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, LIST_PRICE_PERCENTAGE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
 }
 
 class AddProductScreen(val productId: Int = 0) : Screen {
@@ -200,11 +203,17 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                                 UpdatableProductData.LIST_PRICE,
                                                 ""
                                             )
+                                            viewModel.updateProduct(UpdatableProductData.LIST_PRICE_PERCENTAGE, "")
                                             viewModel.changeListPriceSelection(value)
                                         }
 
                                         LIST_PRICE -> viewModel.updateProduct(
                                             UpdatableProductData.LIST_PRICE,
+                                            value
+                                        )
+
+                                        LIST_PRICE_PERCENTAGE -> viewModel.updateProduct(
+                                            UpdatableProductData.LIST_PRICE_PERCENTAGE,
                                             value
                                         )
 
@@ -339,6 +348,7 @@ private fun PriceItem(
 
     val buyPrice = if (product.buyPrice == 0L) "" else product.buyPrice.toString()
     val listPrice = if (product.listPrice == 0L) "" else product.listPrice.toString()
+    val listPricePercentage = if (state.percentageListProfit == 0L) "" else state.percentageListProfit.toString()
     val cashPrice = if (product.cashPrice == 0L) "" else product.cashPrice.toString()
 
     Card(
@@ -386,60 +396,22 @@ private fun PriceItem(
                         }
                         AnimatedContent(state.priceListTypeSelected) {
                             if (state.priceListTypeSelected == viewModel.priceListType.first()) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    GenericTextField(
-                                        listPrice,
-                                        "Precio de lista",
-                                        onlyNumbers = true,
-                                        modifier = Modifier.weight(1f),
-                                        isPrice = true,
-                                    ) { onActionDone(LIST_PRICE, it) }
-                                    Box(
-                                        modifier = Modifier.background(GreenText),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            state.percentageListProfit,
-                                            fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(16.dp)
-                                        )
-                                    }
-                                }
+                                GenericTextField(
+                                    listPrice,
+                                    "Precio de lista",
+                                    onlyNumbers = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    isPrice = true,
+                                ) { onActionDone(LIST_PRICE, it) }
                             } else {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    GenericTextField(
-                                        listPrice,
-                                        "Porcentaje de ganancia",
-                                        onlyNumbers = true,
-                                        modifier = Modifier.weight(1f),
-                                        isPercentAdd = true
-                                    ) { onActionDone(LIST_PRICE, it) }
-                                    Box(
-                                        modifier = Modifier.background(GreenText),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            state.priceListProfit,
-                                            fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(16.dp)
-                                        )
-                                    }
-
-                                }
+                                GenericTextField(
+                                    listPricePercentage,
+                                    "Porcentaje de ganancia",
+                                    onlyNumbers = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    isPercentAdd = true
+                                ) { onActionDone(LIST_PRICE_PERCENTAGE, it) }
                             }
-
                         }
                     }
                 }
@@ -467,58 +439,21 @@ private fun PriceItem(
                         }
                         AnimatedContent(state.cashPriceTypeSelected) {
                             if (state.cashPriceTypeSelected == viewModel.cashPriceType.first()) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
                                     GenericTextField(
                                         cashPrice,
                                         "Precio en efectivo/transferencia",
                                         onlyNumbers = true,
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.fillMaxWidth(),
                                         isPrice = true,
                                     ) { onActionDone(CASH_PRICE, it) }
-                                    Box(
-                                        modifier = Modifier.background(GreenText),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            "54%",
-                                            fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(16.dp)
-                                        )
-                                    }
-                                }
-
                             } else {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
                                     GenericTextField(
                                         cashPrice,
                                         "Descuento a aplicar por efectivo/transferencia",
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.fillMaxWidth(),
                                         onlyNumbers = true,
                                         isPercentOff = true
                                     ) { onActionDone(CASH_PRICE, it) }
-                                    Box(
-                                        modifier = Modifier.background(GreenText),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            "$15.000",
-                                            fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(16.dp)
-                                        )
-                                    }
-                                }
                             }
                         }
                     }
@@ -567,16 +502,34 @@ private fun ProfitResumeItem(state: AddProductUiState.Success) {
             colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
             shape = RoundedCornerShape(8.dp),
             elevation = CardDefaults.elevatedCardElevation(16.dp),
-//            modifier = Modifier.width(IntrinsicSize.Min)
+            modifier = Modifier.widthIn(max = 450.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CardTitleCentered("Resumen financiero")
-                RowWithMidTitleAndDescription("Precio de compra:", "$15.000")
-                RowWithMidTitleAndDescription("Precio de lista:", "$18.000")
-                RowWithMidTitleAndDescription("Precio en efectivo/transferencia:", "$18.000")
+                Text(
+                    "Resumen financiero",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxWidth()){
+                    RowWithMidTitleAndDescription("Precio de compra:", state.product.buyPrice.toPrice())
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RowWithMidTitleAndDescription("Precio de lista:", state.product.listPrice.toPrice(), modifier = Modifier.weight(1f))
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
+                        Text(state.percentageListProfit.toPercentAdd(),style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(8.dp))
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RowWithMidTitleAndDescription("Precio en efectivo/transferencia:", state.product.cashPrice.toPrice(), modifier = Modifier.weight(1f))
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
+                        Text("+54%",style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(8.dp))
+                    }
+                }
             }
         }
     }

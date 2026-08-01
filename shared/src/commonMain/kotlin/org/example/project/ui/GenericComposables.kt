@@ -446,13 +446,10 @@ fun RowWithMidBodyAndDescription(title: String, description:String) {
 }
 
 @Composable
-fun RowWithMidTitleAndDescription(title: String, description:String) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
-        Text(description, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GreenText)
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
-            Text("+54%",style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(8.dp))
-        }
+fun RowWithMidTitleAndDescription(title: String, description:String, modifier: Modifier = Modifier) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) {
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(description, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = GreenText)
     }
 }
 

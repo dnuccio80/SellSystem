@@ -8,7 +8,7 @@ sealed class AddProductUiState {
         val cashPriceTypeSelected:String,
         val product: Product,
         val hasVariants: Boolean = false,
-        val percentageListProfit:String,
+        val percentageListProfit: Long,
         val priceListProfit:String,
 //        val percentageCashProfit:String,
 //        val priceCashProfit:String,

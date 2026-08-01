@@ -16,10 +16,11 @@ import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice
 import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
+import org.example.project.ui.ext.toPrice
 import org.example.project.ui.screens.products.CleanProduct
 
 enum class UpdatableProductData {
-    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, CASH_PRICE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_STOCK
+    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_STOCK
 }
 
 class AddProductViewModel(
@@ -45,24 +46,25 @@ class AddProductViewModel(
     private val _hasVariants = MutableStateFlow(false)
     private val _listPriceSelected = MutableStateFlow(priceListType.first())
     private val _cashPriceSelected = MutableStateFlow(cashPriceType.first())
-
+    private val _percentageListPrice = MutableStateFlow(0L)
     private val _uiState = combine(
         _product,
         _hasVariants,
         _listPriceSelected,
         _cashPriceSelected,
-    ) { product, hasVariants, listPriceSelected, cashPriceSelected ->
+        _percentageListPrice
+    ) { product, hasVariants, listPriceSelected, cashPriceSelected, percentageList ->
 
         AddProductUiState.Success(
             product = product,
             hasVariants = hasVariants,
             priceListTypeSelected = listPriceSelected,
             cashPriceTypeSelected = cashPriceSelected,
-            percentageListProfit = calculatePercentageProfitFromSellPrice(
+            percentageListProfit =  if(percentageList != 0L) percentageList else calculatePercentageProfitFromSellPrice(
                 product.buyPrice,
                 sellPrice = product.listPrice
             ),
-            priceListProfit = calculatePriceFromPercentage(product.buyPrice, product.listPrice),
+            priceListProfit = calculatePriceFromPercentage(product.buyPrice, product.listPrice).toPrice(),
 //            percentageCashProfit = ,
 //            priceCashProfit = ,
         ) as AddProductUiState
@@ -136,6 +138,18 @@ class AddProductViewModel(
                 current.copy(listPrice = newValue)
             }
 
+            UpdatableProductData.LIST_PRICE_PERCENTAGE -> {
+                val percentage = if ((value as String).isBlank()) 0L else value.toLong()
+
+                _percentageListPrice.update { percentage }
+                _product.update { current ->
+                    current.copy(listPrice = calculatePriceFromPercentage(
+                        buyPrice = current.buyPrice,
+                        percentage = percentage
+                    ))
+                }
+            }
+
             UpdatableProductData.CASH_PRICE -> _product.update { current ->
                 val newValue = if ((value as String).isBlank()) 0L else value.toLong()
                 current.copy(cashPrice = newValue)
@@ -163,6 +177,7 @@ class AddProductViewModel(
             UpdatableProductData.TOGGLE_MANAGE_STOCK -> _product.update { current ->
                 current.copy(manageStock = !current.manageStock)
             }
+
 
         }
     }
