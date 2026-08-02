@@ -49,6 +49,7 @@ import org.example.project.ui.RowWithMidTitleAndDescription
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SimpleGenericHeader
 import org.example.project.ui.ext.toPercentAdd
+import org.example.project.ui.ext.toPercentOff
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.screens.addproducts.UpdateProductAction.*
 import org.example.project.ui.screens.clients.ConfirmDialog
@@ -61,7 +62,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 enum class UpdateProductAction {
-    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, LIST_PRICE_PERCENTAGE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
+    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, LIST_PRICE_PERCENTAGE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CASH_PRICE_PERCENTAGE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
 }
 
 class AddProductScreen(val productId: Int = 0) : Screen {
@@ -222,6 +223,10 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                                 UpdatableProductData.CASH_PRICE,
                                                 ""
                                             )
+                                            viewModel.updateProduct(
+                                                UpdatableProductData.CASH_PRICE_PERCENTAGE,
+                                                ""
+                                            )
                                             viewModel.changeCashPriceSelection(value)
                                         }
 
@@ -229,6 +234,13 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                             UpdatableProductData.CASH_PRICE,
                                             value
                                         )
+
+                                        CASH_PRICE_PERCENTAGE -> {
+                                            viewModel.updateProduct(
+                                                UpdatableProductData.CASH_PRICE_PERCENTAGE,
+                                                value
+                                            )
+                                        }
 
                                         else -> {}
                                     }
@@ -349,6 +361,7 @@ private fun PriceItem(
     val buyPrice = if (product.buyPrice == 0L) "" else product.buyPrice.toString()
     val listPrice = if (product.listPrice == 0L) "" else product.listPrice.toString()
     val listPricePercentage = if (state.percentageListProfit == 0L) "" else state.percentageListProfit.toString()
+    val cashPricePercentage = if (state.percentageCashDiscount == 0L) "" else state.percentageCashDiscount.toString()
     val cashPrice = if (product.cashPrice == 0L) "" else product.cashPrice.toString()
 
     Card(
@@ -406,7 +419,7 @@ private fun PriceItem(
                             } else {
                                 GenericTextField(
                                     listPricePercentage,
-                                    "Porcentaje de ganancia",
+                                    "Margen de ganancia (en porcentaje)",
                                     onlyNumbers = true,
                                     modifier = Modifier.fillMaxWidth(),
                                     isPercentAdd = true
@@ -448,12 +461,12 @@ private fun PriceItem(
                                     ) { onActionDone(CASH_PRICE, it) }
                             } else {
                                     GenericTextField(
-                                        cashPrice,
+                                        cashPricePercentage,
                                         "Descuento a aplicar por efectivo/transferencia",
                                         modifier = Modifier.fillMaxWidth(),
                                         onlyNumbers = true,
                                         isPercentOff = true
-                                    ) { onActionDone(CASH_PRICE, it) }
+                                    ) { onActionDone(CASH_PRICE_PERCENTAGE, it) }
                             }
                         }
                     }
@@ -521,19 +534,18 @@ private fun ProfitResumeItem(state: AddProductUiState.Success) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     RowWithMidTitleAndDescription("Precio de lista:", state.product.listPrice.toPrice(), modifier = Modifier.weight(1f))
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
-                        Text(state.percentageListProfit.toPercentAdd(),style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(8.dp))
+                        Text(state.percentageListProfit.toPercentAdd(),style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(4.dp))
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     RowWithMidTitleAndDescription("Precio en efectivo/transferencia:", state.product.cashPrice.toPrice(), modifier = Modifier.weight(1f))
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
-                        Text("+54%",style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(8.dp))
+                        Text(state.percentageCashDiscount.toPercentOff(),style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(4.dp))
                     }
                 }
             }
         }
     }
-
 
 }
 

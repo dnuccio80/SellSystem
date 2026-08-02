@@ -13,21 +13,37 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
+import org.example.project.domain.models.PercentageValues
+import org.example.project.domain.models.ProductError
+import org.example.project.domain.models.ProductError.*
 import org.example.project.domain.usecases.products.AddProduct
+import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice
-import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
-import org.example.project.ui.ext.toPrice
+import org.example.project.domain.usecases.products.CalculatePriceFromPercentageAdd
+import org.example.project.domain.usecases.products.CalculatePriceFromPercentageDiscount
 import org.example.project.ui.screens.products.CleanProduct
 
 enum class UpdatableProductData {
-    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_STOCK
+    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CASH_PRICE_PERCENTAGE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_STOCK
+}
+
+sealed class PriceListType(val name: String) {
+    data object Price : PriceListType("Precio")
+    data object PercentEarn : PriceListType("Porcentaje de ganancia")
+}
+
+sealed class PriceCashType(val name: String) {
+    data object Price : PriceCashType("Precio")
+    data object PercentDiscount : PriceCashType("Porcentaje de descuento")
 }
 
 class AddProductViewModel(
     private val addProduct: AddProduct,
     private val repository: ProductRepositoryImpl,
     private val calculatePercentageProfitFromSellPrice: CalculatePercentageProfitFromSellPrice,
-    private val calculatePriceFromPercentage: CalculatePriceFromPercentage
+    private val calculatePriceFromPercentage: CalculatePriceFromPercentageAdd,
+    private val calculatePriceFromPercentageDiscount: CalculatePriceFromPercentageDiscount,
+    private val calculatePercentageDiscountFromCashPrice: CalculatePercentageDiscountFromCashPrice,
 
     ) : ViewModel() {
 
@@ -35,58 +51,64 @@ class AddProductViewModel(
     val events = _events.asSharedFlow()
 
     val priceListType: List<String> = listOf(
-        "Precio",
-        "Porcentaje de ganancia"
+        PriceListType.Price.name,
+        PriceListType.PercentEarn.name
     )
     val cashPriceType: List<String> = listOf(
-        "Precio",
-        "Porcentaje de descuento"
+        PriceCashType.Price.name,
+        PriceCashType.PercentDiscount.name
     )
     private val _product = MutableStateFlow(CleanProduct().getCleanProduct())
     private val _hasVariants = MutableStateFlow(false)
     private val _listPriceSelected = MutableStateFlow(priceListType.first())
     private val _cashPriceSelected = MutableStateFlow(cashPriceType.first())
-    private val _percentageListPrice = MutableStateFlow(0L)
+    private val _percentages = MutableStateFlow(PercentageValues())
+
     private val _uiState = combine(
         _product,
         _hasVariants,
         _listPriceSelected,
         _cashPriceSelected,
-        _percentageListPrice
-    ) { product, hasVariants, listPriceSelected, cashPriceSelected, percentageList ->
+        _percentages
+    ) { product, hasVariants, listPriceSelected, cashPriceSelected, percentages ->
 
         AddProductUiState.Success(
             product = product,
             hasVariants = hasVariants,
             priceListTypeSelected = listPriceSelected,
             cashPriceTypeSelected = cashPriceSelected,
-            percentageListProfit =  if(percentageList != 0L) percentageList else calculatePercentageProfitFromSellPrice(
+            percentageListProfit = if (percentages.priceListAdd != 0L) percentages.priceListAdd else calculatePercentageProfitFromSellPrice(
                 product.buyPrice,
                 sellPrice = product.listPrice
             ),
-            priceListProfit = calculatePriceFromPercentage(product.buyPrice, product.listPrice).toPrice(),
-//            percentageCashProfit = ,
-//            priceCashProfit = ,
+            percentageCashDiscount = if (percentages.priceCashDiscount != 0L) percentages.priceCashDiscount else calculatePercentageDiscountFromCashPrice(
+                listPrice = product.listPrice,
+                cashPrice = product.cashPrice
+            ),
         ) as AddProductUiState
     }.catch { e -> }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AddProductUiState.Loading)
     val uiState = _uiState
 
     fun tryAddProduct(onDone: (Boolean) -> Unit) {
-        val state = _uiState.value as AddProductUiState.Success
 
         viewModelScope.launch {
-            if (checkDataCorrect()) {
-                val product = if (!state.product.manageStock) {
-                    state.product.copy(currentStock = 0, adviceStock = 0)
-                } else state.product
-
-                async { addProduct(product) }.await()
-                onDone(state.product.id != 0)
+            try {
+                async { addProduct(_product.value) }.await()
+                onDone(_product.value.id != 0)
                 cleanProductData()
                 _events.emit("Operación exitosa!")
-            } else {
-                _events.emit("Faltan rellenar datos!")
+            } catch (e: ProductError) {
+                when (e) {
+                    CashPriceLessThanBuyPrice -> _events.emit("El precio en efectivo/transferencia es menor al precio de compra!")
+                    CashPriceMoreThenListPrice -> _events.emit("El precio en efectivo/transferencia es mayor al precio de lista!")
+                    ListPriceLessThanBuyPrice -> _events.emit("El precio de lista es menor al precio de compra!")
+                    InvalidStockData -> _events.emit("Si manejas el stock, no debe ser cero")
+                    NoBuyPriceData -> _events.emit("Debes ingresar el precio de compra")
+                    NoCashPriceData -> _events.emit("Debes ingresar el precio en efectivo/transferencia")
+                    NoListPriceData -> _events.emit("Debes ingresar el precio de lista")
+                    NotEnoughData -> _events.emit("Falta ingresar nombre o marca del producto")
+                }
             }
         }
     }
@@ -130,29 +152,124 @@ class AddProductViewModel(
 
             UpdatableProductData.BUY_PRICE -> _product.update { current ->
                 val newValue = if ((value as String).isBlank()) 0L else value.toLong()
-                current.copy(buyPrice = newValue)
+
+                when (_listPriceSelected.value) {
+                    PriceListType.PercentEarn.name
+                        if _cashPriceSelected.value == PriceCashType.PercentDiscount.name -> {
+
+                        val newListPrice = calculatePriceFromPercentage(
+                            buyPrice = newValue,
+                            percentage = _percentages.value.priceListAdd
+                        )
+
+                        current.copy(
+                            buyPrice = newValue,
+                            listPrice = newListPrice,
+                            cashPrice = calculatePriceFromPercentageDiscount(
+                                listPrice = newListPrice,
+                                discount = _percentages.value.priceCashDiscount
+                            )
+                        )
+                    }
+
+                    PriceListType.PercentEarn.name if _cashPriceSelected.value != PriceCashType.PercentDiscount.name -> {
+                        current.copy(
+                            buyPrice = newValue,
+                            listPrice = calculatePriceFromPercentage(
+                                buyPrice = newValue,
+                                percentage = _percentages.value.priceListAdd
+                            )
+                        )
+                    }
+
+                    else -> {
+                        current.copy(buyPrice = newValue)
+                    }
+                }
             }
 
             UpdatableProductData.LIST_PRICE -> _product.update { current ->
-                val newValue = if ((value as String).isBlank()) 0L else value.toLong()
-                current.copy(listPrice = newValue)
+                val newListPrice = if ((value as String).isBlank()) 0L else value.toLong()
+
+                when {
+                    _cashPriceSelected.value == PriceCashType.PercentDiscount.name -> {
+                        current.copy(
+                            listPrice = newListPrice,
+                            cashPrice = calculatePriceFromPercentageDiscount(
+                                listPrice = newListPrice,
+                                discount = _percentages.value.priceCashDiscount
+                            )
+                        )
+                    }
+
+                    else -> {
+                        current.copy(listPrice = newListPrice)
+                    }
+                }
+
+
             }
 
             UpdatableProductData.LIST_PRICE_PERCENTAGE -> {
-                val percentage = if ((value as String).isBlank()) 0L else value.toLong()
+                val percentage =
+                    if ((value as String).isBlank()) 0L else value.toLong().coerceIn(0, 99)
 
-                _percentageListPrice.update { percentage }
-                _product.update { current ->
-                    current.copy(listPrice = calculatePriceFromPercentage(
-                        buyPrice = current.buyPrice,
-                        percentage = percentage
-                    ))
+                _percentages.update { current ->
+                    current.copy(priceListAdd = percentage)
+                }
+
+                when {
+                    _cashPriceSelected.value == PriceCashType.PercentDiscount.name -> {
+                        _product.update { current ->
+
+                            val newListPrice = calculatePriceFromPercentage(
+                                buyPrice = current.buyPrice,
+                                percentage = percentage
+                            )
+                            current.copy(
+                                listPrice = newListPrice,
+                                cashPrice = calculatePriceFromPercentageDiscount(
+                                    listPrice = newListPrice,
+                                    discount = _percentages.value.priceCashDiscount
+                                )
+                            )
+                        }
+                    }
+
+                    else -> {
+                        _product.update { current ->
+                            current.copy(
+                                listPrice = calculatePriceFromPercentage(
+                                    buyPrice = current.buyPrice,
+                                    percentage = percentage
+                                ),
+                            )
+                        }
+                    }
                 }
             }
 
             UpdatableProductData.CASH_PRICE -> _product.update { current ->
                 val newValue = if ((value as String).isBlank()) 0L else value.toLong()
                 current.copy(cashPrice = newValue)
+            }
+
+            UpdatableProductData.CASH_PRICE_PERCENTAGE -> {
+                val discount =
+                    if ((value as String).isBlank()) 0L else value.toLong().coerceIn(0, 99)
+
+                _percentages.update { current ->
+                    current.copy(priceCashDiscount = discount)
+                }
+                _product.update { current ->
+                    current.copy(
+                        cashPrice = calculatePriceFromPercentageDiscount(
+                            listPrice = current.listPrice,
+                            discount = discount
+                        )
+                    )
+                }
+
             }
 
             UpdatableProductData.CURRENT_STOCK -> _product.update { current ->
@@ -173,11 +290,9 @@ class AddProductViewModel(
                 !current
             }
 
-
             UpdatableProductData.TOGGLE_MANAGE_STOCK -> _product.update { current ->
                 current.copy(manageStock = !current.manageStock)
             }
-
 
         }
     }
@@ -191,17 +306,11 @@ class AddProductViewModel(
 
     fun cleanProductData() {
         _product.update { CleanProduct().getCleanProduct() }
+        _percentages.update { current ->
+            current.copy(priceListAdd = 0L, priceCashDiscount = 0L)
+        }
         _hasVariants.update { false }
     }
-    fun checkDataCorrect(): Boolean {
-        return _product.value.name.isNotBlank() &&
-            _product.value.category.isNotBlank() &&
-            _product.value.brand.isNotBlank() &&
-            _product.value.buyPrice > 0 &&
-            _product.value.listPrice > 0 &&
-            _product.value.cashPrice > 0 &&
-            _product.value.description.isNotBlank() &&
-            if (_product.value.manageStock) _product.value.currentStock > 0 else _product.value.currentStock >= 0
-    }
+
 }
 

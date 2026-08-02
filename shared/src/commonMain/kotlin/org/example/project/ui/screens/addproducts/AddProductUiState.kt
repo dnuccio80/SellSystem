@@ -9,9 +9,7 @@ sealed class AddProductUiState {
         val product: Product,
         val hasVariants: Boolean = false,
         val percentageListProfit: Long,
-        val priceListProfit:String,
-//        val percentageCashProfit:String,
-//        val priceCashProfit:String,
+        val percentageCashDiscount:Long,
     ) : AddProductUiState()
 
     data class Error(val msg: Throwable) : AddProductUiState()

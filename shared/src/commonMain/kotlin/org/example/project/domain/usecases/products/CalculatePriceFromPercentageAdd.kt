@@ -1,8 +1,6 @@
 package org.example.project.domain.usecases.products
 
-import org.example.project.ui.ext.toPrice
-
-class CalculatePriceFromPercentage {
+class CalculatePriceFromPercentageAdd {
     operator fun invoke(buyPrice: Long, percentage: Long): Long {
 
         if(buyPrice == 0L) return 0L

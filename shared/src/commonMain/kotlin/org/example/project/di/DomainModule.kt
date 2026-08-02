@@ -4,8 +4,10 @@ import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
 import org.example.project.domain.usecases.products.AddProduct
+import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice
-import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
+import org.example.project.domain.usecases.products.CalculatePriceFromPercentageAdd
+import org.example.project.domain.usecases.products.CalculatePriceFromPercentageDiscount
 import org.example.project.domain.usecases.products.GetProducts
 import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
@@ -26,5 +28,7 @@ val domainModule = module {
     factoryOf(::GetProducts)
     factoryOf(::AddProduct)
     factoryOf(::CalculatePercentageProfitFromSellPrice)
-    factoryOf(::CalculatePriceFromPercentage)
+    factoryOf(::CalculatePriceFromPercentageAdd)
+    factoryOf(::CalculatePercentageDiscountFromCashPrice)
+    factoryOf(::CalculatePriceFromPercentageDiscount)
 }
