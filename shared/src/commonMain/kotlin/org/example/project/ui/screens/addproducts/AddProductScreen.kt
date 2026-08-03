@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,9 +20,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,17 +45,21 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.example.project.domain.models.Product
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CardTitleCentered
 import org.example.project.ui.CheckBoxItem
+import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
-import org.example.project.ui.RowWithMidBodyAndDescription
 import org.example.project.ui.RowWithMidTitleAndDescription
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SimpleGenericHeader
+import org.example.project.ui.ext.formatToDisplay
 import org.example.project.ui.ext.toPercentAdd
 import org.example.project.ui.ext.toPercentOff
 import org.example.project.ui.ext.toPrice
@@ -58,11 +70,14 @@ import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
+import org.example.project.ui.utils.WhiteText
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 
 enum class UpdateProductAction {
-    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, LIST_PRICE_PERCENTAGE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CASH_PRICE_PERCENTAGE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, TOGGLE_VARIANT_PRODUCT
+    NAME, DESCRIPTION, BRAND, BUY_PRICE, CHANGE_LIST_PRICE_SELECTION, LIST_PRICE, LIST_PRICE_PERCENTAGE, CHANGE_CASH_PRICE_SELECTION, CASH_PRICE, CASH_PRICE_PERCENTAGE, CATEGORY, CURRENT_STOCK, ADVICE_STOCK, TOGGLE_MANAGE_STOCK, EXPIRE_DATE, TOGGLE_MANAGE_EXPIRE_DATE, TOGGLE_VARIANT_PRODUCT
 }
 
 class AddProductScreen(val productId: Int = 0) : Screen {
@@ -125,6 +140,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                 hasSearch = false,
                                 onButtonClick = { showConfirmDialog = true }
                             )
+
                         }
                         Column(
                             modifier = Modifier.fillMaxWidth()
@@ -161,6 +177,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                             )
                             StockAndVariantItem(
                                 product = state.product,
+                                viewModel = viewModel,
                                 manageStock = state.product.manageStock,
                                 isVariableProduct = state.hasVariants,
                                 onActionDone = { action, value ->
@@ -185,6 +202,15 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                             value
                                         )
 
+                                        EXPIRE_DATE -> viewModel.updateProduct(
+                                            UpdatableProductData.EXPIRE_DATE,
+                                            value
+                                        )
+
+                                        TOGGLE_MANAGE_EXPIRE_DATE -> viewModel.updateProduct(
+                                            UpdatableProductData.TOGGLE_MANAGE_EXPIRE_DATE, ""
+                                        )
+
                                         else -> {}
                                     }
                                 }
@@ -204,7 +230,10 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                                                 UpdatableProductData.LIST_PRICE,
                                                 ""
                                             )
-                                            viewModel.updateProduct(UpdatableProductData.LIST_PRICE_PERCENTAGE, "")
+                                            viewModel.updateProduct(
+                                                UpdatableProductData.LIST_PRICE_PERCENTAGE,
+                                                ""
+                                            )
                                             viewModel.changeListPriceSelection(value)
                                         }
 
@@ -293,6 +322,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
 @Composable
 fun StockAndVariantItem(
     product: Product,
+    viewModel: AddProductViewModel,
     manageStock: Boolean,
     isVariableProduct: Boolean,
     onActionDone: (UpdateProductAction, String) -> Unit,
@@ -300,6 +330,23 @@ fun StockAndVariantItem(
 
     val currentStock = if (product.currentStock == 0) "" else product.currentStock.toString()
     val adviceStock = if (product.adviceStock == 0) "" else product.adviceStock.toString()
+
+    val today = Clock.System
+        .todayIn(TimeZone.currentSystemDefault())
+
+    val selectableDates = object : SelectableDates {
+        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+            val date = Instant
+                .fromEpochMilliseconds(utcTimeMillis)
+                .toLocalDateTime(TimeZone.UTC)
+                .date
+
+            return date > today
+        }
+    }
+
+    val datePickerState = rememberDatePickerState(selectableDates = selectableDates)
+    var showExpireDateDialog by rememberSaveable { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -326,12 +373,50 @@ fun StockAndVariantItem(
                             adviceStock,
                             "Cantidad para notificar poco stock", onlyNumbers = true
                         ) { onActionDone(ADVICE_STOCK, it) }
+                        Spacer(Modifier.size(16.dp))
+
                     }
                 }
             }
+            CheckBoxItem(
+                "Gestionar fecha de vencimiento",
+                product.manageExpireDate
+            ) { onActionDone(TOGGLE_MANAGE_EXPIRE_DATE, "") }
+            AnimatedContent(product.manageExpireDate) {
+                if (product.manageExpireDate) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        val hasExpireDate = product.expireDate != null
+                        GenericButton(text = "Agregar fecha") { showExpireDateDialog = true }
+                        Text(
+                            text = if (hasExpireDate) "Fecha: ${product.expireDate.formatToDisplay()}" else "Sin fecha de vencimiento",
+                            fontWeight = FontWeight.SemiBold,
+                            color = GreenText,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    Spacer(Modifier.size(16.dp))
+                }
+                DatePickerDialogItem(
+                    show = showExpireDateDialog,
+                    onDismiss = { showExpireDateDialog = false },
+                    onConfirm = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val date = Instant.fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.UTC)
+                                .date
+                            viewModel.updateProduct(UpdatableProductData.EXPIRE_DATE, date)
+                            showExpireDateDialog = false
+                        }
+                    },
+                    datePickerState = datePickerState
+                )
+            }
             if (product.id != 0) return@Column
             CheckBoxItem(
-                "Producto con variantes",
+                "Gestionar variantes",
                 isVariableProduct
             ) { onActionDone(TOGGLE_VARIANT_PRODUCT, "") }
             AnimatedContent(isVariableProduct) {
@@ -350,6 +435,84 @@ fun StockAndVariantItem(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun DatePickerDialogItem(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    datePickerState: DatePickerState,
+) {
+    if (show) {
+        DatePickerDialog(
+            onDismissRequest = { onDismiss() },
+            confirmButton = {
+                GenericButton(
+                    text = "Confirmar",
+                    color = GreenText
+                ) {
+                    onConfirm()
+                }
+            },
+            dismissButton = {
+                GenericButton(
+                    text = "Cancelar",
+                    color = GrayText
+                ) {
+                    onDismiss()
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = PrimaryCardBackground
+            )
+        ) {
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    containerColor = PrimaryCardBackground,
+                    titleContentColor = WhiteText,
+                    headlineContentColor =WhiteText,
+                    weekdayContentColor = WhiteText,
+                    subheadContentColor = WhiteText,
+                    navigationContentColor = WhiteText,
+                    yearContentColor = WhiteText,
+                    currentYearContentColor = GreenText,
+                    selectedYearContentColor = Color.White,
+                    selectedYearContainerColor = GreenText,
+                    dayContentColor = WhiteText,
+                    selectedDayContentColor = Color.White,
+                    disabledDayContentColor = GrayText,
+                    disabledYearContentColor = GrayText,
+                    selectedDayContainerColor = GreenText,
+                    todayContentColor = WhiteText,
+                    todayDateBorderColor = GrayText,
+                    dividerColor = GrayText,
+                    dateTextFieldColors = TextFieldDefaults.colors(
+                        unfocusedTextColor = Color.White,
+                        focusedTextColor = Color.White,
+                        focusedPlaceholderColor = WhiteText,
+                        unfocusedPlaceholderColor = WhiteText,
+                        focusedTrailingIconColor = WhiteText,
+                        unfocusedTrailingIconColor = WhiteText,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = GreenText,
+                        unfocusedIndicatorColor = GrayText,
+                        cursorColor = GreenText,
+                        focusedLabelColor = GreenText,
+                        unfocusedLabelColor = GrayText,
+                        errorTextColor = WhiteText,
+                        errorLabelColor = GreenText,
+                        errorCursorColor = AccentColor,
+                        errorSupportingTextColor = AccentColor,
+                        errorContainerColor = PrimaryCardBackground,
+                    ),
+                )
+            )
+        }
+    }
+}
+
+@Composable
 private fun PriceItem(
     state: AddProductUiState.Success,
     viewModel: AddProductViewModel,
@@ -360,8 +523,10 @@ private fun PriceItem(
 
     val buyPrice = if (product.buyPrice == 0L) "" else product.buyPrice.toString()
     val listPrice = if (product.listPrice == 0L) "" else product.listPrice.toString()
-    val listPricePercentage = if (state.percentageListProfit == 0L) "" else state.percentageListProfit.toString()
-    val cashPricePercentage = if (state.percentageCashDiscount == 0L) "" else state.percentageCashDiscount.toString()
+    val listPricePercentage =
+        if (state.percentageListProfit == 0L) "" else state.percentageListProfit.toString()
+    val cashPricePercentage =
+        if (state.percentageCashDiscount == 0L) "" else state.percentageCashDiscount.toString()
     val cashPrice = if (product.cashPrice == 0L) "" else product.cashPrice.toString()
 
     Card(
@@ -452,21 +617,21 @@ private fun PriceItem(
                         }
                         AnimatedContent(state.cashPriceTypeSelected) {
                             if (state.cashPriceTypeSelected == viewModel.cashPriceType.first()) {
-                                    GenericTextField(
-                                        cashPrice,
-                                        "Precio en efectivo/transferencia",
-                                        onlyNumbers = true,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        isPrice = true,
-                                    ) { onActionDone(CASH_PRICE, it) }
+                                GenericTextField(
+                                    cashPrice,
+                                    "Precio en efectivo/transferencia",
+                                    onlyNumbers = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    isPrice = true,
+                                ) { onActionDone(CASH_PRICE, it) }
                             } else {
-                                    GenericTextField(
-                                        cashPricePercentage,
-                                        "Descuento a aplicar por efectivo/transferencia",
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onlyNumbers = true,
-                                        isPercentOff = true
-                                    ) { onActionDone(CASH_PRICE_PERCENTAGE, it) }
+                                GenericTextField(
+                                    cashPricePercentage,
+                                    "Descuento a aplicar por efectivo/transferencia",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onlyNumbers = true,
+                                    isPercentOff = true
+                                ) { onActionDone(CASH_PRICE_PERCENTAGE, it) }
                             }
                         }
                     }
@@ -528,19 +693,54 @@ private fun ProfitResumeItem(state: AddProductUiState.Success) {
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxWidth()){
-                    RowWithMidTitleAndDescription("Precio de compra:", state.product.buyPrice.toPrice())
+                Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxWidth()) {
+                    RowWithMidTitleAndDescription(
+                        "Precio de compra:",
+                        state.product.buyPrice.toPrice()
+                    )
                 }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RowWithMidTitleAndDescription("Precio de lista:", state.product.listPrice.toPrice(), modifier = Modifier.weight(1f))
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
-                        Text(state.percentageListProfit.toPercentAdd(),style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    RowWithMidTitleAndDescription(
+                        "Precio de lista:",
+                        state.product.listPrice.toPrice(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.background(GreenText)
+                    ) {
+                        Text(
+                            state.percentageListProfit.toPercentAdd(),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(4.dp)
+                        )
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RowWithMidTitleAndDescription("Precio en efectivo/transferencia:", state.product.cashPrice.toPrice(), modifier = Modifier.weight(1f))
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.background(GreenText)){
-                        Text(state.percentageCashDiscount.toPercentOff(),style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    RowWithMidTitleAndDescription(
+                        "Precio en efectivo/transferencia:",
+                        state.product.cashPrice.toPrice(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.background(GreenText)
+                    ) {
+                        Text(
+                            state.percentageCashDiscount.toPercentOff(),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(4.dp)
+                        )
                     }
                 }
             }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.domain.models.PercentageValues
 import org.example.project.domain.models.ProductError
@@ -24,7 +25,7 @@ import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
 import org.example.project.ui.screens.products.CleanProduct
 
 enum class UpdatableProductData {
-    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CASH_PRICE_PERCENTAGE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_STOCK
+    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CASH_PRICE_PERCENTAGE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_EXPIRE_DATE, EXPIRE_DATE, TOGGLE_MANAGE_STOCK
 }
 
 sealed class PriceListType(val name: String) {
@@ -99,16 +100,7 @@ class AddProductViewModel(
                 cleanProductData()
                 _events.emit("Operación exitosa!")
             } catch (e: ProductError) {
-                when (e) {
-                    CashPriceLessThanBuyPrice -> _events.emit("El precio en efectivo/transferencia es menor al precio de compra!")
-                    CashPriceMoreThenListPrice -> _events.emit("El precio en efectivo/transferencia es mayor al precio de lista!")
-                    ListPriceLessThanBuyPrice -> _events.emit("El precio de lista es menor al precio de compra!")
-                    InvalidStockData -> _events.emit("Si manejas el stock, no debe ser cero")
-                    NoBuyPriceData -> _events.emit("Debes ingresar el precio de compra")
-                    NoCashPriceData -> _events.emit("Debes ingresar el precio en efectivo/transferencia")
-                    NoListPriceData -> _events.emit("Debes ingresar el precio de lista")
-                    NotEnoughData -> _events.emit("Falta ingresar nombre o marca del producto")
-                }
+                _events.emit(e.msg)
             }
         }
     }
@@ -294,6 +286,13 @@ class AddProductViewModel(
                 current.copy(manageStock = !current.manageStock)
             }
 
+            UpdatableProductData.TOGGLE_MANAGE_EXPIRE_DATE -> _product.update { current ->
+                current.copy(manageExpireDate = !current.manageExpireDate)
+            }
+
+            UpdatableProductData.EXPIRE_DATE -> _product.update { current ->
+                current.copy(expireDate = value as LocalDate)
+            }
         }
     }
 

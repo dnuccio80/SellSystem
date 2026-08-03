@@ -17,11 +17,13 @@ class AddProduct(private val repo: ProductRepositoryImpl) {
             product.buyPrice <= 0 -> throw ProductError.NoBuyPriceData
             product.name.isBlank() || product.brand.isBlank() -> throw ProductError.NotEnoughData
             product.manageStock && product.currentStock == 0 -> throw ProductError.InvalidStockData
+            product.manageExpireDate && product.expireDate == null -> throw ProductError.NotExpireDateSelected
         }
 
         val managedStockProduct = if(!product.manageStock) product.copy(currentStock = 0, adviceStock = 0) else product
+        val managedExpireDateProduct = if(!managedStockProduct.manageExpireDate) managedStockProduct.copy(expireDate = null) else product
 
-        repo.addProduct(managedStockProduct)
+        repo.addProduct(managedExpireDateProduct)
 
     }
 

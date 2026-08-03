@@ -23,6 +23,7 @@ roomRuntimeJvm = "2.8.4"
 androidx-sqliteBundled = "2.7.0"
 kotlinSerialization = "2.4.0"
 kotlinxSerialization = "1.11.0"
+kotlinxDatetime = "0.7.1"
 
 
 [libraries]
@@ -64,7 +65,8 @@ androidx-room-runtime-jvm = { group = "androidx.room", name = "room-runtime-jvm"
 # Kotlin Serialization
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
-
+# Kotlin DateTime
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

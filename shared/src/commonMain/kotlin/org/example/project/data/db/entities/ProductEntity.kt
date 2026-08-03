@@ -2,6 +2,7 @@ package org.example.project.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.datetime.LocalDate
 import org.example.project.domain.models.Product
 
 @Entity
@@ -18,6 +19,7 @@ data class ProductEntity(
     val adviceStock:Int,
     val manageStock: Boolean,
     val description:String,
+    val expireDate: LocalDate?
 ) {
     fun toDomain(): Product {
         return Product(
@@ -31,7 +33,8 @@ data class ProductEntity(
             currentStock = currentStock,
             adviceStock = adviceStock,
             description = description,
-            manageStock = manageStock
+            manageStock = manageStock,
+            expireDate = expireDate
         )
     }
 }

@@ -1,5 +1,6 @@
 package org.example.project.domain.models
 
+import kotlinx.datetime.LocalDate
 import org.example.project.data.db.entities.ProductEntity
 
 data class Product(
@@ -14,6 +15,8 @@ data class Product(
     val currentStock: Int,
     val adviceStock: Int,
     val description: String,
+    val manageExpireDate: Boolean = false,
+    val expireDate: LocalDate? = null,
 ) {
     fun toEntity(): ProductEntity {
         return ProductEntity(
@@ -27,7 +30,8 @@ data class Product(
             currentStock = currentStock,
             adviceStock = adviceStock,
             description = description,
-            manageStock = manageStock
+            manageStock = manageStock,
+            expireDate = expireDate
         )
     }
 

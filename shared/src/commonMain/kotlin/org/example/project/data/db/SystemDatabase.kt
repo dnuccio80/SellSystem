@@ -19,7 +19,7 @@ expect object SystemCTor : RoomDatabaseConstructor<SystemDatabase>
 
 @Database(
     entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class],
-    version = 5
+    version = 6
 )
 @ConstructedBy(SystemCTor::class)
 @TypeConverters(Converters::class)
