@@ -17,6 +17,7 @@ data class Product(
     val description: String,
     val manageExpireDate: Boolean = false,
     val expireDate: LocalDate? = null,
+    val imagePath: String? = null,
 ) {
     fun toEntity(): ProductEntity {
         return ProductEntity(
@@ -31,7 +32,8 @@ data class Product(
             adviceStock = adviceStock,
             description = description,
             manageStock = manageStock,
-            expireDate = expireDate
+            expireDate = expireDate,
+            imagePath = imagePath
         )
     }
 

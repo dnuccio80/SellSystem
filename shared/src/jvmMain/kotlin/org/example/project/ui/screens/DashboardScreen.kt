@@ -65,9 +65,9 @@ class DashboardScreen: Screen {
                     onFirstButtonClick = {},
                     onSecondButtonClick = { }
                 )
-                HeaderCardSummary()
-                MidCardSummary(Modifier.weight(1f))
-                LowCardSummary(Modifier.weight(1f))
+             HeaderCardSummary()
+             MidCardSummary(Modifier.weight(1f))
+             LowCardSummary(Modifier.weight(1f))
             }
         }
     }
@@ -118,8 +118,12 @@ private fun MidCardSummary(modifier: Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        PendingOrdersSummaryCard(Modifier.weight(1f))
-        LowStockCardSummary(Modifier.weight(1f))
+       PendingOrdersSummaryCard(
+            Modifier.weight(
+                1f
+            )
+        )
+      LowStockCardSummary(Modifier.weight(1f))
     }
 }
 
@@ -282,7 +286,15 @@ fun LowCardSummary(modifier: Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CurrentAccountsCardSummary(Modifier.weight(1f))
-        MostSellArticlesCardSummary(Modifier.weight(1f))
+        CurrentAccountsCardSummary(
+            Modifier.weight(
+                1f
+            )
+        )
+       MostSellArticlesCardSummary(
+            Modifier.weight(
+                1f
+            )
+        )
     }
 }

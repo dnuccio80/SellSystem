@@ -19,7 +19,8 @@ data class ProductEntity(
     val adviceStock:Int,
     val manageStock: Boolean,
     val description:String,
-    val expireDate: LocalDate?
+    val expireDate: LocalDate?,
+    val imagePath:String? = null
 ) {
     fun toDomain(): Product {
         return Product(
@@ -34,7 +35,8 @@ data class ProductEntity(
             adviceStock = adviceStock,
             description = description,
             manageStock = manageStock,
-            expireDate = expireDate
+            expireDate = expireDate,
+            imagePath = imagePath
         )
     }
 }

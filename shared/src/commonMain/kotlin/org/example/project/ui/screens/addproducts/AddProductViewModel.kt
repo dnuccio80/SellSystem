@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
+import org.example.project.data.storage.ImagePicker
+import org.example.project.data.storage.ImageStorage
 import org.example.project.domain.models.PercentageValues
 import org.example.project.domain.models.ProductError
 import org.example.project.domain.models.ProductError.*
@@ -25,7 +27,7 @@ import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
 import org.example.project.ui.screens.products.CleanProduct
 
 enum class UpdatableProductData {
-    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CASH_PRICE_PERCENTAGE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_EXPIRE_DATE, EXPIRE_DATE, TOGGLE_MANAGE_STOCK
+    NAME, CATEGORY, BRAND, BUY_PRICE, LIST_PRICE, LIST_PRICE_PERCENTAGE, CASH_PRICE, CASH_PRICE_PERCENTAGE, CURRENT_STOCK, ADVICE_STOCK, DESCRIPTION, TOGGLE_HAS_VARIANTS, TOGGLE_MANAGE_EXPIRE_DATE, EXPIRE_DATE, TOGGLE_MANAGE_STOCK, DELETE_IMAGE
 }
 
 sealed class PriceListType(val name: String) {
@@ -45,7 +47,8 @@ class AddProductViewModel(
     private val calculatePriceFromPercentage: CalculatePriceFromPercentageAdd,
     private val calculatePriceFromPercentageDiscount: CalculatePriceFromPercentageDiscount,
     private val calculatePercentageDiscountFromCashPrice: CalculatePercentageDiscountFromCashPrice,
-
+    private val imageStorage: ImageStorage,
+    private val imagePicker: ImagePicker,
     ) : ViewModel() {
 
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -101,6 +104,20 @@ class AddProductViewModel(
                 _events.emit("Operación exitosa!")
             } catch (e: ProductError) {
                 _events.emit(e.msg)
+            }
+        }
+    }
+
+    fun selectImage() {
+        viewModelScope.launch {
+            val image = imagePicker.pickImage() ?: return@launch
+
+            val path = imageStorage.saveImage(
+                image = image.bytes,
+                extension = image.extension
+            )
+            _product.update { current ->
+                current.copy(imagePath = path)
             }
         }
     }
@@ -292,6 +309,10 @@ class AddProductViewModel(
 
             UpdatableProductData.EXPIRE_DATE -> _product.update { current ->
                 current.copy(expireDate = value as LocalDate)
+            }
+
+            UpdatableProductData.DELETE_IMAGE -> _product.update { current ->
+                current.copy(imagePath = null)
             }
         }
     }

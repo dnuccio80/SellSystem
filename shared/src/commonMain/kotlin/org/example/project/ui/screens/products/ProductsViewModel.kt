@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.stateIn
 import org.example.project.domain.usecases.products.GetProducts
 import kotlin.time.Duration.Companion.milliseconds
 
-
 class ProductsViewModel(
     getProducts: GetProducts,
 ) : ViewModel() {

@@ -48,7 +48,7 @@ class ExpensesScreen: Screen {
             }
 
             if (showNewExpenseDialog) {
-                AddExpenseDialog(
+               AddExpenseDialog(
                     onDismiss = { showNewExpenseDialog = false }
                 )
             }

@@ -36,7 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.domain.models.Client
 import org.example.project.ui.AcceptDeclineButtons
-import org.example.project.ui.Capitalization
 import org.example.project.ui.Capitalization.NONE
 import org.example.project.ui.Capitalization.SENTENCES
 import org.example.project.ui.Capitalization.WORDS

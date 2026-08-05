@@ -2,6 +2,7 @@ package org.example.project.ui.screens.addproducts
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,10 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,11 +47,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
@@ -72,6 +83,7 @@ import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.WhiteText
 import org.koin.compose.viewmodel.koinViewModel
+import java.io.File
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -276,6 +288,14 @@ class AddProductScreen(val productId: Int = 0) : Screen {
 
                                 }
                             )
+                            ImageCardItem(
+                                state.product,
+                                onSelectImageClick = { viewModel.selectImage() },
+                                onDeleteImage = {
+                                    viewModel.updateProduct(
+                                        UpdatableProductData.DELETE_IMAGE, ""
+                                    )
+                                })
                             ProfitResumeItem(state)
                             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 AcceptDeclineButtons(
@@ -414,6 +434,7 @@ fun StockAndVariantItem(
                     datePickerState = datePickerState
                 )
             }
+
             if (product.id != 0) return@Column
             CheckBoxItem(
                 "Gestionar variantes",
@@ -470,7 +491,7 @@ fun DatePickerDialogItem(
                 colors = DatePickerDefaults.colors(
                     containerColor = PrimaryCardBackground,
                     titleContentColor = WhiteText,
-                    headlineContentColor =WhiteText,
+                    headlineContentColor = WhiteText,
                     weekdayContentColor = WhiteText,
                     subheadContentColor = WhiteText,
                     navigationContentColor = WhiteText,
@@ -747,5 +768,70 @@ private fun ProfitResumeItem(state: AddProductUiState.Success) {
         }
     }
 
+}
+
+@Composable
+private fun ImageCardItem(
+    product: Product,
+    onSelectImageClick: () -> Unit,
+    onDeleteImage: () -> Unit,
+) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.elevatedCardElevation(16.dp),
+            modifier = Modifier.width(450.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "Imagen del producto",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                GenericButton(
+                    "Seleccionar Imagen",
+                    color = GreenText
+                ) {
+                    onSelectImageClick()
+                }
+                if (product.imagePath == null) {
+                    Text(
+                        "Ninguna imagen seleccionada",
+                        color = WhiteText,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else {
+                    Box(Modifier.size(100.dp), contentAlignment = Alignment.TopEnd) {
+                        AsyncImage(
+                            model = File(product.imagePath),
+                            contentDescription = product.name,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Card(
+                            shape = CircleShape,
+                            colors = CardDefaults.cardColors(containerColor = AccentColor)
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "eliminar imagen",
+                                tint = Color.White,
+                                modifier = Modifier.clickable{ onDeleteImage() }.pointerHoverIcon(
+                                    PointerIcon.Hand)
+                            )
+                        }
+
+                    }
+
+                }
+            }
+        }
+    }
 }
 

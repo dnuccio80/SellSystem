@@ -52,7 +52,7 @@ import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 
-class DailyScreen: Screen {
+class DailyScreen : Screen {
     @Composable
     override fun Content() {
         ScreenContainer {
@@ -70,12 +70,15 @@ class DailyScreen: Screen {
                     onSecondButtonClick = { }
                 )
                 SummaryHeader()
-                LastTransactionsCard(modifier = Modifier.weight(1f))
+                LastTransactionsCard(
+                    modifier = Modifier.weight(
+                        1f
+                    )
+                )
             }
         }
     }
 }
-
 
 
 @Composable
@@ -118,7 +121,6 @@ private fun LastTransactionsCard(modifier: Modifier) {
         }
     }
 }
-
 
 
 @Composable

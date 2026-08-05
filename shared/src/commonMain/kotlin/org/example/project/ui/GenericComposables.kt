@@ -115,6 +115,8 @@ fun MainHeader() {
 
 }
 
+
+
 @Composable
 fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, onDelete: () -> Unit, onValueChange: (String) -> Unit) {
 
@@ -434,6 +436,14 @@ fun GenericScreenTitleHeaderWithButtons(
             GenericButton(firstButtonText, buttonIcon) { onFirstButtonClick() }
             GenericButton(secondButtonText) { onSecondButtonClick() }
         }
+    }
+}
+
+@Composable
+fun RowWithSmallBodyAndDescription(title: String, description:String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(description, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = GreenText)
     }
 }
 
