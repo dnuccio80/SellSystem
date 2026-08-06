@@ -17,6 +17,7 @@ import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.data.storage.ImagePicker
 import org.example.project.data.storage.ImageStorage
 import org.example.project.domain.models.PercentageValues
+import org.example.project.domain.models.PriceOptions
 import org.example.project.domain.models.ProductError
 import org.example.project.domain.models.ProductError.*
 import org.example.project.domain.usecases.products.AddProduct
@@ -24,6 +25,7 @@ import org.example.project.domain.usecases.products.CalculatePercentageDiscountF
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice
 import org.example.project.domain.usecases.products.CalculatePriceFromPercentageAdd
 import org.example.project.domain.usecases.products.CalculatePriceFromPercentageDiscount
+import org.example.project.domain.usecases.products.GetCategories
 import org.example.project.ui.screens.products.CleanProduct
 
 enum class UpdatableProductData {
@@ -49,6 +51,7 @@ class AddProductViewModel(
     private val calculatePercentageDiscountFromCashPrice: CalculatePercentageDiscountFromCashPrice,
     private val imageStorage: ImageStorage,
     private val imagePicker: ImagePicker,
+    private val getCategories: GetCategories
     ) : ViewModel() {
 
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -64,23 +67,25 @@ class AddProductViewModel(
     )
     private val _product = MutableStateFlow(CleanProduct().getCleanProduct())
     private val _hasVariants = MutableStateFlow(false)
-    private val _listPriceSelected = MutableStateFlow(priceListType.first())
-    private val _cashPriceSelected = MutableStateFlow(cashPriceType.first())
     private val _percentages = MutableStateFlow(PercentageValues())
+    private val _pricesSelected = MutableStateFlow(PriceOptions(
+        listPriceSelected = priceListType.first(),
+        cashPriceSelected = cashPriceType.first()
+    ))
 
     private val _uiState = combine(
         _product,
         _hasVariants,
-        _listPriceSelected,
-        _cashPriceSelected,
-        _percentages
-    ) { product, hasVariants, listPriceSelected, cashPriceSelected, percentages ->
+        _pricesSelected,
+        _percentages,
+        getCategories("")
+    ) { product, hasVariants, pricesSelected, percentages, categories ->
 
         AddProductUiState.Success(
             product = product,
             hasVariants = hasVariants,
-            priceListTypeSelected = listPriceSelected,
-            cashPriceTypeSelected = cashPriceSelected,
+            priceListTypeSelected = pricesSelected.listPriceSelected,
+            cashPriceTypeSelected = pricesSelected.cashPriceSelected,
             percentageListProfit = if (percentages.priceListAdd != 0L) percentages.priceListAdd else calculatePercentageProfitFromSellPrice(
                 product.buyPrice,
                 sellPrice = product.listPrice
@@ -89,6 +94,7 @@ class AddProductViewModel(
                 listPrice = product.listPrice,
                 cashPrice = product.cashPrice
             ),
+            categories = categories
         ) as AddProductUiState
     }.catch { e -> }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AddProductUiState.Loading)
@@ -136,12 +142,16 @@ class AddProductViewModel(
 
     fun changeListPriceSelection(index: String) {
         val valueSelected = priceListType[index.toInt()]
-        _listPriceSelected.update { valueSelected }
+        _pricesSelected.update { priceOptions ->
+            priceOptions.copy(listPriceSelected = valueSelected)
+        }
     }
 
     fun changeCashPriceSelection(index: String) {
         val valueSelected = cashPriceType[index.toInt()]
-        _cashPriceSelected.update { valueSelected }
+        _pricesSelected.update { priceOptions ->
+            priceOptions.copy(cashPriceSelected = valueSelected)
+        }
     }
 
     fun updateProduct(data: UpdatableProductData, value: Any) {
@@ -162,9 +172,9 @@ class AddProductViewModel(
             UpdatableProductData.BUY_PRICE -> _product.update { current ->
                 val newValue = if ((value as String).isBlank()) 0L else value.toLong()
 
-                when (_listPriceSelected.value) {
+                when (_pricesSelected.value.listPriceSelected) {
                     PriceListType.PercentEarn.name
-                        if _cashPriceSelected.value == PriceCashType.PercentDiscount.name -> {
+                        if _pricesSelected.value.cashPriceSelected == PriceCashType.PercentDiscount.name -> {
 
                         val newListPrice = calculatePriceFromPercentage(
                             buyPrice = newValue,
@@ -181,7 +191,7 @@ class AddProductViewModel(
                         )
                     }
 
-                    PriceListType.PercentEarn.name if _cashPriceSelected.value != PriceCashType.PercentDiscount.name -> {
+                    PriceListType.PercentEarn.name if _pricesSelected.value.cashPriceSelected != PriceCashType.PercentDiscount.name -> {
                         current.copy(
                             buyPrice = newValue,
                             listPrice = calculatePriceFromPercentage(
@@ -201,7 +211,7 @@ class AddProductViewModel(
                 val newListPrice = if ((value as String).isBlank()) 0L else value.toLong()
 
                 when {
-                    _cashPriceSelected.value == PriceCashType.PercentDiscount.name -> {
+                    _pricesSelected.value.cashPriceSelected == PriceCashType.PercentDiscount.name -> {
                         current.copy(
                             listPrice = newListPrice,
                             cashPrice = calculatePriceFromPercentageDiscount(
@@ -228,7 +238,7 @@ class AddProductViewModel(
                 }
 
                 when {
-                    _cashPriceSelected.value == PriceCashType.PercentDiscount.name -> {
+                    _pricesSelected.value.cashPriceSelected == PriceCashType.PercentDiscount.name -> {
                         _product.update { current ->
 
                             val newListPrice = calculatePriceFromPercentage(

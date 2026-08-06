@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -165,6 +166,35 @@ fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, on
 
 enum class Capitalization {
     WORDS, SENTENCES, NONE
+}
+
+@Composable
+fun GenericSelectableTextField(
+    value:String,
+    placeholderText:String,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+
+    TextField(
+        value = value,
+        modifier = modifier.clickable{ onClick() }.pointerHoverIcon(PointerIcon.Hand),
+        enabled = false,
+        onValueChange = { },
+        label = { Text(placeholderText) },
+        shape = RoundedCornerShape(4.dp),
+        colors = TextFieldDefaults.colors(
+            disabledTextColor = Color.White,
+            disabledContainerColor = Color.Transparent,
+            disabledPlaceholderColor =  Color.White,
+            disabledTrailingIconColor = Color.White,
+            disabledLabelColor = GrayText,
+            cursorColor = GreenText,
+        ),
+        trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
+        singleLine = true,
+        maxLines = 1
+    )
 }
 
 @Composable

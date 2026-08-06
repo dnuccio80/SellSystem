@@ -1,6 +1,7 @@
 package org.example.project.ui.screens.addproducts
 
 import org.example.project.domain.models.Product
+import org.example.project.domain.models.ProductCategory
 
 sealed class AddProductUiState {
     data class Success(
@@ -10,6 +11,7 @@ sealed class AddProductUiState {
         val hasVariants: Boolean = false,
         val percentageListProfit: Long,
         val percentageCashDiscount:Long,
+        val categories:List<ProductCategory>
     ) : AddProductUiState()
 
     data class Error(val msg: Throwable) : AddProductUiState()

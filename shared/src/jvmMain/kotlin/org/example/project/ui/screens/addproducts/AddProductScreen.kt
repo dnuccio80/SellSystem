@@ -2,6 +2,7 @@ package org.example.project.ui.screens.addproducts
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,8 +22,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.MenuDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -31,8 +34,10 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -46,13 +51,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.room.Update
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil3.compose.AsyncImage
@@ -60,11 +68,13 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import org.example.project.domain.models.Product
+import org.example.project.domain.models.ProductCategory
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CardTitleCentered
 import org.example.project.ui.CheckBoxItem
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
+import org.example.project.ui.GenericSelectableTextField
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.RowWithMidTitleAndDescription
@@ -74,13 +84,30 @@ import org.example.project.ui.ext.formatToDisplay
 import org.example.project.ui.ext.toPercentAdd
 import org.example.project.ui.ext.toPercentOff
 import org.example.project.ui.ext.toPrice
-import org.example.project.ui.screens.addproducts.UpdateProductAction.*
+import org.example.project.ui.screens.addproducts.UpdateProductAction.ADVICE_STOCK
+import org.example.project.ui.screens.addproducts.UpdateProductAction.BRAND
+import org.example.project.ui.screens.addproducts.UpdateProductAction.BUY_PRICE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.CASH_PRICE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.CASH_PRICE_PERCENTAGE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.CATEGORY
+import org.example.project.ui.screens.addproducts.UpdateProductAction.CHANGE_CASH_PRICE_SELECTION
+import org.example.project.ui.screens.addproducts.UpdateProductAction.CHANGE_LIST_PRICE_SELECTION
+import org.example.project.ui.screens.addproducts.UpdateProductAction.CURRENT_STOCK
+import org.example.project.ui.screens.addproducts.UpdateProductAction.DESCRIPTION
+import org.example.project.ui.screens.addproducts.UpdateProductAction.EXPIRE_DATE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.LIST_PRICE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.LIST_PRICE_PERCENTAGE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.NAME
+import org.example.project.ui.screens.addproducts.UpdateProductAction.TOGGLE_MANAGE_EXPIRE_DATE
+import org.example.project.ui.screens.addproducts.UpdateProductAction.TOGGLE_MANAGE_STOCK
+import org.example.project.ui.screens.addproducts.UpdateProductAction.TOGGLE_VARIANT_PRODUCT
 import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
+import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
@@ -161,6 +188,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
                         ) {
                             DataItem(
                                 product = state.product,
+                                categories = state.categories,
                                 onActionDone = { action, value ->
                                     when (action) {
                                         NAME -> viewModel.updateProduct(
@@ -665,8 +693,12 @@ private fun PriceItem(
 @Composable
 private fun DataItem(
     product: Product,
+    categories:List<ProductCategory>,
     onActionDone: (UpdateProductAction, String) -> Unit,
 ) {
+
+    var showDropdownMenuCategory by rememberSaveable { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
@@ -687,9 +719,74 @@ private fun DataItem(
                     )
                 }
                 GenericTextField(product.brand, "Marca") { onActionDone(BRAND, it) }
-                GenericTextField(product.category, "Categoría") { onActionDone(CATEGORY, it) }
-            }
+                Column {
+                    GenericSelectableTextField(
+                        value = product.category,
+                        placeholderText = "Categoría",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showDropdownMenuCategory = true }
+                    )
+                    DropdownMenu(
+                        expanded = showDropdownMenuCategory,
+                        onDismissRequest = { showDropdownMenuCategory = false },
+                        modifier = Modifier.background(SecondaryCardBackground).width(350.dp).heightIn(max = 200.dp),
+                        scrollState = rememberScrollState()
+                    ) {
+                        if(categories.isNotEmpty()) {
+                            DropdownMenuItem(
+                                text = { Text("Sin categoría") },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                                onClick = {
+                                    onActionDone(CATEGORY, "Sin categoría")
+                                    showDropdownMenuCategory = false
+                                },
+                                colors = MenuItemColors(
+                                    textColor = Color.White,
+                                    leadingIconColor = Color.White,
+                                    trailingIconColor = Color.White,
+                                    disabledTextColor = Color.White,
+                                    disabledLeadingIconColor = Color.White,
+                                    disabledTrailingIconColor = Color.White,
+                                )
+                            )
+                            categories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category.name) },
+                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                                    onClick = {
+                                        onActionDone(CATEGORY, category.name)
+                                        showDropdownMenuCategory = false
+                                    },
+                                    colors = MenuItemColors(
+                                        textColor = Color.White,
+                                        leadingIconColor = Color.White,
+                                        trailingIconColor = Color.White,
+                                        disabledTextColor = Color.White,
+                                        disabledLeadingIconColor = Color.White,
+                                        disabledTrailingIconColor = Color.White,
+                                    )
+                                )
+                            }
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text("No hay categorías creadas") },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                                onClick = { },
+                                colors = MenuItemColors(
+                                    textColor = Color.White,
+                                    leadingIconColor = Color.White,
+                                    trailingIconColor = Color.White,
+                                    disabledTextColor = Color.White,
+                                    disabledLeadingIconColor = Color.White,
+                                    disabledTrailingIconColor = Color.White,
+                                )
+                            )
+                        }
 
+
+                    }
+                }
+            }
         }
     }
 }
@@ -822,8 +919,9 @@ private fun ImageCardItem(
                                 Icons.Default.Close,
                                 contentDescription = "eliminar imagen",
                                 tint = Color.White,
-                                modifier = Modifier.clickable{ onDeleteImage() }.pointerHoverIcon(
-                                    PointerIcon.Hand)
+                                modifier = Modifier.clickable { onDeleteImage() }.pointerHoverIcon(
+                                    PointerIcon.Hand
+                                )
                             )
                         }
 
