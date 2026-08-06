@@ -94,11 +94,6 @@ fun App() {
                     icon = Icons.Outlined.LocalGroceryStore
                 ),
                 MenuItemData(
-                    title = "Variantes de productos",
-                    route = Routes.ProductVariants,
-                    icon = Icons.Outlined.Category
-                ),
-                MenuItemData(
                     title = "Clientes",
                     route = Routes.Clients,
                     icon = Icons.Outlined.Person
