@@ -1,8 +1,8 @@
 package org.example.project.domain.usecases.products
 
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
-import org.example.project.domain.models.Product
-import org.example.project.domain.models.ProductError
+import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductError
 
 class AddProduct(private val repo: ProductRepositoryImpl) {
 

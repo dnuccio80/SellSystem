@@ -1,9 +1,7 @@
 package org.example.project.ui.screens.products
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import org.example.project.domain.models.Product
-import org.example.project.domain.models.ProductCategory
+import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductCategory
 
 sealed class ProductUiState {
     data object Loading: ProductUiState()

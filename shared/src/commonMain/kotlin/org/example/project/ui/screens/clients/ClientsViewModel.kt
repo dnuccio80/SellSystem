@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.example.project.domain.models.Client
+import kotlinx.datetime.LocalDate
+import org.example.project.domain.models.client.ClientError
 import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
@@ -40,13 +41,7 @@ class ClientsViewModel(
     val events = _events.asSharedFlow()
 
     private val _clientData = MutableStateFlow(
-        Client(
-            fullName = "",
-            phoneNumber = 0,
-            address = "",
-            birthday = "",
-            notes = ""
-        )
+        CleanClient().getCleanClient()
     )
     val clientData = _clientData.asStateFlow()
 
@@ -69,7 +64,15 @@ class ClientsViewModel(
         }
     }
 
-    fun updateBirthDay(newValue: String) {
+    fun updateCity(newValue: String) {
+        _clientData.update { current -> current.copy(city = newValue) }
+    }
+
+    fun updateProvince(newValue: String) {
+        _clientData.update { current -> current.copy(province = newValue) }
+    }
+
+    fun updateBirthDay(newValue: LocalDate) {
         _clientData.update { current ->
             current.copy(birthday = newValue)
         }
@@ -86,11 +89,11 @@ class ClientsViewModel(
     }
     fun addClient(onDone:() -> Unit) {
         viewModelScope.launch {
-            if (isAllDataCorrect()) {
+            try {
                 addNewClient(_clientData.value)
                 onDone()
-            } else {
-                _events.emit("Faltan rellenar datos!")
+            }catch (e: ClientError) {
+                _events.emit(e.msg)
             }
         }
     }
@@ -116,19 +119,8 @@ class ClientsViewModel(
             onDone()
         }
     }
-
     fun cleanData() {
-        _clientData.update { current ->
-            current.copy(id = 0, fullName = "", phoneNumber = 0, address = "", birthday = "", notes = "", loyaltyPoints = 0, hasCurrentAccount = false)
-        }
+        _clientData.update { CleanClient().getCleanClient() }
     }
-    fun isAllDataCorrect(): Boolean {
-        return _clientData.value.fullName.isNotBlank() &&
-                _clientData.value.phoneNumber != 0L &&
-                _clientData.value.address.isNotBlank() &&
-                _clientData.value.birthday.isNotBlank() &&
-                _clientData.value.fullName.isNotBlank()
-    }
-
 
 }

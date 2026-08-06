@@ -21,7 +21,7 @@ expect object SystemCTor : RoomDatabaseConstructor<SystemDatabase>
 
 @Database(
     entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class],
-    version = 8
+    version = 10
 )
 @ConstructedBy(SystemCTor::class)
 @TypeConverters(Converters::class)

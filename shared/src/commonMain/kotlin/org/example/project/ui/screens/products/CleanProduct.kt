@@ -1,6 +1,6 @@
 package org.example.project.ui.screens.products
 
-import org.example.project.domain.models.Product
+import org.example.project.domain.models.product.Product
 
 class CleanProduct {
     fun getCleanProduct(): Product {

@@ -1,7 +1,7 @@
 package org.example.project.domain.repositories
 
 import kotlinx.coroutines.flow.Flow
-import org.example.project.domain.models.ProductVariant
+import org.example.project.domain.models.product.ProductVariant
 
 interface ProductVariantRepository {
 

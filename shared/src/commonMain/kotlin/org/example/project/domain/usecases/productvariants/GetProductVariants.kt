@@ -2,7 +2,7 @@ package org.example.project.domain.usecases.productvariants
 
 import kotlinx.coroutines.flow.Flow
 import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
-import org.example.project.domain.models.ProductVariant
+import org.example.project.domain.models.product.ProductVariant
 
 class GetProductVariants(private val repo: ProductVariantRepositoryImpl) {
     operator fun invoke(query:String): Flow<List<ProductVariant>> {

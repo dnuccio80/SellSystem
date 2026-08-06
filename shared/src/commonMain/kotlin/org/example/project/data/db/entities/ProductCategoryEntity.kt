@@ -2,7 +2,7 @@ package org.example.project.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.example.project.domain.models.ProductCategory
+import org.example.project.domain.models.product.ProductCategory
 
 @Entity
 data class ProductCategoryEntity(

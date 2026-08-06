@@ -3,7 +3,7 @@ package org.example.project.data.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDate
-import org.example.project.domain.models.Product
+import org.example.project.domain.models.product.Product
 
 @Entity
 data class ProductEntity(

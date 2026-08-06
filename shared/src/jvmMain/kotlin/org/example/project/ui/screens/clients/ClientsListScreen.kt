@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,25 +35,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import org.example.project.domain.models.Client
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.example.project.domain.models.client.Client
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.Capitalization.NONE
 import org.example.project.ui.Capitalization.SENTENCES
 import org.example.project.ui.Capitalization.WORDS
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
+import org.example.project.ui.GenericSelectableTextField
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.ext.formatToDisplay
+import org.example.project.ui.screens.addproducts.DatePickerDialogItem
 import org.example.project.ui.screens.clients.ClientValueChangeActions.ADDRESS
-import org.example.project.ui.screens.clients.ClientValueChangeActions.BIRTHDAY
+import org.example.project.ui.screens.clients.ClientValueChangeActions.CITY
 import org.example.project.ui.screens.clients.ClientValueChangeActions.NAME
 import org.example.project.ui.screens.clients.ClientValueChangeActions.NOTES
 import org.example.project.ui.screens.clients.ClientValueChangeActions.PHONE_NUMBER
-import org.example.project.ui.utils.CardTitleBackground
-import org.example.project.ui.utils.GrayText
+import org.example.project.ui.screens.clients.ClientValueChangeActions.PROVINCE
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
+import org.example.project.ui.utils.SecondaryCardBackground
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Instant
 
 class ClientsListScreen : Screen {
     @Composable
@@ -120,11 +128,13 @@ class ClientsListScreen : Screen {
                             NAME -> viewmodel.updateName(value)
                             PHONE_NUMBER -> viewmodel.updatePhoneNumber(value)
                             ADDRESS -> viewmodel.updateAddress(value)
-                            BIRTHDAY -> viewmodel.updateBirthDay(value)
                             NOTES -> viewmodel.updateNotes(value)
+                            CITY -> viewmodel.updateCity(value)
+                            PROVINCE -> viewmodel.updateProvince(value)
                         }
                     },
                     isModification = isModification,
+                    onUpdateBirthday = { viewmodel.updateBirthDay(it) },
                     onAccept = { viewmodel.addClient { showAddClientDialog = false } },
                     onDismiss = {
                         showAddClientDialog = false
@@ -143,7 +153,8 @@ private fun ClientCard(client: Client, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val cardColor = if (isHovered) CardTitleBackground else GrayText
+    val cardColor = if (isHovered) SecondaryCardBackground else PrimaryCardBackground
+
 
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -226,7 +237,7 @@ private fun ClientCard(client: Client, onClick: () -> Unit) {
 }
 
 enum class ClientValueChangeActions {
-    NAME, PHONE_NUMBER, ADDRESS, BIRTHDAY, NOTES
+    NAME, PHONE_NUMBER, ADDRESS, CITY, PROVINCE, NOTES
 }
 
 @Composable
@@ -278,6 +289,7 @@ fun ConfirmDialog(msg:String, onAccept: () -> Unit , onDismiss: () -> Unit) {
 private fun AddClientDialog(
     clientData: Client,
     onActionDone: (ClientValueChangeActions, String) -> Unit,
+    onUpdateBirthday:(LocalDate) -> Unit,
     isModification: Boolean,
     onAccept: () -> Unit,
     onDismiss: () -> Unit,
@@ -285,6 +297,9 @@ private fun AddClientDialog(
 
     val phoneNumber = if (clientData.phoneNumber == 0L) "" else clientData.phoneNumber.toString()
     val acceptText = if (isModification) "Modificar" else "Aceptar"
+
+    val datePickerState = rememberDatePickerState()
+    var showBirthdayPicker by rememberSaveable { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -322,10 +337,22 @@ private fun AddClientDialog(
                         capitalizationMethod = WORDS
                     ) { onActionDone(ADDRESS, it) }
                     GenericTextField(
-                        clientData.birthday,
-                        "Fecha de cumpleaños",
-                        capitalizationMethod = NONE
-                    ) { onActionDone(BIRTHDAY, it) }
+                        clientData.city,
+                        "Ciudad",
+                        capitalizationMethod = WORDS
+                    ) { onActionDone(CITY, it) }
+                    GenericTextField(
+                        clientData.province,
+                        "Provincia",
+                        capitalizationMethod = WORDS
+                    ) { onActionDone(PROVINCE, it) }
+                    GenericSelectableTextField(
+                        value = clientData.birthday?.formatToDisplay() ?: "" ,
+                        labelText = "Fecha de cumpleaños",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showBirthdayPicker = true }
+                    )
+
                     GenericTextField(
                         clientData.notes,
                         "Notas adicionales",
@@ -338,6 +365,20 @@ private fun AddClientDialog(
                     acceptColor = GreenText,
                     onAccept = { onAccept() },
                     onDismiss = { onDismiss() })
+                DatePickerDialogItem(
+                    show = showBirthdayPicker,
+                    onDismiss = { showBirthdayPicker = false },
+                    onConfirm = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val date = Instant.fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.UTC)
+                                .date
+                            onUpdateBirthday(date)
+                            showBirthdayPicker = false
+                        }
+                    },
+                    datePickerState = datePickerState
+                )
             }
         }
 

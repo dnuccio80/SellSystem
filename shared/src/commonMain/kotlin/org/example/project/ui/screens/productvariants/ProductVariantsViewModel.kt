@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
-import org.example.project.domain.models.ProductVariant
+import org.example.project.domain.models.product.ProductVariant
 import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants

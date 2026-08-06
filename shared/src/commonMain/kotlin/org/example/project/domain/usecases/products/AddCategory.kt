@@ -1,7 +1,7 @@
 package org.example.project.domain.usecases.products
 
-import org.example.project.domain.models.ProductCategory
-import org.example.project.domain.models.ProductError
+import org.example.project.domain.models.product.ProductCategory
+import org.example.project.domain.models.product.ProductError
 import org.example.project.domain.repositories.ProductCategoryRepository
 
 class AddCategory(private val repository: ProductCategoryRepository) {

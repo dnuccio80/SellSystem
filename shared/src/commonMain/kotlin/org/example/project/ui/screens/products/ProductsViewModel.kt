@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.example.project.domain.models.ProductCategory
-import org.example.project.domain.models.ProductError
+import org.example.project.domain.models.product.ProductCategory
+import org.example.project.domain.models.product.ProductError
 import org.example.project.domain.repositories.ProductCategoryRepository
 import org.example.project.domain.usecases.products.AddCategory
 import org.example.project.domain.usecases.products.GetCategories

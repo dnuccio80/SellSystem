@@ -1,7 +1,7 @@
 package org.example.project.domain.repositories
 
 import kotlinx.coroutines.flow.Flow
-import org.example.project.domain.models.Product
+import org.example.project.domain.models.product.Product
 
 interface ProductRepository {
     fun getAllProducts(): Flow<List<Product>>

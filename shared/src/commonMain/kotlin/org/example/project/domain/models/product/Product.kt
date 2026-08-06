@@ -1,4 +1,4 @@
-package org.example.project.domain.models
+package org.example.project.domain.models.product
 
 import kotlinx.datetime.LocalDate
 import org.example.project.data.db.entities.ProductEntity

@@ -1,4 +1,4 @@
-package org.example.project.domain.models
+package org.example.project.domain.models.product
 
 sealed class ProductError(val msg: String): Exception() {
     data object ListPriceLessThanBuyPrice: ProductError("El precio de lista es menor al precio de compra")

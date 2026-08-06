@@ -2,7 +2,7 @@ package org.example.project.domain.usecases.products
 
 import kotlinx.coroutines.flow.Flow
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
-import org.example.project.domain.models.Product
+import org.example.project.domain.models.product.Product
 
 class GetProducts(private val repo: ProductRepositoryImpl) {
 

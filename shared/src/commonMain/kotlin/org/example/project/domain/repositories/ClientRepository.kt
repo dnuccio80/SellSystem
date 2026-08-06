@@ -1,7 +1,7 @@
 package org.example.project.domain.repositories
 
 import kotlinx.coroutines.flow.Flow
-import org.example.project.domain.models.Client
+import org.example.project.domain.models.client.Client
 
 interface ClientRepository {
     fun getAllClients(): Flow<List<Client>>

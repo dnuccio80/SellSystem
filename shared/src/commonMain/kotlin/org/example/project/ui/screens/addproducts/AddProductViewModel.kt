@@ -16,10 +16,9 @@ import kotlinx.datetime.LocalDate
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.data.storage.ImagePicker
 import org.example.project.data.storage.ImageStorage
-import org.example.project.domain.models.PercentageValues
-import org.example.project.domain.models.PriceOptions
-import org.example.project.domain.models.ProductError
-import org.example.project.domain.models.ProductError.*
+import org.example.project.domain.models.product.PercentageValues
+import org.example.project.domain.models.product.PriceOptions
+import org.example.project.domain.models.product.ProductError
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice

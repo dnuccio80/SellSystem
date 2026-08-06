@@ -1,7 +1,6 @@
 package org.example.project.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -171,7 +170,7 @@ enum class Capitalization {
 @Composable
 fun GenericSelectableTextField(
     value:String,
-    placeholderText:String,
+    labelText:String,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
@@ -181,7 +180,7 @@ fun GenericSelectableTextField(
         modifier = modifier.clickable{ onClick() }.pointerHoverIcon(PointerIcon.Hand),
         enabled = false,
         onValueChange = { },
-        label = { Text(placeholderText) },
+        label = { Text(labelText) },
         shape = RoundedCornerShape(4.dp),
         colors = TextFieldDefaults.colors(
             disabledTextColor = Color.White,

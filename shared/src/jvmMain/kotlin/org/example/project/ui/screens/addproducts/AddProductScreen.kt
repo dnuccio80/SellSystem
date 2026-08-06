@@ -2,7 +2,6 @@ package org.example.project.ui.screens.addproducts
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
-import androidx.compose.material.MenuDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -51,24 +49,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.room.Update
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
-import org.example.project.domain.models.Product
-import org.example.project.domain.models.ProductCategory
+import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductCategory
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CardTitleCentered
 import org.example.project.ui.CheckBoxItem
@@ -722,7 +717,7 @@ private fun DataItem(
                 Column {
                     GenericSelectableTextField(
                         value = product.category,
-                        placeholderText = "Categoría",
+                        labelText = "Categoría",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { showDropdownMenuCategory = true }
                     )

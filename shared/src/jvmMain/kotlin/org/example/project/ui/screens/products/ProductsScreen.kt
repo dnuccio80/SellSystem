@@ -56,8 +56,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil3.compose.AsyncImage
-import org.example.project.domain.models.Product
-import org.example.project.domain.models.ProductCategory
+import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductCategory
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.Capitalization.SENTENCES
 import org.example.project.ui.GenericButton
@@ -80,7 +80,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import sellsystem.shared.generated.resources.Res
 import sellsystem.shared.generated.resources.generic_image
-import sellsystem.shared.generated.resources.woman_img
 import java.io.File
 
 

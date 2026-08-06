@@ -3,7 +3,7 @@ package org.example.project.data.db.repositoriesimpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.example.project.data.db.SystemDatabase
-import org.example.project.domain.models.ProductVariant
+import org.example.project.domain.models.product.ProductVariant
 import org.example.project.domain.repositories.ProductVariantRepository
 
 class ProductVariantRepositoryImpl(private val db: SystemDatabase): ProductVariantRepository {

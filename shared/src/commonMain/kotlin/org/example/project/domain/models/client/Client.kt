@@ -1,5 +1,6 @@
-package org.example.project.domain.models
+package org.example.project.domain.models.client
 
+import kotlinx.datetime.LocalDate
 import org.example.project.data.db.entities.ClientEntity
 
 data class Client(
@@ -7,7 +8,9 @@ data class Client(
     val fullName:String,
     val phoneNumber:Long,
     val address:String,
-    val birthday:String,
+    val city:String,
+    val province:String,
+    val birthday: LocalDate? = null,
     val notes:String,
     val loyaltyPoints:Int = 0,
     val hasCurrentAccount: Boolean = false
@@ -18,6 +21,8 @@ data class Client(
             fullName = fullName,
             phoneNumber = phoneNumber,
             address = address,
+            city = city,
+            province = province,
             birthday = birthday,
             notes = notes,
             loyaltyPoints = loyaltyPoints,

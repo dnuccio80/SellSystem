@@ -2,7 +2,8 @@ package org.example.project.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.example.project.domain.models.Client
+import kotlinx.datetime.LocalDate
+import org.example.project.domain.models.client.Client
 
 @Entity
 data class ClientEntity(
@@ -11,7 +12,9 @@ data class ClientEntity(
     val fullName:String,
     val phoneNumber:Long,
     val address:String,
-    val birthday:String,
+    val city:String,
+    val province:String,
+    val birthday: LocalDate?,
     val notes:String,
     val loyaltyPoints:Int,
     val hasCurrentAccount: Boolean
@@ -22,6 +25,8 @@ data class ClientEntity(
             fullName = fullName,
             phoneNumber = phoneNumber,
             address = address,
+            city = city,
+            province = province,
             birthday = birthday,
             notes = notes,
             loyaltyPoints = loyaltyPoints,
