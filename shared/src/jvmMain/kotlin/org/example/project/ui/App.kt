@@ -61,7 +61,7 @@ import org.example.project.ui.screens.products.ProductsScreen
 import org.example.project.ui.screens.PromotionsScreen
 import org.example.project.ui.screens.ReturnsScreen
 import org.example.project.ui.screens.SellsListScreen
-import org.example.project.ui.screens.SuppliersListScreen
+import org.example.project.ui.screens.suppliers.SuppliersListScreen
 import org.example.project.ui.utils.FullCard
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground

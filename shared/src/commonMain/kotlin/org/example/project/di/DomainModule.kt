@@ -18,6 +18,8 @@ import org.example.project.domain.usecases.products.GetProducts
 import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants
+import org.example.project.domain.usecases.suppliers.AddSupplier
+import org.example.project.domain.usecases.suppliers.GetSuppliers
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
@@ -44,5 +46,8 @@ val domainModule = module {
     factoryOf(::AddExpense)
     factoryOf(::GetComposedExpensesFinance)
     factoryOf(::GetSingleExpenseFinance)
+//    Suppliers
+    factoryOf(::GetSuppliers)
+    factoryOf(::AddSupplier)
 
 }
