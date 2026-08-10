@@ -25,6 +25,13 @@ data class Supplier(
     }
 
     fun toPresentation(): SupplierPresentation {
+
+        val productsList = productsOffered.split(",").map { word ->
+            word.trim().replaceFirstChar { char ->
+                char.uppercaseChar()
+            }
+        }.filter { it.isNotBlank() }
+
         return SupplierPresentation(
             id = id,
             name = name,
@@ -32,7 +39,7 @@ data class Supplier(
             phoneNumber = phoneNumber,
             webpage = webpage,
             address = address,
-            productsOffered = productsOffered.split(",")
+            productsOffered = productsList
         )
     }
 }
