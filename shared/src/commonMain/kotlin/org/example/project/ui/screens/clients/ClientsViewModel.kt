@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class ClientsViewModel(
     getClients: GetClients,
     private val addNewClient: AddNewClient,
-    private val getClientById: GetClientById
+    private val getClientById: GetClientById,
 ) : ViewModel() {
 
     private val _queryClientName = MutableStateFlow("")
@@ -84,41 +84,32 @@ class ClientsViewModel(
         }
     }
 
-    fun updateQuerySearch(newValue:String) {
+    fun updateQuerySearch(newValue: String) {
         _queryClientName.value = newValue
     }
-    fun addClient(onDone:() -> Unit) {
+
+    fun addClient(onDone: () -> Unit) {
         viewModelScope.launch {
             try {
                 addNewClient(_clientData.value)
                 onDone()
-            }catch (e: ClientError) {
+            } catch (e: ClientError) {
                 _events.emit(e.msg)
             }
         }
     }
 
-    fun getClientData(id:Int, onDone: () -> Unit) {
+    fun getClientData(id: Int, onDone: () -> Unit) {
         viewModelScope.launch {
             val client = async {
                 getClientById(id)
             }.await()
 
-            _clientData.update { current ->
-                current.copy(
-                    id = client.id,
-                    fullName = client.fullName,
-                    phoneNumber = client.phoneNumber,
-                    address = client.address,
-                    birthday = client.birthday,
-                    notes = client.notes,
-                    loyaltyPoints = client.loyaltyPoints,
-                    hasCurrentAccount = client.hasCurrentAccount
-                )
-            }
+            _clientData.update { client }
             onDone()
         }
     }
+
     fun cleanData() {
         _clientData.update { CleanClient().getCleanClient() }
     }

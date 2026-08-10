@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.CreditScore
 import androidx.compose.material.icons.outlined.Discount
 import androidx.compose.material.icons.outlined.LocalGroceryStore
@@ -53,7 +52,7 @@ import org.example.project.ui.screens.clients.ClientsListScreen
 import org.example.project.ui.screens.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
-import org.example.project.ui.screens.ExpensesScreen
+import org.example.project.ui.screens.expenses.ExpensesScreen
 import org.example.project.ui.screens.FinancialReportsScreen
 import org.example.project.ui.screens.LoyaltySystemScreen
 import org.example.project.ui.screens.PendingOrdersScreen

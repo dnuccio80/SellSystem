@@ -1,8 +1,12 @@
 package org.example.project.di
 
+import org.example.project.domain.models.expense.AddExpense
 import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
+import org.example.project.domain.usecases.expenses.GetComposedExpensesFinance
+import org.example.project.domain.usecases.expenses.GetExpenses
+import org.example.project.domain.usecases.expenses.GetSingleExpenseFinance
 import org.example.project.domain.usecases.products.AddCategory
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
@@ -35,4 +39,10 @@ val domainModule = module {
     factoryOf(::CalculatePriceFromPercentageDiscount)
     factoryOf(::GetCategories)
     factoryOf(::AddCategory)
+//    Expenses
+    factoryOf(::GetExpenses)
+    factoryOf(::AddExpense)
+    factoryOf(::GetComposedExpensesFinance)
+    factoryOf(::GetSingleExpenseFinance)
+
 }
