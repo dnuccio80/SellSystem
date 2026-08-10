@@ -1,5 +1,6 @@
 package org.example.project.ui.screens.expenses
 
+import androidx.collection.CircularArray
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,6 +60,7 @@ import org.example.project.ui.ext.toPercentAdd
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
+import org.example.project.ui.screens.expenses.ExpensesUiState.Success
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
@@ -65,30 +69,22 @@ import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 import org.koin.compose.viewmodel.koinViewModel
 
-enum class ExpenseFilterLabel(val etiquette: String) {
-    TODAY("Hoy"), WEEK("Esta semana"), MONTH("Este mes"), THREE_MONTHS("Últimos 3 meses"), ALL("Todo")
-}
+
 class ExpensesScreen : Screen {
 
     @Composable
     override fun Content() {
         val viewModel = koinViewModel<ExpensesViewModel>()
         var showNewExpenseDialog by rememberSaveable { mutableStateOf(false) }
-        val expenseData by viewModel.expenseData.collectAsStateWithLifecycle()
+
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         var isEditDialog by rememberSaveable { mutableStateOf(false) }
-        val expensesList by viewModel.expenses.collectAsStateWithLifecycle()
-        val query by viewModel.query.collectAsStateWithLifecycle()
-        val financeData by viewModel.composedFinance.collectAsStateWithLifecycle()
 
-        val labelFilterList = listOf(
-            ExpenseFilterLabel.ALL.etiquette,
-            ExpenseFilterLabel.TODAY.etiquette,
-            ExpenseFilterLabel.WEEK.etiquette,
-            ExpenseFilterLabel.MONTH.etiquette,
-            ExpenseFilterLabel.THREE_MONTHS.etiquette,
-        )
+//        val expenseData by viewModel.expenseData.collectAsStateWithLifecycle()
+//        val expensesList by viewModel.expenses.collectAsStateWithLifecycle()
+//        val query by viewModel.query.collectAsStateWithLifecycle()
+//        val financeData by viewModel.composedFinance.collectAsStateWithLifecycle()
 
-        var labelSelected by rememberSaveable { mutableStateOf(labelFilterList.first()) }
 
         var adviceMsg by rememberSaveable { mutableStateOf("") }
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
@@ -101,79 +97,92 @@ class ExpensesScreen : Screen {
             }
         }
 
-        ScreenContainer {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                GenericHeaderWithButtonAndSearch(
-                    title = "Gastos",
-                    description = "Listado de todos los gastos históricos",
-                    buttonText = "Agregar gasto",
-                    searchValue = query,
-                    onSearchValueChange = { viewModel.updateQuery(it) },
-                    onDeleteQuerySearch = { viewModel.updateQuery("") }
-                ) {
-                    isEditDialog = false
-                    showNewExpenseDialog = true
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    ExpensesListCardItem(
-                        modifier = Modifier.weight(1f),
-                        expensesList = expensesList,
-                        onExpenseClick = { id ->
-                            viewModel.getExpenseDataFromId(id) {
-                                isEditDialog = true
-                                showNewExpenseDialog = true
-                            }
-                        },
-                        onLabelChange = { labelSelected = it },
-                        labelFilterList = labelFilterList,
-                        labelFilterSelected = labelSelected
-                    )
-                    ExpenseFinance(financeData, modifier = Modifier.weight(.5f))
-                }
+        when (uiState) {
+            is ExpensesUiState.Error -> {}
+            ExpensesUiState.Loading -> {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
             }
 
-            if (showNewExpenseDialog) {
-                AddExpenseDialog(
-                    expenseData = expenseData,
-                    isEdit = isEditDialog,
-                    onDismiss = {
-                        showNewExpenseDialog = false
-                        viewModel.cleanExpenseData()
-                    },
-                    onDescriptionChange = { viewModel.updateDescription(it) },
-                    onAmountChange = { viewModel.updateAmount(it) },
-                    onDeleteExpense = { showConfirmDialog = true },
-                    onAccept = { viewModel.addExpense { showNewExpenseDialog = false } }
-                )
-            }
-            SimpleAdviceDialog(
-                msg = adviceMsg,
-                show = showAdviceDialog,
-                onDismiss = { showAdviceDialog = false }
-            )
-            if (showConfirmDialog) {
-                ConfirmDialog(
-                    msg = "Seguro que deseas eliminar el gasto?",
-                    onAccept = {
-                        showConfirmDialog = false
-                        showNewExpenseDialog = false
-                        viewModel.deleteExpense()
-                    },
-                    onDismiss = {
-                        showConfirmDialog = false
+            is Success -> {
+                ScreenContainer {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        GenericHeaderWithButtonAndSearch(
+                            title = "Gastos",
+                            description = "Listado de todos los gastos históricos",
+                            buttonText = "Agregar gasto",
+                            searchValue = (uiState as Success).query,
+                            onSearchValueChange = { viewModel.updateQuery(it) },
+                            onDeleteQuerySearch = { viewModel.updateQuery("") }
+                        ) {
+                            isEditDialog = false
+                            showNewExpenseDialog = true
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            ExpensesListCardItem(
+                                modifier = Modifier.weight(1f),
+                                expensesList = (uiState as Success).expenses,
+                                onExpenseClick = { id ->
+                                    viewModel.getExpenseDataFromId(id) {
+                                        isEditDialog = true
+                                        showNewExpenseDialog = true
+                                    }
+                                },
+                                onLabelChange = { viewModel.updateLabel(it) },
+                                labelFilterList = viewModel.labelFilterList,
+                                labelFilterSelected =  (uiState as Success).labelSelected
+                            )
+                            ExpenseFinance((uiState as Success).composedFinance, modifier = Modifier.weight(.5f))
+                        }
                     }
-                )
+
+                    if (showNewExpenseDialog) {
+                        AddExpenseDialog(
+                            expenseData = (uiState as Success).expenseData,
+                            isEdit = isEditDialog,
+                            onDismiss = {
+                                showNewExpenseDialog = false
+                                viewModel.cleanExpenseData()
+                            },
+                            onDescriptionChange = { viewModel.updateDescription(it) },
+                            onAmountChange = { viewModel.updateAmount(it) },
+                            onDeleteExpense = { showConfirmDialog = true },
+                            onAccept = { viewModel.addExpense { showNewExpenseDialog = false } }
+                        )
+                    }
+                    SimpleAdviceDialog(
+                        msg = adviceMsg,
+                        show = showAdviceDialog,
+                        onDismiss = { showAdviceDialog = false }
+                    )
+                    if (showConfirmDialog) {
+                        ConfirmDialog(
+                            msg = "Seguro que deseas eliminar el gasto?",
+                            onAccept = {
+                                showConfirmDialog = false
+                                showNewExpenseDialog = false
+                                viewModel.deleteExpense()
+                            },
+                            onDismiss = {
+                                showConfirmDialog = false
+                            }
+                        )
+                    }
+                }
             }
         }
     }
+
 
     @Composable
     private fun AddExpenseDialog(
@@ -269,9 +278,9 @@ fun ExpensesListCardItem(
     modifier: Modifier,
     expensesList: List<Expense>,
     labelFilterList: List<String>,
-    labelFilterSelected:String,
+    labelFilterSelected: String,
     onExpenseClick: (Int) -> Unit,
-    onLabelChange:(String) -> Unit
+    onLabelChange: (String) -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxHeight(),
@@ -396,7 +405,8 @@ private fun ExpenseCardItem(expense: Expense, onClick: () -> Unit) {
 private fun ExpensesFinanceResume(
     modifier: Modifier = Modifier,
     title: String,
-    financeData: ExpenseFinanceData) {
+    financeData: ExpenseFinanceData,
+) {
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
@@ -416,9 +426,15 @@ private fun ExpensesFinanceResume(
                 )
             }
             Column(verticalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.weight(1f)) {
-                RowWithMidTitleAndDescription("Cantidad de gastos:", financeData.expensesQuantity.toString())
+                RowWithMidTitleAndDescription(
+                    "Cantidad de gastos:",
+                    financeData.expensesQuantity.toString()
+                )
                 RowWithMidTitleAndDescription("Total:", financeData.totalAmount.toPrice())
-                RowWithMidTitleAndDescription("Mayor gasto:", "${financeData.maxExpense?.description ?: "No hay registro"}: ${financeData.maxExpense?.amount?.toPrice() ?: ""}")
+                RowWithMidTitleAndDescription(
+                    "Mayor gasto:",
+                    "${financeData.maxExpense?.description ?: "No hay registro"}: ${financeData.maxExpense?.amount?.toPrice() ?: ""}"
+                )
                 RowWithMidTitleAndDescription("Con respecto al mes anterior:", 15L.toPercentAdd())
             }
         }
