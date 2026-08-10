@@ -79,13 +79,6 @@ class ExpensesScreen : Screen {
 
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         var isEditDialog by rememberSaveable { mutableStateOf(false) }
-
-//        val expenseData by viewModel.expenseData.collectAsStateWithLifecycle()
-//        val expensesList by viewModel.expenses.collectAsStateWithLifecycle()
-//        val query by viewModel.query.collectAsStateWithLifecycle()
-//        val financeData by viewModel.composedFinance.collectAsStateWithLifecycle()
-
-
         var adviceMsg by rememberSaveable { mutableStateOf("") }
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
         var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
@@ -244,7 +237,6 @@ class ExpensesScreen : Screen {
                     AcceptDeclineButtons(onAccept = { onAccept() }, onDismiss = { onDismiss() })
                 }
             }
-
         }
     }
 }
@@ -292,46 +284,46 @@ fun ExpensesListCardItem(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-            if (expensesList.isNotEmpty()) {
-                Column {
+            Column {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Listado de gastos",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                     Row(
-                        Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier.height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            "Listado de gastos",
-                            style = MaterialTheme.typography.titleMedium,
+                            "Ver:",
                             color = Color.White,
+                            style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.height(IntrinsicSize.Min),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
+                        labelFilterList.forEach { label ->
                             Text(
-                                "Ver:",
-                                color = Color.White,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold
+                                label,
+                                modifier = Modifier.clickable { onLabelChange(label) }
+                                    .pointerHoverIcon(PointerIcon.Hand),
+                                color = if (label == labelFilterSelected) GreenText else Color.White,
+                                style = MaterialTheme.typography.labelLarge
                             )
-                            labelFilterList.forEach { label ->
-                                Text(
-                                    label,
-                                    modifier = Modifier.clickable { onLabelChange(label) }
-                                        .pointerHoverIcon(PointerIcon.Hand),
-                                    color = if (label == labelFilterSelected) GreenText else Color.White,
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                                if (label != labelFilterList.last()) {
-                                    VerticalDivider(thickness = 2.dp, color = GrayText)
-                                }
+                            if (label != labelFilterList.last()) {
+                                VerticalDivider(thickness = 2.dp, color = GrayText)
                             }
                         }
                     }
-                    HorizontalDivider(thickness = 1.5.dp, color = WhiteText)
                 }
+                HorizontalDivider(thickness = 1.5.dp, color = WhiteText)
+            }
+            if (expensesList.isNotEmpty()) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(expensesList) { expense ->
                         ExpenseCardItem(expense) {
