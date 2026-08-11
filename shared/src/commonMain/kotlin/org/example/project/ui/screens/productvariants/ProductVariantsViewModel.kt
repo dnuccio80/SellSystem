@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
 import org.example.project.domain.models.product.ProductVariant
+import org.example.project.domain.repositories.ProductVariantRepository
 import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants
@@ -28,7 +28,7 @@ class ProductVariantsViewModel(
     private val addProductVariant: AddProductVariant,
     private val getProductVariants: GetProductVariants,
     private val getProductVariantById: GetProductVariantById,
-    private val productVariantRepository: ProductVariantRepositoryImpl
+    private val productVariantRepository: ProductVariantRepository,
 ) :
     ViewModel() {
 
@@ -57,16 +57,17 @@ class ProductVariantsViewModel(
     val events = _events.asSharedFlow()
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    private val _allProductVariants = _querySearch.debounce(300.milliseconds).flatMapLatest { query ->
-        getProductVariants(query)
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000), emptyList()
-    )
+    private val _allProductVariants =
+        _querySearch.debounce(300.milliseconds).flatMapLatest { query ->
+            getProductVariants(query)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000), emptyList()
+        )
     val allProductVariants = _allProductVariants
 
 
-    fun addField(value:String = "") {
+    fun addField(value: String = "") {
         _variantsList.update {
             it + value
         }
@@ -118,7 +119,7 @@ class ProductVariantsViewModel(
         }
     }
 
-    fun editProductVariant(id:Int, onDone: () -> Unit) {
+    fun editProductVariant(id: Int, onDone: () -> Unit) {
         viewModelScope.launch {
             val pv = async { getProductVariantById(id) }.await()
             productVariantId.value = id

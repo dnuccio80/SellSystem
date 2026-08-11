@@ -1,10 +1,10 @@
 package org.example.project.domain.usecases.products
 
-import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductError
+import org.example.project.domain.repositories.ProductRepository
 
-class AddProduct(private val repo: ProductRepositoryImpl) {
+class AddProduct(private val repo: ProductRepository) {
 
     suspend operator fun invoke(product: Product) {
 

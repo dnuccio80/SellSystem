@@ -1,9 +1,9 @@
 package org.example.project.domain.usecases.productvariants
 
-import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
 import org.example.project.domain.models.product.ProductVariant
+import org.example.project.domain.repositories.ProductVariantRepository
 
-class AddProductVariant(private val productVariantRepo: ProductVariantRepositoryImpl) {
+class AddProductVariant(private val productVariantRepo: ProductVariantRepository) {
 
     suspend operator fun invoke(productVariant: ProductVariant) {
 

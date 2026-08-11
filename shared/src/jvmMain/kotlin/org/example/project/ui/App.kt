@@ -49,7 +49,7 @@ import org.example.project.di.domainModule
 import org.example.project.di.platformModule
 import org.example.project.di.uiModule
 import org.example.project.ui.screens.clients.ClientsListScreen
-import org.example.project.ui.screens.CurrentAccountsListScreen
+import org.example.project.ui.screens.currentaccounts.CurrentAccountsListScreen
 import org.example.project.ui.screens.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.expenses.ExpensesScreen

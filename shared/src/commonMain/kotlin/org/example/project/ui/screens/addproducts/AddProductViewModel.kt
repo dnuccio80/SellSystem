@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.data.storage.ImagePicker
 import org.example.project.data.storage.ImageStorage
 import org.example.project.domain.models.product.PercentageValues
 import org.example.project.domain.models.product.PriceOptions
 import org.example.project.domain.models.product.ProductError
+import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
 import org.example.project.domain.usecases.products.CalculatePercentageProfitFromSellPrice
@@ -43,7 +43,7 @@ sealed class PriceCashType(val name: String) {
 
 class AddProductViewModel(
     private val addProduct: AddProduct,
-    private val repository: ProductRepositoryImpl,
+    private val repository: ProductRepository,
     private val calculatePercentageProfitFromSellPrice: CalculatePercentageProfitFromSellPrice,
     private val calculatePriceFromPercentage: CalculatePriceFromPercentageAdd,
     private val calculatePriceFromPercentageDiscount: CalculatePriceFromPercentageDiscount,

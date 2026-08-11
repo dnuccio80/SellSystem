@@ -4,6 +4,8 @@ import org.example.project.domain.models.expense.AddExpense
 import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
+import org.example.project.domain.usecases.currentaccounts.GetClientsWithNoCurrentAccounts
+import org.example.project.domain.usecases.currentaccounts.GetCurrentAccounts
 import org.example.project.domain.usecases.expenses.GetComposedExpensesFinance
 import org.example.project.domain.usecases.expenses.GetExpenses
 import org.example.project.domain.usecases.expenses.GetSingleExpenseFinance
@@ -49,5 +51,8 @@ val domainModule = module {
 //    Suppliers
     factoryOf(::GetSuppliers)
     factoryOf(::AddSupplier)
+//    Current Accounts
+    factoryOf(::GetCurrentAccounts)
+    factoryOf(::GetClientsWithNoCurrentAccounts)
 
 }

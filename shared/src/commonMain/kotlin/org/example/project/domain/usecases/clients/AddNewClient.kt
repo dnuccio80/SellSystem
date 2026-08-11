@@ -3,8 +3,9 @@ package org.example.project.domain.usecases.clients
 import org.example.project.data.db.repositoriesimpl.ClientRepositoryImpl
 import org.example.project.domain.models.client.Client
 import org.example.project.domain.models.client.ClientError
+import org.example.project.domain.repositories.ClientRepository
 
-class AddNewClient(private val clientRepository: ClientRepositoryImpl) {
+class AddNewClient(private val clientRepository: ClientRepository) {
     suspend operator fun invoke(client: Client) {
 
         when {
