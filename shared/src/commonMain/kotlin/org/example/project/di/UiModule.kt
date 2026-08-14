@@ -4,6 +4,7 @@ import org.example.project.ui.screens.addproducts.AddProductViewModel
 import org.example.project.ui.screens.clients.ClientsViewModel
 import org.example.project.ui.screens.currentaccounts.CurrentAccountDetailsViewModel
 import org.example.project.ui.screens.currentaccounts.CurrentAccountsViewModel
+import org.example.project.ui.screens.daily.DailyViewModel
 import org.example.project.ui.screens.expenses.ExpensesViewModel
 import org.example.project.ui.screens.products.ProductsViewModel
 import org.example.project.ui.screens.productvariants.ProductVariantsViewModel
@@ -20,4 +21,5 @@ val uiModule = module {
     viewModelOf(::SuppliersViewModel)
     viewModelOf(::CurrentAccountsViewModel)
     viewModelOf(::CurrentAccountDetailsViewModel)
+    viewModelOf(::DailyViewModel)
 }
