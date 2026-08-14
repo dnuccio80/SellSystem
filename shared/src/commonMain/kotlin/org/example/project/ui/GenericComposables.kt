@@ -437,6 +437,8 @@ fun GenericScreenTitleHeaderWithButtons(
     firstButtonText: String,
     secondButtonText: String,
     buttonIcon: ImageVector? = null,
+    firstButtonColor:Color = SecondaryCardBackground,
+    secondButtonColor:Color = SecondaryCardBackground,
     onFirstButtonClick: () -> Unit,
     onSecondButtonClick: () -> Unit,
 ) {
@@ -462,8 +464,8 @@ fun GenericScreenTitleHeaderWithButtons(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            GenericButton(firstButtonText, buttonIcon) { onFirstButtonClick() }
-            GenericButton(secondButtonText) { onSecondButtonClick() }
+            GenericButton(firstButtonText, buttonIcon, color = firstButtonColor) { onFirstButtonClick() }
+            GenericButton(secondButtonText, color = secondButtonColor) { onSecondButtonClick() }
         }
     }
 }

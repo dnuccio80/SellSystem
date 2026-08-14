@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,8 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import org.example.project.data.db.entities.relations.ClientWithCurrentAccount
+import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.client.Client
+import org.example.project.domain.models.currentaccount.ClientWithCurrentAccount
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.Capitalization
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
@@ -52,10 +52,10 @@ import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.ext.toPrice
+import org.example.project.ui.screens.addproducts.AddProductScreen
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
-import org.example.project.ui.utils.WhiteText
 import org.koin.compose.viewmodel.koinViewModel
 
 class CurrentAccountsListScreen : Screen {
@@ -68,6 +68,8 @@ class CurrentAccountsListScreen : Screen {
         val query by viewModel.query.collectAsStateWithLifecycle()
         val selectedClient by viewModel.selectedClient.collectAsStateWithLifecycle()
         val currentAccounts by viewModel.currentAccounts.collectAsStateWithLifecycle()
+
+        val navigator = LocalNavigator.current
 
         ScreenContainer {
             Column(
@@ -86,10 +88,14 @@ class CurrentAccountsListScreen : Screen {
                 ) { showNewCurrentAccountDialog = true }
                 if (currentAccounts.isNotEmpty()) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        items(currentAccounts) {clientWithCurrentAccount ->
-                            CurrentAccountItem(clientWithCurrentAccount) { }
+                        items(currentAccounts) { clientWithCurrentAccount ->
+                            CurrentAccountItem(clientWithCurrentAccount) {
+                                navigator?.push(
+                                    CurrentAccountDetailsScreen(clientWithCurrentAccount.client.id)
+                                )
+                            }
                         }
-                     }
+                    }
                 } else {
                     Text(
                         "No hay cuentas corrientes en la búsqueda",
@@ -106,7 +112,10 @@ class CurrentAccountsListScreen : Screen {
                 clients = clients,
                 selectedClient = selectedClient,
                 onClientClick = { viewModel.updateSelectedClient(it) },
-                onAccept = { viewModel.addCurrentAccount() },
+                onAccept = {
+                    viewModel.addCurrentAccount()
+                    showNewCurrentAccountDialog = false
+                },
                 onDismiss = { showNewCurrentAccountDialog = false },
             )
         }
@@ -260,7 +269,10 @@ private fun CurrentAccountItem(
                 color = Color.White,
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     "Deuda:",
                     fontWeight = FontWeight.Bold,

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.example.project.domain.models.client.ClientError
+import org.example.project.domain.repositories.ClientRepository
 import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
@@ -26,6 +27,7 @@ class ClientsViewModel(
     getClients: GetClients,
     private val addNewClient: AddNewClient,
     private val getClientById: GetClientById,
+    private val repository: ClientRepository
 ) : ViewModel() {
 
     private val _queryClientName = MutableStateFlow("")
@@ -107,6 +109,13 @@ class ClientsViewModel(
 
             _clientData.update { client }
             onDone()
+        }
+    }
+
+    fun deleteClient() {
+        viewModelScope.launch {
+            async { repository.deleteClientById(_clientData.value.id) }.await()
+            cleanData()
         }
     }
 

@@ -6,7 +6,13 @@ import org.example.project.data.db.SystemDatabase
 import org.example.project.domain.models.client.Client
 import org.example.project.domain.repositories.ClientRepository
 
-class ClientRepositoryImpl(private val db: SystemDatabase): ClientRepository {
+class ClientRepositoryImpl : ClientRepository {
+    private val db: SystemDatabase
+
+    constructor(db: SystemDatabase) {
+        this.db = db
+    }
+
     override fun getAllClients(): Flow<List<Client>> {
         return db.clientDao().getAllClients().map { list ->
             list.map { client ->
@@ -29,5 +35,9 @@ class ClientRepositoryImpl(private val db: SystemDatabase): ClientRepository {
 
     override suspend fun addClient(client: Client) {
         db.clientDao().addClient(client.toEntity())
+    }
+
+    override suspend fun deleteClientById(id: Int) {
+        db.clientDao().deleteClientById(id)
     }
 }

@@ -56,6 +56,7 @@ import org.example.project.ui.screens.clients.ClientValueChangeActions.NAME
 import org.example.project.ui.screens.clients.ClientValueChangeActions.NOTES
 import org.example.project.ui.screens.clients.ClientValueChangeActions.PHONE_NUMBER
 import org.example.project.ui.screens.clients.ClientValueChangeActions.PROVINCE
+import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
@@ -70,9 +71,9 @@ class ClientsListScreen : Screen {
         var showAddClientDialog by rememberSaveable { mutableStateOf(false) }
         val clientData by viewmodel.clientData.collectAsStateWithLifecycle()
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
+        var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
         var message by rememberSaveable { mutableStateOf("") }
-        var isModification by rememberSaveable { mutableStateOf(false) }
-
+        var isEdit by rememberSaveable { mutableStateOf(false) }
         val clientList by viewmodel.clientList.collectAsStateWithLifecycle()
         val querySearch by viewmodel.queryClientName.collectAsStateWithLifecycle()
 
@@ -98,7 +99,7 @@ class ClientsListScreen : Screen {
                     onSearchValueChange = { viewmodel.updateQuerySearch(it) },
                     onDeleteQuerySearch = { viewmodel.updateQuerySearch("") }
                 ) {
-                    isModification = false
+                    isEdit = false
                     showAddClientDialog = true
                 }
                 Spacer(modifier = Modifier.size(32.dp))
@@ -112,7 +113,7 @@ class ClientsListScreen : Screen {
                     clientList.forEach { client ->
                         ClientCard(client) {
                             viewmodel.getClientData(client.id) {
-                                isModification = true
+                                isEdit = true
                                 showAddClientDialog = true
                             }
                         }
@@ -123,6 +124,7 @@ class ClientsListScreen : Screen {
             if (showAddClientDialog) {
                 AddClientDialog(
                     clientData,
+                    isEdit = isEdit,
                     onActionDone = { action, value ->
                         when (action) {
                             NAME -> viewmodel.updateName(value)
@@ -133,17 +135,29 @@ class ClientsListScreen : Screen {
                             PROVINCE -> viewmodel.updateProvince(value)
                         }
                     },
-                    isModification = isModification,
                     onUpdateBirthday = { viewmodel.updateBirthDay(it) },
                     onAccept = { viewmodel.addClient { showAddClientDialog = false } },
                     onDismiss = {
                         showAddClientDialog = false
                         viewmodel.cleanData()
-                    }
+                    },
+                    onDelete = { showConfirmDialog = true }
                 )
             }
         }
         SimpleAdviceDialog(message, showAdviceDialog) { showAdviceDialog = false }
+        if (showConfirmDialog) {
+            ConfirmDialog(
+                msg = "Seguro que deseas eliminar al cliente?",
+                onAccept = {
+                    showConfirmDialog = false
+                    showAddClientDialog = false
+                    viewmodel.deleteClient()
+                },
+                onDismiss = { showConfirmDialog = false }
+            )
+        }
+
     }
 }
 
@@ -263,8 +277,9 @@ fun SimpleAdviceDialog(msg: String, show: Boolean, onDismiss: () -> Unit) {
         }
     }
 }
+
 @Composable
-fun ConfirmDialog(msg:String, onAccept: () -> Unit , onDismiss: () -> Unit) {
+fun ConfirmDialog(msg: String, onAccept: () -> Unit, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
             colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
@@ -288,15 +303,16 @@ fun ConfirmDialog(msg:String, onAccept: () -> Unit , onDismiss: () -> Unit) {
 @Composable
 private fun AddClientDialog(
     clientData: Client,
+    isEdit: Boolean,
     onActionDone: (ClientValueChangeActions, String) -> Unit,
-    onUpdateBirthday:(LocalDate) -> Unit,
-    isModification: Boolean,
+    onUpdateBirthday: (LocalDate) -> Unit,
     onAccept: () -> Unit,
     onDismiss: () -> Unit,
+    onDelete: () -> Unit,
 ) {
 
     val phoneNumber = if (clientData.phoneNumber == 0L) "" else clientData.phoneNumber.toString()
-    val acceptText = if (isModification) "Modificar" else "Aceptar"
+    val acceptText = if (isEdit) "Modificar" else "Aceptar"
 
     val datePickerState = rememberDatePickerState()
     var showBirthdayPicker by rememberSaveable { mutableStateOf(false) }
@@ -311,13 +327,22 @@ private fun AddClientDialog(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(
-                        "Agregar nuevo cliente",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Agregar nuevo cliente",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                    if (isEdit) {
+                        GenericButton(
+                            text = "Eliminar",
+                            color = AccentColor,
+                            onClick = { onDelete() }
+                        )
+                    }
                 }
                 Column {
                     GenericTextField(
@@ -347,7 +372,7 @@ private fun AddClientDialog(
                         capitalizationMethod = WORDS
                     ) { onActionDone(PROVINCE, it) }
                     GenericSelectableTextField(
-                        value = clientData.birthday?.formatToDisplay() ?: "" ,
+                        value = clientData.birthday?.formatToDisplay() ?: "",
                         labelText = "Fecha de cumpleaños",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { showBirthdayPicker = true }

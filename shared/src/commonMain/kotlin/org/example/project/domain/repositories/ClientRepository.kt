@@ -8,4 +8,5 @@ interface ClientRepository {
     fun getClientBySearchQuery(query:String):Flow<List<Client>>
     suspend fun getClientById(id:Int): Client
     suspend fun addClient(client: Client)
+    suspend fun deleteClientById(id:Int)
 }

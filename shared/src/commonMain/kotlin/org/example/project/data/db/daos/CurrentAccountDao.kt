@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.example.project.data.db.entities.CurrentAccountEntity
-import org.example.project.data.db.entities.relations.ClientWithCurrentAccount
+import org.example.project.data.db.entities.relations.ClientWithCurrentAccountEntity
 
 @Dao
 interface CurrentAccountDao {
@@ -17,15 +17,15 @@ interface CurrentAccountDao {
 
     @Transaction
     @Query("SELECT * FROM ClientEntity ORDER by fullName ASC")
-    fun getAllClientsWithCurrentAccount(): Flow<List<ClientWithCurrentAccount>>
+    fun getAllClientsWithCurrentAccount(): Flow<List<ClientWithCurrentAccountEntity>>
 
     @Transaction
     @Query("SELECT * FROM ClientEntity WHERE fullName LIKE '%' || :query || '%'")
-    fun getClientsWithCurrentAccountByQuery(query:String):Flow<List<ClientWithCurrentAccount>>
+    fun getClientsWithCurrentAccountByQuery(query:String):Flow<List<ClientWithCurrentAccountEntity>>
 
     @Transaction
     @Query("SELECT * FROM ClientEntity WHERE id = :id")
-    suspend fun getClientWithCurrentAccountById(id:Int): ClientWithCurrentAccount
+    suspend fun getClientWithCurrentAccountById(id:Int): ClientWithCurrentAccountEntity
 
     @Insert(onConflict = REPLACE)
     suspend fun addCurrentAccount(currentAccountEntity: CurrentAccountEntity)
