@@ -91,7 +91,7 @@ class ClientsListScreen : Screen {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 GenericHeaderWithButtonAndSearch(
-                    title = "Agregar cliente",
+                    title = "Clientes",
                     description = "Listado de todos los clientes añadidos",
                     buttonText = "Agregar cliente",
                     searchValue = querySearch,

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.daily.DailyData
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
@@ -50,6 +51,7 @@ import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SummaryCardHeader
 import org.example.project.ui.ext.toPrice
+import org.example.project.ui.screens.NewSellScreen
 import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.screens.daily.DailyDataAction.UPDATE_CASH
@@ -64,6 +66,8 @@ import org.koin.compose.viewmodel.koinViewModel
 class DailyScreen : Screen {
     @Composable
     override fun Content() {
+
+        val navigator = LocalNavigator.current
 
         val viewModel = koinViewModel<DailyViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -111,7 +115,9 @@ class DailyScreen : Screen {
                     LastTransactionsCard(
                         modifier = Modifier.weight(
                             1f
-                        )
+                        ),
+                        onSellButtonClick = { navigator?.push(NewSellScreen()) },
+                        onExpenseButtonClick = { }
                     )
                 } else {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -216,10 +222,7 @@ private fun OpenFinanceDialog(
 
 
 @Composable
-private fun LastTransactionsCard(modifier: Modifier) {
-
-    var showSellDialog by rememberSaveable { mutableStateOf(false) }
-    var showExpenseDialog by rememberSaveable { mutableStateOf(false) }
+private fun LastTransactionsCard(modifier: Modifier, onSellButtonClick:() -> Unit, onExpenseButtonClick:() -> Unit) {
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -243,12 +246,12 @@ private fun LastTransactionsCard(modifier: Modifier) {
                     GenericButton(
                         text = "Nueva venta",
                         icon = Icons.Outlined.Add,
-                        onClick = { showSellDialog = true }
+                        onClick = { onSellButtonClick() }
                     )
                     GenericButton(
                         text = "Nuevo gasto",
                         icon = Icons.Outlined.Remove,
-                        onClick = { }
+                        onClick = { onExpenseButtonClick() }
                     )
                 }
             }

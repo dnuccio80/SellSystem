@@ -118,7 +118,7 @@ fun MainHeader() {
 
 
 @Composable
-fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, onDelete: () -> Unit, onValueChange: (String) -> Unit) {
+fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, modifier:Modifier = Modifier, onDelete: () -> Unit, onValueChange: (String) -> Unit) {
 
     val capitalizedValue = when(capitalization) {
         WORDS -> value.capitalizeWords()
@@ -129,6 +129,7 @@ fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, on
     TextField(
         value = capitalizedValue,
         onValueChange = { onValueChange(it) },
+        modifier = modifier,
         placeholder = { Text("Buscar...") },
         trailingIcon = {
             if (value.isBlank()) {
