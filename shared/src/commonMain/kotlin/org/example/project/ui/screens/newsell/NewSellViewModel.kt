@@ -46,6 +46,9 @@ class NewSellViewModel(
 
     private val _productWithQuantityList = MutableStateFlow<List<ProductWithQuantity>>(emptyList())
 
+    private val _clientSelected = MutableStateFlow<String>("")
+    val clientSelected = _clientSelected.asStateFlow()
+
     private val _uiState: StateFlow<NewSellUiState> = combine(
         _query,
         _productList,
@@ -67,6 +70,10 @@ class NewSellViewModel(
 
     fun updateQuery(newValue: String) {
         _query.update { newValue }
+    }
+
+    fun updateClientSelected(newValue:String) {
+        _clientSelected.update { newValue }
     }
 
     fun addProductToCart(list: List<Product>) {

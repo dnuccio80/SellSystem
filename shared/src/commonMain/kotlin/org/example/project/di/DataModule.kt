@@ -1,5 +1,6 @@
 package org.example.project.di
 
+import org.example.project.data.db.daos.SellRepository
 import org.example.project.data.db.repositoriesimpl.ClientRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.CurrentAccountDetailsRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.CurrentAccountRepositoryImpl
@@ -8,6 +9,7 @@ import org.example.project.data.db.repositoriesimpl.ExpenseRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductCategoryRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
+import org.example.project.data.db.repositoriesimpl.SellRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.SupplierRepositoryImpl
 import org.example.project.domain.repositories.ClientRepository
 import org.example.project.domain.repositories.CurrentAccountDetailRepository
@@ -31,4 +33,5 @@ val dataModule = module {
     single<CurrentAccountRepository> { CurrentAccountRepositoryImpl(get()) }
     single<CurrentAccountDetailRepository> { CurrentAccountDetailsRepositoryImpl(get()) }
     single<DailyTransactionRepository> { DailyTransactionRepositoryImpl(get()) }
+    single<SellRepository> { SellRepositoryImpl(get()) }
 }

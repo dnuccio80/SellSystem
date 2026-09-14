@@ -90,6 +90,7 @@ class NewSellScreen : Screen {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val clientSearchQuery by viewModel.clientSearchQuery.collectAsStateWithLifecycle()
 
+
         when (uiState) {
             is NewSellUiState.Error -> {}
             NewSellUiState.Loading -> {
@@ -102,9 +103,11 @@ class NewSellScreen : Screen {
             is NewSellUiState.Success -> {
                 ScreenContainer {
                     var isUsualClient by rememberSaveable { mutableStateOf(false) }
-                    var inCash by rememberSaveable { mutableStateOf(false) }
                     var showClientDialog by rememberSaveable { mutableStateOf(false) }
                     var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
+                    var currentAccountClientSelected by rememberSaveable { mutableStateOf("") }
+                    val clientSelected by viewModel.clientSelected.collectAsStateWithLifecycle()
+
 
                     val navigator = LocalNavigator.current
 
@@ -135,7 +138,7 @@ class NewSellScreen : Screen {
                                         items((uiState as NewSellUiState.Success).productWithQuantityList) { productWithQuantity ->
                                             NewItemSell(
                                                 productWithQuantity,
-                                                onValueChange = {newValue ->
+                                                onValueChange = { newValue ->
                                                     viewModel.manualQuantityChange(
                                                         productWithQuantity.product.id,
                                                         newValue
@@ -236,12 +239,16 @@ class NewSellScreen : Screen {
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                                 ) {
                                                     Text(
-                                                        "Cliente seleccionado:",
+                                                        if (clientSelected.isNotBlank()) {
+                                                            "Cliente seleccionado:"
+                                                        } else {
+                                                            "Selecciona un cliente"
+                                                        },
                                                         fontWeight = FontWeight.SemiBold,
-                                                        color = Color.White
+                                                        color = if(clientSelected.isBlank()) AccentColor else Color.White
                                                     )
                                                     Text(
-                                                        "Laura Cana",
+                                                        clientSelected,
                                                         fontWeight = FontWeight.SemiBold,
                                                         color = GreenText
                                                     )
@@ -263,12 +270,16 @@ class NewSellScreen : Screen {
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
                                         Text(
-                                            "Cliente seleccionado:",
+                                            if (clientSelected.isNotBlank()) {
+                                                "Cliente seleccionado:"
+                                            } else {
+                                                "Selecciona un cliente"
+                                            },
                                             fontWeight = FontWeight.SemiBold,
-                                            color = Color.White
+                                            color = if(clientSelected.isBlank()) AccentColor else Color.White
                                         )
                                         Text(
-                                            "Laura Cana",
+                                            clientSelected,
                                             fontWeight = FontWeight.SemiBold,
                                             color = GreenText
                                         )
@@ -368,8 +379,10 @@ class NewSellScreen : Screen {
                                         (uiState as NewSellUiState.Success).clients.forEach {
                                             ClientItem(
                                                 it.fullName,
-                                                selected = "Damian",
-                                                onClick = { }
+                                                selected = currentAccountClientSelected,
+                                                onClick = {
+                                                    currentAccountClientSelected = it.fullName
+                                                }
                                             )
                                         }
                                     } else {
@@ -383,8 +396,16 @@ class NewSellScreen : Screen {
 
                                 }
                             },
-                            onAccept = { }
-                        ) { showClientDialog = false }
+                            onAccept = {
+                                if (currentAccountClientSelected.isNotBlank()) {
+                                    showClientDialog = false
+                                    viewModel.updateClientSelected(currentAccountClientSelected)
+                                }
+                            }
+                        ) {
+                            showClientDialog = false
+                            currentAccountClientSelected = ""
+                        }
                     }
                     if (showAddItemsDialog) {
 
@@ -491,7 +512,7 @@ private fun DialogContent(
 private fun ClientItem(name: String, selected: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable {
-
+            onClick()
         },
         shape = RoundedCornerShape(4.dp),
         colors = CardDefaults.cardColors(
