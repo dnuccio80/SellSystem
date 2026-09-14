@@ -95,6 +95,7 @@ class ClientsViewModel(
             try {
                 addNewClient(_clientData.value)
                 onDone()
+                cleanData()
             } catch (e: ClientError) {
                 _events.emit(e.msg)
             }

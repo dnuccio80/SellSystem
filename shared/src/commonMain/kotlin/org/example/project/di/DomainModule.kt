@@ -13,6 +13,8 @@ import org.example.project.domain.usecases.currentaccounts.GetPurchasesByClient
 import org.example.project.domain.usecases.expenses.GetComposedExpensesFinance
 import org.example.project.domain.usecases.expenses.GetExpenses
 import org.example.project.domain.usecases.expenses.GetSingleExpenseFinance
+import org.example.project.domain.usecases.newsell.GetSubtotalProductWithQuantity
+import org.example.project.domain.usecases.newsell.GetTotalAmountSell
 import org.example.project.domain.usecases.products.AddCategory
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
@@ -62,5 +64,8 @@ val domainModule = module {
     factoryOf(::GetPurchasesByClient)
     factoryOf(::GetPaymentsByClient)
     factoryOf(::GetCurrentAccountBalance)
+//    New Sells
+    factoryOf(::GetSubtotalProductWithQuantity)
+    factoryOf(::GetTotalAmountSell)
 
 }

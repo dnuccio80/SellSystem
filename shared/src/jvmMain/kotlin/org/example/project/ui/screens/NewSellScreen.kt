@@ -1,6 +1,7 @@
 package org.example.project.ui.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -40,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +53,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -60,15 +61,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.product.Product
+import org.example.project.domain.usecases.newsell.PaymentMethod
 import org.example.project.ui.AcceptDeclineButtons
-import org.example.project.ui.Capitalization
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
-import org.example.project.ui.GenericTextField
+import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SearchTextField
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.models.ProductWithQuantity
+import org.example.project.ui.screens.ItemSellActions.*
 import org.example.project.ui.screens.newsell.NewSellUiState
 import org.example.project.ui.screens.newsell.NewSellViewModel
 import org.example.project.ui.utils.AccentColor
@@ -86,6 +88,7 @@ class NewSellScreen : Screen {
 
         val viewModel = koinViewModel<NewSellViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val clientSearchQuery by viewModel.clientSearchQuery.collectAsStateWithLifecycle()
 
         when (uiState) {
             is NewSellUiState.Error -> {}
@@ -99,6 +102,7 @@ class NewSellScreen : Screen {
             is NewSellUiState.Success -> {
                 ScreenContainer {
                     var isUsualClient by rememberSaveable { mutableStateOf(false) }
+                    var inCash by rememberSaveable { mutableStateOf(false) }
                     var showClientDialog by rememberSaveable { mutableStateOf(false) }
                     var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -122,76 +126,211 @@ class NewSellScreen : Screen {
                             border = BorderStroke(2.dp, color = GrayText),
                             colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                         ) {
-                            if ((uiState as NewSellUiState.Success).productWithQuantityList.isNotEmpty()) {
-                                LazyColumn(
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.padding(16.dp)
-                                ) {
-                                    items((uiState as NewSellUiState.Success).productWithQuantityList) {
-                                        NewItemSell(it)
+                            AnimatedContent((uiState as NewSellUiState.Success).productWithQuantityList.isNotEmpty()) { notEmpty ->
+                                if (notEmpty) {
+                                    LazyColumn(
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        modifier = Modifier.padding(16.dp).animateContentSize()
+                                    ) {
+                                        items((uiState as NewSellUiState.Success).productWithQuantityList) { productWithQuantity ->
+                                            NewItemSell(
+                                                productWithQuantity,
+                                                onValueChange = {newValue ->
+                                                    viewModel.manualQuantityChange(
+                                                        productWithQuantity.product.id,
+                                                        newValue
+                                                    )
+                                                }
+                                            ) { action ->
+                                                when (action) {
+                                                    INCREASE_QUANTITY -> viewModel.increaseProductQuantity(
+                                                        productWithQuantity.product.id
+                                                    )
+
+                                                    DECREASE_QUANTITY -> viewModel.decreaseProductQuantity(
+                                                        productWithQuantity.product.id
+                                                    )
+
+                                                    DELETE_ITEM -> viewModel.deleteProductWithQuantity(
+                                                        productWithQuantity.product.id
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Text(
+                                        "No hay items añadidos",
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = WhiteText,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+
+                            val paymentMethods = listOf(
+                                PaymentMethod.CASH,
+                                PaymentMethod.TRANSFER,
+                                PaymentMethod.CARD,
+                                PaymentMethod.CURRENT_ACCOUNT,
+                            )
+
+                            Text(
+                                "Método de pago:",
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleMedium,
+                                textDecoration = TextDecoration.Underline
+                            )
+                            paymentMethods.forEach {
+                                RadioButtonRowWithText(
+                                    name = it.etiquette,
+                                    selected = (uiState as NewSellUiState.Success).paymentMethod.etiquette,
+                                    onClick = { viewModel.updatePaymentMethod(it) }
+                                )
+                            }
+
+                        }
+                        AnimatedContent((uiState as NewSellUiState.Success).paymentMethod) {
+                            if (it != PaymentMethod.CURRENT_ACCOUNT) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        modifier = Modifier.clickable {
+                                            isUsualClient = !isUsualClient
+                                        },
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Checkbox(
+                                            checked = isUsualClient,
+                                            onCheckedChange = {
+                                                isUsualClient = !isUsualClient
+                                            },
+                                            colors = CheckboxDefaults.colors(
+                                                checkedColor = GreenText,
+                                                uncheckedColor = GrayText
+                                            )
+                                        )
+                                        Text(
+                                            "Es cliente usual",
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    AnimatedContent(isUsualClient) {
+                                        if (isUsualClient) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                GenericButton("Seleccionar cliente") {
+                                                    showClientDialog = true
+                                                }
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Text(
+                                                        "Cliente seleccionado:",
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = Color.White
+                                                    )
+                                                    Text(
+                                                        "Laura Cana",
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = GreenText
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             } else {
-                                Text(
-                                    "No hay items añadidos",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = WhiteText,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-
-                            }
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Row(
-                                modifier = Modifier.clickable { isUsualClient = !isUsualClient },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = isUsualClient,
-                                    onCheckedChange = {
-                                        isUsualClient = !isUsualClient
-                                    },
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = GreenText,
-                                        uncheckedColor = GrayText
-                                    )
-                                )
-                                Text(
-                                    "Es cliente usual",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            AnimatedContent(isUsualClient) {
-                                if (isUsualClient) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    GenericButton("Seleccionar cliente") {
+                                        showClientDialog = true
+                                    }
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        GenericButton("Seleccionar cliente") {
-                                            showClientDialog = true
-                                        }
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Text(
-                                                "Cliente seleccionado:",
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = Color.White
-                                            )
-                                            Text(
-                                                "Laura Cana",
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = GreenText
-                                            )
-                                        }
+                                        Text(
+                                            "Cliente seleccionado:",
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            "Laura Cana",
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = GreenText
+                                        )
                                     }
                                 }
                             }
                         }
+
+                        AnimatedContent((uiState as NewSellUiState.Success).paymentMethod) {
+
+                            when (it) {
+                                PaymentMethod.CASH, PaymentMethod.TRANSFER -> {
+                                    Column {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                Text(
+                                                    "Subtotal:",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    (uiState as NewSellUiState.Success).amounts.subtotal.toPrice(),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = GreenText,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                Text(
+                                                    "Descuento pago en efectivo/transferencia:",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    (uiState as NewSellUiState.Success).amounts.discounts.toPrice(),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = GreenText,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                    }
+                                }
+
+                                else -> {}
+                            }
+
+                        }
+
                         Column(
                             Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -205,7 +344,7 @@ class NewSellScreen : Screen {
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    150000L.toPrice(),
+                                    (uiState as NewSellUiState.Success).amounts.total.toPrice(),
                                     style = MaterialTheme.typography.headlineSmall,
                                     color = GreenText,
                                     fontWeight = FontWeight.Bold
@@ -219,15 +358,29 @@ class NewSellScreen : Screen {
 
                     if (showClientDialog) {
                         DialogContent(
-                            textFieldValue = "",
-                            onTextFieldValueChange = { },
+                            textFieldValue = clientSearchQuery,
+                            onTextFieldValueChange = { viewModel.updateClientSearchQuery(it) },
                             content = {
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    ClientItem("Leysa Asnal")
-                                    ClientItem("Laura Cana")
-                                    ClientItem("Florencia Medina")
+                                    if ((uiState as NewSellUiState.Success).clients.isNotEmpty()) {
+                                        (uiState as NewSellUiState.Success).clients.forEach {
+                                            ClientItem(
+                                                it.fullName,
+                                                selected = "Damian",
+                                                onClick = { }
+                                            )
+                                        }
+                                    } else {
+                                        Text(
+                                            "No hay clientes en la búsqueda",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = WhiteText
+                                        )
+                                    }
+
                                 }
                             },
                             onAccept = { }
@@ -335,9 +488,11 @@ private fun DialogContent(
 
 
 @Composable
-private fun ClientItem(name: String) {
+private fun ClientItem(name: String, selected: String, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable {
+
+        },
         shape = RoundedCornerShape(4.dp),
         colors = CardDefaults.cardColors(
             containerColor = SecondaryCardBackground,
@@ -349,10 +504,10 @@ private fun ClientItem(name: String) {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
-                    selected = false,
-                    onClick = { },
+                    selected = name == selected,
+                    onClick = { onClick() },
                     colors = RadioButtonDefaults.colors(
                         selectedColor = GreenText,
                         unselectedColor = GrayText
@@ -446,8 +601,16 @@ private fun ProductItem(product: Product, onProductAdd: (Boolean) -> Unit) {
     }
 }
 
+enum class ItemSellActions {
+    INCREASE_QUANTITY, DECREASE_QUANTITY, DELETE_ITEM
+}
+
 @Composable
-private fun NewItemSell(productWithQuantity: ProductWithQuantity) {
+private fun NewItemSell(
+    productWithQuantity: ProductWithQuantity,
+    onValueChange: (Int) -> Unit,
+    onActionDone: (ItemSellActions) -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -465,52 +628,72 @@ private fun NewItemSell(productWithQuantity: ProductWithQuantity) {
                 maxLines = 2,
                 modifier = Modifier.weight(5f)
             )
+            Row(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text("Cant.", color = WhiteText, maxLines = 1)
+                    IconButton(
+                        onClick = {
+                            if (productWithQuantity.quantity == 1) onActionDone(DELETE_ITEM)
+                            else onActionDone(DECREASE_QUANTITY)
+                        },
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                    ) {
+                        Icon(
+                            if (productWithQuantity.quantity == 1) Icons.Outlined.Delete else Icons.Outlined.Remove,
+                            contentDescription = "reduce by 1",
+                            tint = if (productWithQuantity.quantity == 1) AccentColor else Color.White
+                        )
+                    }
+                    TextField(
+                        value = productWithQuantity.quantity.toString(), onValueChange = {
+                            val value = it.toIntOrNull() ?: 1
+                            onValueChange(value)
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = SecondaryCardBackground,
+                            unfocusedContainerColor = SecondaryCardBackground,
+                            focusedIndicatorColor = GreenText,
+                            unfocusedIndicatorColor = GrayText,
+                            unfocusedTextColor = WhiteText,
+                            focusedTextColor = WhiteText,
+                            cursorColor = GreenText
+                        ),
+                        modifier = Modifier.width(80.dp).height(55.dp),
+                        singleLine = true,
+                        maxLines = 1,
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                    )
+                    IconButton(
+                        onClick = { onActionDone(INCREASE_QUANTITY) },
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                    ) {
+                        Icon(
+                            Icons.Outlined.Add,
+                            contentDescription = "plus by 1",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.width(32.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.width(180.dp)
             ) {
-                Text("Cant.", color = WhiteText, maxLines = 1)
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                ) {
-                    Icon(
-                        if(productWithQuantity.quantity == 1) Icons.Outlined.Delete else Icons.Outlined.Remove,
-                        contentDescription = "reduce by 1",
-                        tint = if(productWithQuantity.quantity == 1) AccentColor else Color.White
-                    )
-                }
-                TextField(
-                    value = productWithQuantity.quantity.toString(), onValueChange = { },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = SecondaryCardBackground,
-                        unfocusedContainerColor = SecondaryCardBackground,
-                        focusedIndicatorColor = GreenText,
-                        unfocusedIndicatorColor = GrayText,
-                        unfocusedTextColor = WhiteText,
-                        focusedTextColor = WhiteText,
-                        cursorColor = GreenText
-                    ),
-                    modifier = Modifier.width(80.dp).height(55.dp),
-                    singleLine = true,
-                    maxLines = 1,
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                Text("Subtotal:", color = WhiteText, fontWeight = FontWeight.Bold, maxLines = 1)
+                Text(
+                    productWithQuantity.amount.toPrice(),
+                    color = GreenText,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                ) {
-                    Icon(Icons.Outlined.Add, contentDescription = "plus by 1", tint = Color.White)
-                }
             }
+
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text("Subtotal:", color = WhiteText, fontWeight = FontWeight.Bold, maxLines = 1)
-            Text(12500L.toPrice(), color = GreenText, fontWeight = FontWeight.Bold, maxLines = 1)
-        }
+
     }
 }
