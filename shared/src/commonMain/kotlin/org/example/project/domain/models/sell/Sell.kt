@@ -5,7 +5,7 @@ import org.example.project.data.db.entities.SellEntity
 
 data class Sell(
     val id:Int = 0,
-    val date: LocalDate,
+    val date: LocalDate? = null,
     val clientName:String,
     val description: String, // items, quantities, discounts
     val paymentMethod: String,
@@ -14,8 +14,8 @@ data class Sell(
     fun toEntity(): SellEntity {
         return SellEntity(
             id = id,
-            date = date,
-            clientName = clientName,
+            date = date!!,
+            clientName = clientName.ifBlank { null },
             description = description,
             paymentMethod = paymentMethod,
             total = total

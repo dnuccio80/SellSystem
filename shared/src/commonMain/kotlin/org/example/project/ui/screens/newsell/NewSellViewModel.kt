@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -14,13 +16,17 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.sell.SellError
 import org.example.project.domain.usecases.clients.GetClients
 import org.example.project.domain.usecases.newsell.GetSubtotalProductWithQuantity
 import org.example.project.domain.usecases.newsell.GetTotalAmountSell
 import org.example.project.domain.usecases.newsell.PaymentMethod
 import org.example.project.domain.usecases.products.GetProducts
+import org.example.project.domain.usecases.sells.CreateNewSell
 import org.example.project.ui.models.ProductWithQuantity
+import org.example.project.ui.models.SellPresentation
 import kotlin.collections.emptyList
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -29,7 +35,8 @@ class NewSellViewModel(
     private val getProducts: GetProducts,
     getClients: GetClients,
     private val getSubtotalProductWithQuantity: GetSubtotalProductWithQuantity,
-    private val getTotalAmountSell: GetTotalAmountSell
+    private val getTotalAmountSell: GetTotalAmountSell,
+    private val createNewSell: CreateNewSell,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -48,6 +55,12 @@ class NewSellViewModel(
 
     private val _clientSelected = MutableStateFlow<String>("")
     val clientSelected = _clientSelected.asStateFlow()
+
+    private val _isUsualClient = MutableStateFlow(false)
+    val isUsualClient = _isUsualClient.asStateFlow()
+
+    private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val events = _events.asSharedFlow()
 
     private val _uiState: StateFlow<NewSellUiState> = combine(
         _query,
@@ -72,8 +85,16 @@ class NewSellViewModel(
         _query.update { newValue }
     }
 
-    fun updateClientSelected(newValue:String) {
+    fun updateClientSelected(newValue: String) {
         _clientSelected.update { newValue }
+    }
+
+    fun updateIsUsualClient(newValue: Boolean) {
+        _isUsualClient.update { newValue }
+    }
+
+    fun toggleIsUsualClient() {
+        _isUsualClient.update { !it }
     }
 
     fun addProductToCart(list: List<Product>) {
@@ -83,13 +104,13 @@ class NewSellViewModel(
         _productWithQuantityList.value.forEach {
             newList.add(it)
         }
-        list.forEach {product ->
+        list.forEach { product ->
             val productWithQuantity = ProductWithQuantity(
                 product = product,
                 quantity = 1,
                 amount = getSubtotalProductWithQuantity(product, 1),
             )
-            if(newList.none { it.product.id == product.id}) {
+            if (newList.none { it.product.id == product.id }) {
                 newList.add(productWithQuantity)
             }
         }
@@ -99,10 +120,11 @@ class NewSellViewModel(
     fun increaseProductQuantity(productId: Int) {
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
-                if(productWithQuantity.product.id == productId) {
+                if (productWithQuantity.product.id == productId) {
 
                     val newQuantity = productWithQuantity.quantity + 1
-                    val newAmount = getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
+                    val newAmount =
+                        getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
 
                     productWithQuantity.copy(quantity = newQuantity, amount = newAmount)
                 } else productWithQuantity
@@ -110,11 +132,12 @@ class NewSellViewModel(
         }
     }
 
-    fun manualQuantityChange(productId:Int, value:Int) {
+    fun manualQuantityChange(productId: Int, value: Int) {
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
-                if(productWithQuantity.product.id == productId) {
-                    val newAmount = getSubtotalProductWithQuantity(productWithQuantity.product, value)
+                if (productWithQuantity.product.id == productId) {
+                    val newAmount =
+                        getSubtotalProductWithQuantity(productWithQuantity.product, value)
                     productWithQuantity.copy(quantity = value, amount = newAmount)
                 } else productWithQuantity
             }
@@ -122,19 +145,33 @@ class NewSellViewModel(
     }
 
     fun updatePaymentMethod(newValue: PaymentMethod) {
+
+        when {
+            newValue == PaymentMethod.CURRENT_ACCOUNT && _paymentMethod.value != PaymentMethod.CURRENT_ACCOUNT -> {
+                _isUsualClient.value = false
+                clearClientSelected()
+            }
+            newValue != PaymentMethod.CURRENT_ACCOUNT && _paymentMethod.value == PaymentMethod.CURRENT_ACCOUNT -> {
+                _isUsualClient.value = false
+                clearClientSelected()
+            }
+        }
+
         _paymentMethod.update { newValue }
+
     }
 
     fun updateClientSearchQuery(newValue: String) {
         _clientSearchQuery.update { newValue }
     }
 
-    fun decreaseProductQuantity(productId:Int) {
+    fun decreaseProductQuantity(productId: Int) {
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
-                if(productWithQuantity.product.id == productId) {
+                if (productWithQuantity.product.id == productId) {
                     val newQuantity = productWithQuantity.quantity - 1
-                    val newAmount = getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
+                    val newAmount =
+                        getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
                     productWithQuantity.copy(quantity = newQuantity, amount = newAmount)
                 } else productWithQuantity
             }
@@ -145,6 +182,31 @@ class NewSellViewModel(
         _productWithQuantityList.update { currentList ->
             currentList.filterNot { it.product.id == productId }
         }
+    }
+
+    fun addSell() {
+        val newSell = SellPresentation(
+            isUsualClient = _isUsualClient.value,
+            clientName = clientSelected.value,
+            productQuantityList = _productWithQuantityList.value,
+            paymentMethod = _paymentMethod.value,
+            totalAmount = getTotalAmountSell(
+                _paymentMethod.value,
+                _productWithQuantityList.value
+            ).total
+        )
+        viewModelScope.launch {
+            try {
+                createNewSell(newSell)
+            } catch (e: SellError) {
+                _events.emit(e.msg)
+            }
+        }
+
+    }
+
+    fun clearClientSelected() {
+        _clientSelected.update { "" }
     }
 
 

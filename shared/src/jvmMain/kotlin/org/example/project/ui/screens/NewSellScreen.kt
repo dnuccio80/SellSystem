@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
@@ -33,6 +35,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -41,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +75,7 @@ import org.example.project.ui.SearchTextField
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.models.ProductWithQuantity
 import org.example.project.ui.screens.ItemSellActions.*
+import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.screens.newsell.NewSellUiState
 import org.example.project.ui.screens.newsell.NewSellViewModel
 import org.example.project.ui.utils.AccentColor
@@ -90,7 +95,6 @@ class NewSellScreen : Screen {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val clientSearchQuery by viewModel.clientSearchQuery.collectAsStateWithLifecycle()
 
-
         when (uiState) {
             is NewSellUiState.Error -> {}
             NewSellUiState.Loading -> {
@@ -101,15 +105,25 @@ class NewSellScreen : Screen {
             }
 
             is NewSellUiState.Success -> {
+
+
                 ScreenContainer {
-                    var isUsualClient by rememberSaveable { mutableStateOf(false) }
                     var showClientDialog by rememberSaveable { mutableStateOf(false) }
                     var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
+                    val isUsualClient by viewModel.isUsualClient.collectAsStateWithLifecycle()
                     var currentAccountClientSelected by rememberSaveable { mutableStateOf("") }
                     val clientSelected by viewModel.clientSelected.collectAsStateWithLifecycle()
-
+                    var adviceMsg by rememberSaveable { mutableStateOf("") }
+                    var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
 
                     val navigator = LocalNavigator.current
+
+                    LaunchedEffect(viewModel.events) {
+                        viewModel.events.collect { msg ->
+                            adviceMsg = msg
+                            showAdviceDialog = true
+                        }
+                    }
 
                     Column(
                         modifier = Modifier.fillMaxWidth()
@@ -204,14 +218,14 @@ class NewSellScreen : Screen {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Row(
                                         modifier = Modifier.clickable {
-                                            isUsualClient = !isUsualClient
+                                            viewModel.toggleIsUsualClient()
                                         },
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Checkbox(
                                             checked = isUsualClient,
                                             onCheckedChange = {
-                                                isUsualClient = !isUsualClient
+                                                viewModel.toggleIsUsualClient()
                                             },
                                             colors = CheckboxDefaults.colors(
                                                 checkedColor = GreenText,
@@ -245,13 +259,29 @@ class NewSellScreen : Screen {
                                                             "Selecciona un cliente"
                                                         },
                                                         fontWeight = FontWeight.SemiBold,
-                                                        color = if(clientSelected.isBlank()) AccentColor else Color.White
+                                                        color = if (clientSelected.isBlank()) AccentColor else Color.White
                                                     )
                                                     Text(
                                                         clientSelected,
                                                         fontWeight = FontWeight.SemiBold,
                                                         color = GreenText
                                                     )
+                                                    if (clientSelected.isNotBlank()) {
+                                                        IconButton(
+                                                            onClick = { viewModel.clearClientSelected() },
+                                                            modifier = Modifier.size(18.dp),
+                                                            colors = IconButtonDefaults.iconButtonColors(
+                                                                containerColor = AccentColor,
+                                                                contentColor = Color.White
+                                                            )
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Default.Close,
+                                                                modifier = Modifier.padding(4.dp),
+                                                                contentDescription = "Delete client"
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -276,13 +306,37 @@ class NewSellScreen : Screen {
                                                 "Selecciona un cliente"
                                             },
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if(clientSelected.isBlank()) AccentColor else Color.White
+                                            color = if (clientSelected.isBlank()) AccentColor else Color.White
                                         )
                                         Text(
                                             clientSelected,
                                             fontWeight = FontWeight.SemiBold,
                                             color = GreenText
                                         )
+                                        if (clientSelected.isNotBlank()) {
+                                            Card(
+                                                shape = CircleShape,
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = AccentColor,
+                                                    contentColor = Color.White
+                                                )
+                                            ) {
+                                                IconButton(
+                                                    onClick = { viewModel.clearClientSelected() },
+                                                    modifier = Modifier.size(18.dp),
+                                                    colors = IconButtonDefaults.iconButtonColors(
+                                                        containerColor = AccentColor,
+                                                        contentColor = Color.White
+                                                    )
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Close,
+                                                        modifier = Modifier.padding(4.dp),
+                                                        contentDescription = "Delete client"
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -363,7 +417,7 @@ class NewSellScreen : Screen {
                             }
                             AcceptDeclineButtons(
                                 onDismiss = { navigator?.pop() },
-                                onAccept = { })
+                                onAccept = { viewModel.addSell() })
                         }
                     }
 
@@ -400,10 +454,13 @@ class NewSellScreen : Screen {
                                 if (currentAccountClientSelected.isNotBlank()) {
                                     showClientDialog = false
                                     viewModel.updateClientSelected(currentAccountClientSelected)
+                                    viewModel.updateClientSearchQuery("")
+                                    currentAccountClientSelected = ""
                                 }
                             }
                         ) {
                             showClientDialog = false
+                            viewModel.updateClientSearchQuery("")
                             currentAccountClientSelected = ""
                         }
                     }
@@ -447,6 +504,11 @@ class NewSellScreen : Screen {
                             showAddItemsDialog = false
                         }
                     }
+                    SimpleAdviceDialog(
+                        msg = adviceMsg,
+                        show = showAdviceDialog,
+                        onDismiss = { showAdviceDialog = false }
+                    )
                 }
             }
         }
@@ -606,7 +668,7 @@ private fun ProductItem(product: Product, onProductAdd: (Boolean) -> Unit) {
                     )
                 )
                 Text(
-                    product.name,
+                    "${product.name} '${product.brand}' ${product.description}",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium
@@ -643,7 +705,7 @@ private fun NewItemSell(
             modifier = Modifier.weight(5f)
         ) {
             Text(
-                productWithQuantity.product.name,
+                "${productWithQuantity.product.name} '${productWithQuantity.product.brand}' ${productWithQuantity.product.description}",
                 color = WhiteText,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,

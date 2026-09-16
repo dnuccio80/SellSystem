@@ -11,7 +11,7 @@ data class SellEntity(
     @PrimaryKey(autoGenerate = true)
     val id:Int,
     val date: LocalDate,
-    val clientName:String,
+    val clientName:String?,
     val description: String, // items, quantities, discounts
     val paymentMethod: String,
     val total:Long,
@@ -20,7 +20,7 @@ data class SellEntity(
         return Sell(
             id = id,
             date = date,
-            clientName = clientName,
+            clientName = clientName.orEmpty(),
             description = description,
             paymentMethod = paymentMethod,
             total = total
