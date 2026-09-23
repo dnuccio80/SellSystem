@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -57,11 +55,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.sell.Sell
+import org.example.project.domain.models.sell.SellFinancialReport
 import org.example.project.domain.usecases.sells.SellFilterLabel
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.Capitalization.SENTENCES
 import org.example.project.ui.GenericButton
-import org.example.project.ui.RowWithMidBodyAndDescription
 import org.example.project.ui.RowWithMidTitleAndDescription
 import org.example.project.ui.RowWithSmallBodyAndDescription
 import org.example.project.ui.ScreenContainer
@@ -90,6 +88,7 @@ class SellsListScreen : Screen {
         val sellsList by viewModel.sellsList.collectAsStateWithLifecycle()
         val labelSelected by viewModel.labelSelected.collectAsStateWithLifecycle()
         val sellData by viewModel.sellData.collectAsStateWithLifecycle()
+        val financialReport by viewModel.financialReport.collectAsStateWithLifecycle()
         var showDataSell by rememberSaveable { mutableStateOf(false) }
 
         val labelList = listOf(
@@ -140,7 +139,7 @@ class SellsListScreen : Screen {
                             modifier = Modifier.weight(5f)
                         )
                     }
-                    SummaryCardColumn(Modifier.weight(1f))
+                    SummaryCardColumn(Modifier.weight(1f), financialReport)
                     if (showDataSell) {
                         SellDataDialog(
                             sellData!!,
@@ -234,7 +233,7 @@ private fun Header(
 
 
 @Composable
-private fun SummaryCardColumn(modifier: Modifier) {
+private fun SummaryCardColumn(modifier: Modifier, financialReport: SellFinancialReport) {
     Column(
         modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -242,25 +241,25 @@ private fun SummaryCardColumn(modifier: Modifier) {
         SummaryCardRowItem(
             modifier = Modifier.weight(1f),
             label = "Total ingresos",
-            description = 250000L.toPrice(),
+            description = financialReport.totalEarnings.toPrice(),
             icon = Icons.Outlined.Paid,
         )
         SummaryCardRowItem(
             modifier = Modifier.weight(1f),
             label = "Ventas totales",
-            description = "250",
+            description = financialReport.totalSells.toString(),
             icon = Icons.Outlined.Storefront,
         )
         SummaryCardRowItem(
             modifier = Modifier.weight(1f),
             label = "Ventas a clientes recurrentes",
-            description = "50",
+            description = financialReport.totalSellsToClients.toString(),
             icon = Icons.Outlined.Loyalty,
         )
         SummaryCardRowItem(
             modifier = Modifier.weight(1f),
             label = "Ventas a clientes genéricos",
-            description = "200",
+            description = financialReport.totalSellsToGenericClients.toString(),
             icon = Icons.Outlined.PersonPinCircle,
         )
     }

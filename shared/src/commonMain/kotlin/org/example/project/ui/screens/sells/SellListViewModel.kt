@@ -13,11 +13,15 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.db.daos.SellRepository
 import org.example.project.domain.models.sell.Sell
+import org.example.project.domain.models.sell.SellFinancialReport
+import org.example.project.domain.usecases.sells.GetFinancialSellReport
 import org.example.project.domain.usecases.sells.GetSells
 import org.example.project.domain.usecases.sells.SellFilterLabel
 import org.koin.core.qualifier._q
@@ -25,7 +29,7 @@ import kotlin.collections.emptyList
 import kotlin.time.Duration.Companion.milliseconds
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 
-class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepository) : ViewModel() {
+class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepository, private val financialSellReport: GetFinancialSellReport) : ViewModel() {
 
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
@@ -46,6 +50,11 @@ class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepo
     }.catch { e -> }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val sellsList = _sellsList
+
+    private val _financialReport: StateFlow<SellFinancialReport> = _sellsList.mapLatest { list ->
+        financialSellReport(list)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SellFinancialReport())
+    val financialReport = _financialReport
 
     fun updateQuery(newValue: String) {
         _query.update { newValue }

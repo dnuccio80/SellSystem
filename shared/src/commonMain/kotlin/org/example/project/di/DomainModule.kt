@@ -28,6 +28,7 @@ import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants
 import org.example.project.domain.usecases.sells.CreateNewSell
+import org.example.project.domain.usecases.sells.GetFinancialSellReport
 import org.example.project.domain.usecases.sells.GetSells
 import org.example.project.domain.usecases.suppliers.AddSupplier
 import org.example.project.domain.usecases.suppliers.GetSuppliers
@@ -72,6 +73,7 @@ val domainModule = module {
     factoryOf(::GetTotalAmountSell)
     factoryOf(::CreateNewSell)
     factoryOf(::GetSells)
+    factoryOf(::GetFinancialSellReport)
 
 //    Date
     factoryOf(::GetCurrentDate)
