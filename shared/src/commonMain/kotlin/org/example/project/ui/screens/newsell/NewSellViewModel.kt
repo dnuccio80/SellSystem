@@ -151,6 +151,7 @@ class NewSellViewModel(
                 _isUsualClient.value = false
                 clearClientSelected()
             }
+
             newValue != PaymentMethod.CURRENT_ACCOUNT && _paymentMethod.value == PaymentMethod.CURRENT_ACCOUNT -> {
                 _isUsualClient.value = false
                 clearClientSelected()
@@ -184,7 +185,7 @@ class NewSellViewModel(
         }
     }
 
-    fun addSell() {
+    fun addSell(onDone: () -> Unit) {
         val newSell = SellPresentation(
             isUsualClient = _isUsualClient.value,
             clientName = clientSelected.value,
@@ -198,6 +199,8 @@ class NewSellViewModel(
         viewModelScope.launch {
             try {
                 createNewSell(newSell)
+                onDone()
+                clearSellData()
             } catch (e: SellError) {
                 _events.emit(e.msg)
             }
@@ -207,6 +210,13 @@ class NewSellViewModel(
 
     fun clearClientSelected() {
         _clientSelected.update { "" }
+    }
+
+    fun clearSellData() {
+        clearClientSelected()
+        _paymentMethod.update { PaymentMethod.CASH }
+        _isUsualClient.update { false }
+        _productWithQuantityList.update { emptyList() }
     }
 
 

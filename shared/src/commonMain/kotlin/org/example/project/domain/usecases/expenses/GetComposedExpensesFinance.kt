@@ -4,17 +4,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.todayIn
 import org.example.project.domain.models.expense.ComposedExpenseFinance
 import org.example.project.domain.repositories.ExpensesRepository
-import kotlin.time.Clock
+import org.example.project.domain.usecases.utils.GetCurrentDate
 
-class GetComposedExpensesFinance(private val repository: ExpensesRepository,private val getSingleExpenseFinance: GetSingleExpenseFinance) {
+class GetComposedExpensesFinance(private val repository: ExpensesRepository,private val getSingleExpenseFinance: GetSingleExpenseFinance, private val getCurrentDate: GetCurrentDate) {
 
     operator fun invoke(): Flow<ComposedExpenseFinance> {
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+        val today = getCurrentDate()
 
         val todayExpenses = repository.getAllExpenses().map { expenses ->
             expenses.filter { expense ->

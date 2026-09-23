@@ -9,6 +9,7 @@ import org.example.project.ui.screens.expenses.ExpensesViewModel
 import org.example.project.ui.screens.newsell.NewSellViewModel
 import org.example.project.ui.screens.products.ProductsViewModel
 import org.example.project.ui.screens.productvariants.ProductVariantsViewModel
+import org.example.project.ui.screens.sells.SellListViewModel
 import org.example.project.ui.screens.suppliers.SuppliersViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -24,4 +25,5 @@ val uiModule = module {
     viewModelOf(::CurrentAccountDetailsViewModel)
     viewModelOf(::DailyViewModel)
     viewModelOf(::NewSellViewModel)
+    viewModelOf(::SellListViewModel)
 }

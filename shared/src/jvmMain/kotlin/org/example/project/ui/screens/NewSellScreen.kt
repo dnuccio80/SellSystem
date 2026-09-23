@@ -417,7 +417,7 @@ class NewSellScreen : Screen {
                             }
                             AcceptDeclineButtons(
                                 onDismiss = { navigator?.pop() },
-                                onAccept = { viewModel.addSell() })
+                                onAccept = { viewModel.addSell() { navigator?.pop() } })
                         }
                     }
 

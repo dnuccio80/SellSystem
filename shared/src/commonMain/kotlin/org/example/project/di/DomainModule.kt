@@ -1,6 +1,7 @@
 package org.example.project.di
 
 import org.example.project.domain.models.expense.AddExpense
+import org.example.project.domain.usecases.utils.GetCurrentDate
 import org.example.project.domain.usecases.clients.AddNewClient
 import org.example.project.domain.usecases.clients.GetClientById
 import org.example.project.domain.usecases.clients.GetClients
@@ -27,6 +28,7 @@ import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants
 import org.example.project.domain.usecases.sells.CreateNewSell
+import org.example.project.domain.usecases.sells.GetSells
 import org.example.project.domain.usecases.suppliers.AddSupplier
 import org.example.project.domain.usecases.suppliers.GetSuppliers
 import org.koin.core.module.dsl.factoryOf
@@ -65,9 +67,13 @@ val domainModule = module {
     factoryOf(::GetPurchasesByClient)
     factoryOf(::GetPaymentsByClient)
     factoryOf(::GetCurrentAccountBalance)
-//    New Sells
+//    Sells
     factoryOf(::GetSubtotalProductWithQuantity)
     factoryOf(::GetTotalAmountSell)
     factoryOf(::CreateNewSell)
+    factoryOf(::GetSells)
+
+//    Date
+    factoryOf(::GetCurrentDate)
 
 }

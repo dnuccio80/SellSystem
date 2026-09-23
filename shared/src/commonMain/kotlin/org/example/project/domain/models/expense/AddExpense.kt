@@ -1,11 +1,9 @@
 package org.example.project.domain.models.expense
 
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 import org.example.project.domain.repositories.ExpensesRepository
-import kotlin.time.Clock
+import org.example.project.domain.usecases.utils.GetCurrentDate
 
-class AddExpense(private val repository: ExpensesRepository) {
+class AddExpense(private val repository: ExpensesRepository, private val getCurrentDate: GetCurrentDate) {
 
     suspend operator fun invoke(expense: Expense) {
         when {
@@ -13,7 +11,7 @@ class AddExpense(private val repository: ExpensesRepository) {
             expense.amount == 0L -> throw ExpenseError.EmptyAmount
         }
 
-        val date = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val date = getCurrentDate()
 
         repository.addExpense(expense.copy(description = expense.description.trim(), date = date))
     }

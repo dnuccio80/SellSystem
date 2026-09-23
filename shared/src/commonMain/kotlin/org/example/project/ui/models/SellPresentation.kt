@@ -1,5 +1,6 @@
 package org.example.project.ui.models
 
+import org.example.project.data.db.entities.SellEntity
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.usecases.newsell.PaymentMethod
 
@@ -20,12 +21,13 @@ data class SellPresentation(
             total = totalAmount,
         )
     }
+
 }
 
 private fun getDescription(productQuantityList: List<ProductWithQuantity>): String {
     val description = StringBuilder()
     productQuantityList.forEach { productWithQuantity ->
-        description.append("${productWithQuantity.product} x ${productWithQuantity.quantity} \n")
+        description.append("${productWithQuantity.product.name} '${productWithQuantity.product.brand}' ${productWithQuantity.product.description} x ${productWithQuantity.quantity} \n")
     }
     return description.toString()
 }

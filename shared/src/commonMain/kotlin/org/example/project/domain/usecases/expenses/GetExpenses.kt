@@ -1,30 +1,26 @@
 package org.example.project.domain.usecases.expenses
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import kotlinx.datetime.todayIn
 import org.example.project.domain.models.expense.Expense
 import org.example.project.domain.repositories.ExpensesRepository
+import org.example.project.domain.usecases.utils.GetCurrentDate
 import org.example.project.ui.screens.expenses.ExpenseFilterLabel
 import kotlin.collections.filter
-import kotlin.time.Clock
 
-class GetExpenses(private val repository: ExpensesRepository) {
+class GetExpenses(private val repository: ExpensesRepository, private val getCurrentDate: GetCurrentDate) {
     operator fun invoke(query: String, labelSelected: String): Flow<List<Expense>> {
         return if (query.isNotBlank()) {
-            getFilteredList(repository.getExpensesByQuery(query), labelSelected)
+            getFilteredList(repository.getExpensesByQuery(query), labelSelected,getCurrentDate())
         } else {
-            getFilteredList(repository.getAllExpenses(), labelSelected)
+            getFilteredList(repository.getAllExpenses(), labelSelected,getCurrentDate())
         }
     }
 }
-private fun getFilteredList(list: Flow<List<Expense>>, filter: String): Flow<List<Expense>> {
-
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+private fun getFilteredList(list: Flow<List<Expense>>, filter: String, today: LocalDate): Flow<List<Expense>> {
 
     return when (filter) {
         ExpenseFilterLabel.TODAY.etiquette -> {

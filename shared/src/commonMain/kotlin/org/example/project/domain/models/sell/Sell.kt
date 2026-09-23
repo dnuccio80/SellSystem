@@ -6,6 +6,7 @@ import org.example.project.data.db.entities.SellEntity
 data class Sell(
     val id:Int = 0,
     val date: LocalDate? = null,
+    val isUsualClient: Boolean = false,
     val clientName:String,
     val description: String, // items, quantities, discounts
     val paymentMethod: String,

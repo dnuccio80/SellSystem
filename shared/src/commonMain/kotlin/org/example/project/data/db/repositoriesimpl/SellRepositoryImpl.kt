@@ -9,13 +9,13 @@ import org.example.project.domain.models.sell.Sell
 class SellRepositoryImpl(private val db: SystemDatabase) : SellRepository {
     override fun getAllSells(): Flow<List<Sell>> {
         return db.sellDao().getAllSells().map { list ->
-            list.map { it.toDomain() }
+            list.map { it.toDomain() }.reversed()
         }
     }
 
     override fun getSellsByQuery(query: String): Flow<List<Sell>> {
         return db.sellDao().getSellsByQuery(query).map { list ->
-            list.map { it.toDomain() }
+            list.map { it.toDomain() }.reversed()
         }
     }
 
