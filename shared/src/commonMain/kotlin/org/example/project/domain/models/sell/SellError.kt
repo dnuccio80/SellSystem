@@ -9,4 +9,6 @@ sealed class SellError(val msg: String) : Exception() {
 
     data object UsualClientButNotSelected :
         SellError("Si seleccionas 'Cliente usual', debes seleccionar uno.")
+    data object NoStock :
+        SellError("Producto sin stock suficiente")
 }

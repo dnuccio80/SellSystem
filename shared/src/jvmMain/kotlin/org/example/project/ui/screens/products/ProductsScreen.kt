@@ -2,6 +2,7 @@ package org.example.project.ui.screens.products
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -506,11 +507,18 @@ private fun ProductInLazyGridCardItem(product: Product, onClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            ProductImage(
-                product.imagePath,
-                product.name,
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f)
-            )
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                ProductImage(
+                    product.imagePath,
+                    product.name,
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+                )
+                if(product.currentStock == 0 && product.manageStock) {
+                    Box(Modifier.fillMaxWidth().background(AccentColor), contentAlignment = Alignment.Center) {
+                        Text("Sin stock", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     product.name,

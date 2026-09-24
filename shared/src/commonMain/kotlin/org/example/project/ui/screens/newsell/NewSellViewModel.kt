@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,7 +50,7 @@ class NewSellViewModel(
         getClients(query).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
     private val _productList = _query.debounce(300.milliseconds).flatMapLatest { query ->
-        getProducts(query)
+        getProducts(query).map { it.filter { product -> !product.manageStock || product.currentStock > 0 } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _productWithQuantityList = MutableStateFlow<List<ProductWithQuantity>>(emptyList())
@@ -122,7 +124,7 @@ class NewSellViewModel(
             currentList.map { productWithQuantity ->
                 if (productWithQuantity.product.id == productId) {
 
-                    val newQuantity = productWithQuantity.quantity + 1
+                    val newQuantity = (productWithQuantity.quantity + 1).coerceAtMost(productWithQuantity.product.currentStock)
                     val newAmount =
                         getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
 

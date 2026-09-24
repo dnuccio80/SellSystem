@@ -732,7 +732,7 @@ private fun NewItemSell(
                     }
                     TextField(
                         value = productWithQuantity.quantity.toString(), onValueChange = {
-                            val value = it.toIntOrNull() ?: 1
+                            val value =  (it.toIntOrNull() ?: 1).coerceIn(1, productWithQuantity.product.currentStock)
                             onValueChange(value)
                         },
                         colors = TextFieldDefaults.colors(

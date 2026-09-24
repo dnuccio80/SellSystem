@@ -19,6 +19,10 @@ class ProductRepositoryImpl(private val db: SystemDatabase): ProductRepository {
         }
     }
 
+    override suspend fun updateProduct(product: Product) {
+        db.productDao().updateProduct(product.toEntity())
+    }
+
 
     override suspend fun getProductById(id: Int): Product {
         return db.productDao().getProductById(id).toDomain()

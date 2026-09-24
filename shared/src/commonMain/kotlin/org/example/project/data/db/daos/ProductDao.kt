@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import org.example.project.data.db.entities.ProductEntity
 
@@ -25,7 +26,8 @@ interface ProductDao {
     @Query("DELETE FROM ProductEntity WHERE id = :id")
     suspend fun deleteProductById(id:Int)
 
-
+    @Update
+    suspend fun updateProduct(productEntity: ProductEntity)
 
 
 }

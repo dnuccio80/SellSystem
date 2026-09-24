@@ -2,11 +2,12 @@ package org.example.project.domain.usecases.sells
 
 import org.example.project.data.db.daos.SellRepository
 import org.example.project.domain.models.sell.SellError
+import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.usecases.utils.GetCurrentDate
 import org.example.project.domain.usecases.newsell.PaymentMethod
 import org.example.project.ui.models.SellPresentation
 
-class CreateNewSell(private val sellRepository: SellRepository, private val getCurrentDate: GetCurrentDate) {
+class CreateNewSell(private val sellRepository: SellRepository, private val productRepository: ProductRepository, private val getCurrentDate: GetCurrentDate) {
 
     suspend operator fun invoke(sellPresentation: SellPresentation) {
         when {
@@ -18,7 +19,17 @@ class CreateNewSell(private val sellRepository: SellRepository, private val getC
         val sell = sellPresentation.toDomain()
         val today = getCurrentDate()
 
-        sellRepository.addSell(sell.copy(date = today))
+        try {
+            sellRepository.addSell(sell.copy(date = today))
+            sellPresentation.productQuantityList.forEach { productWithQuantity ->
+                if(productWithQuantity.product.manageStock) {
+                    val updatedStock = productWithQuantity.product.currentStock - productWithQuantity.quantity
+                    productRepository.updateProduct(productWithQuantity.product.copy(currentStock = updatedStock))
+                }
+            }
+        }catch (e: Throwable) {
+            throw e
+        }
 
     }
 
