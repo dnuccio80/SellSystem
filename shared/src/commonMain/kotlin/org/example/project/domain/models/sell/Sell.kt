@@ -8,7 +8,6 @@ data class Sell(
     val date: LocalDate? = null,
     val isUsualClient: Boolean = false,
     val clientName:String,
-    val description: String, // items, quantities, discounts
     val paymentMethod: String,
     val total:Long,
 ) {
@@ -17,7 +16,6 @@ data class Sell(
             id = id,
             date = date!!,
             clientName = clientName.ifBlank { null },
-            description = description,
             paymentMethod = paymentMethod,
             total = total
         )

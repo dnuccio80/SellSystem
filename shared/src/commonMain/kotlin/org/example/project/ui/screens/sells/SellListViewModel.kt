@@ -13,23 +13,29 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.example.project.data.db.daos.SellRepository
+import org.example.project.domain.repositories.SellRepository
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.models.sell.SellFinancialReport
 import org.example.project.domain.usecases.sells.GetFinancialSellReport
+import org.example.project.domain.usecases.sells.GetSellData
 import org.example.project.domain.usecases.sells.GetSells
 import org.example.project.domain.usecases.sells.SellFilterLabel
-import org.koin.core.qualifier._q
+import org.example.project.ui.models.SellWithProductsWithQuantity
 import kotlin.collections.emptyList
 import kotlin.time.Duration.Companion.milliseconds
+
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 
-class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepository, private val financialSellReport: GetFinancialSellReport) : ViewModel() {
+class SellListViewModel(
+    getSells: GetSells,
+    private val sellRepository: SellRepository,
+    private val financialSellReport: GetFinancialSellReport,
+    private val getSellData: GetSellData,
+) : ViewModel() {
 
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
@@ -37,7 +43,7 @@ class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepo
     private val _labelSelected = MutableStateFlow(SellFilterLabel.ALL)
     val labelSelected = _labelSelected.asStateFlow()
 
-    private val _sellData = MutableStateFlow<Sell?>(null)
+    private val _sellData = MutableStateFlow<SellWithProductsWithQuantity?>(null)
     val sellData = _sellData.asStateFlow()
 
     private val _sellsList: StateFlow<List<Sell>> = combine(
@@ -64,16 +70,16 @@ class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepo
         _labelSelected.update { newValue }
     }
 
-    fun getSell(id:Int, onDone:() -> Unit) {
+    fun getSell(sellId: Int, onDone: () -> Unit) {
         viewModelScope.launch {
-            async { _sellData.update { sellRepository.getSellById(id) } }.await()
+            async { _sellData.update { getSellData(sellId) } }.await()
             onDone()
         }
     }
 
     fun deleteSell() {
         viewModelScope.launch {
-            sellRepository.deleteSellById(sellData.value!!.id)
+//            sellRepository.deleteSellById(sellData.value!!.id)
             clearSellData()
         }
     }
@@ -81,7 +87,6 @@ class SellListViewModel(getSells: GetSells, private val sellRepository: SellRepo
     fun clearSellData() {
         _sellData.update { null }
     }
-
 
 
 }

@@ -1,6 +1,6 @@
 package org.example.project.di
 
-import org.example.project.data.db.daos.SellRepository
+import org.example.project.domain.repositories.SellRepository
 import org.example.project.data.db.repositoriesimpl.ClientRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.CurrentAccountDetailsRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.CurrentAccountRepositoryImpl
@@ -20,7 +20,6 @@ import org.example.project.domain.repositories.ProductCategoryRepository
 import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.repositories.ProductVariantRepository
 import org.example.project.domain.repositories.SupplierRepository
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val dataModule = module {

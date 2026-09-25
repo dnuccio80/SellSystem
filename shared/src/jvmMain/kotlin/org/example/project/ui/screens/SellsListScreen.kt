@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,13 +48,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import org.example.project.domain.models.sell.ProductWithQuantity
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.models.sell.SellFinancialReport
 import org.example.project.domain.usecases.sells.SellFilterLabel
@@ -66,6 +70,7 @@ import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SearchTextField
 import org.example.project.ui.ext.formatToDisplay
 import org.example.project.ui.ext.toPrice
+import org.example.project.ui.models.SellWithProductsWithQuantity
 import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.sells.SellListViewModel
 import org.example.project.ui.utils.AccentColor
@@ -266,7 +271,11 @@ private fun SummaryCardColumn(modifier: Modifier, financialReport: SellFinancial
 }
 
 @Composable
-private fun SellDataDialog(sell: Sell, onDismiss: () -> Unit, onDeleteSell: () -> Unit) {
+private fun SellDataDialog(
+    sellWithProducts: SellWithProductsWithQuantity,
+    onDismiss: () -> Unit,
+    onDeleteSell: () -> Unit,
+) {
 
     var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -299,30 +308,41 @@ private fun SellDataDialog(sell: Sell, onDismiss: () -> Unit, onDeleteSell: () -
                 }
                 RowWithSmallBodyAndDescription(
                     "Fecha:",
-                    description = sell.date!!.formatToDisplay()
+                    description = sellWithProducts.sell.date!!.formatToDisplay()
                 )
                 RowWithSmallBodyAndDescription(
                     "Cliente:",
-                    description = sell.clientName.ifBlank { "Genérico" })
-                RowWithSmallBodyAndDescription("Método de pago:", description = sell.paymentMethod)
-                Column(
-                ) {
-                    Text("Listado de productos", color = Color.White, maxLines = 1, overflow = TextOverflow.Visible)
-                    HorizontalDivider(thickness = 2.dp, color = GreenText)
-                }
-                Column(
-                    modifier = Modifier.heightIn(max = 250.dp).verticalScroll(
-                        rememberScrollState()
-                    )
-                ) {
-                    Text(
-                        sell.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
-                    )
+                    description = sellWithProducts.sell.clientName.ifBlank { "Genérico" })
+                RowWithSmallBodyAndDescription(
+                    "Método de pago:",
+                    description = sellWithProducts.sell.paymentMethod
+                )
+                Text(
+                    "Listado de productos",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    maxLines = 1,
+                    fontWeight = FontWeight.Bold
+                )
+                Card(modifier = Modifier.fillMaxWidth().heightIn(max = 250.dp).padding(horizontal = 8.dp), shape = RoundedCornerShape(4.dp) ,colors = CardDefaults.cardColors(containerColor = SecondaryCardBackground)) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxSize().padding(16.dp)
+                    ) {
+                        items(sellWithProducts.productWithQuantity) { productWithQuantity ->
+                            ProductWithQuantityText(productWithQuantity)
+                            Spacer(modifier = Modifier.size(4.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 1.5.dp,
+                                color = GrayText
+                            )
+                        }
+                    }
                 }
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    RowWithMidTitleAndDescription("Total:", sell.total.toPrice())
+                    RowWithMidTitleAndDescription("Total:", sellWithProducts.sell.total.toPrice())
                 }
                 AcceptDeclineButtons(
                     "Aceptar",
@@ -345,6 +365,28 @@ private fun SellDataDialog(sell: Sell, onDismiss: () -> Unit, onDeleteSell: () -
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProductWithQuantityText(productWithQuantity: ProductWithQuantity) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            "${productWithQuantity.product.name} '${productWithQuantity.product.brand}' ${productWithQuantity.product.description}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            "x ${productWithQuantity.quantity}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = LightBlue,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

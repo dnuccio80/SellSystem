@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
-import org.example.project.data.db.daos.SellRepository
+import org.example.project.domain.repositories.SellRepository
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.usecases.utils.GetCurrentDate
 

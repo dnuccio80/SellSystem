@@ -1,6 +1,7 @@
 package org.example.project.domain.usecases.newsell
 
-import org.example.project.ui.models.ProductWithQuantity
+import org.example.project.domain.models.sell.ProductWithQuantity
+import org.example.project.ui.models.ProductWithQuantityPresentation
 
 enum class PaymentMethod(val etiquette:String) {
     CASH("Efectivo"), TRANSFER("Transferencia"), CARD("Tarjeta"), CURRENT_ACCOUNT("Cuenta corriente")
@@ -14,7 +15,7 @@ data class SellAmounts(
 class GetTotalAmountSell {
     operator fun invoke(
         paymentMethod: PaymentMethod,
-        productWithQuantityList: List<ProductWithQuantity>,
+        productWithQuantityList: List<ProductWithQuantityPresentation>,
     ): SellAmounts {
 
         return when (paymentMethod) {

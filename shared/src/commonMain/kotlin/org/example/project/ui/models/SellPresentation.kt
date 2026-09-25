@@ -1,6 +1,7 @@
 package org.example.project.ui.models
 
 import org.example.project.data.db.entities.SellEntity
+import org.example.project.domain.models.sell.ProductWithQuantity
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.usecases.newsell.PaymentMethod
 
@@ -8,7 +9,7 @@ data class SellPresentation(
     val id:Int = 0,
     val isUsualClient: Boolean,
     val clientName: String,
-    val productQuantityList:List<ProductWithQuantity>,
+    val productQuantityList:List<ProductWithQuantityPresentation>,
     val paymentMethod: PaymentMethod,
     val totalAmount:Long
 ) {
@@ -16,7 +17,6 @@ data class SellPresentation(
         return Sell(
             id = id,
             clientName = clientName,
-            description = getDescription(productQuantityList),
             paymentMethod = paymentMethod.etiquette,
             total = totalAmount,
         )
@@ -24,10 +24,3 @@ data class SellPresentation(
 
 }
 
-private fun getDescription(productQuantityList: List<ProductWithQuantity>): String {
-    val description = StringBuilder()
-    productQuantityList.forEach { productWithQuantity ->
-        description.append("${productWithQuantity.product.name} '${productWithQuantity.product.brand}' ${productWithQuantity.product.description} x ${productWithQuantity.quantity} \n")
-    }
-    return description.toString()
-}

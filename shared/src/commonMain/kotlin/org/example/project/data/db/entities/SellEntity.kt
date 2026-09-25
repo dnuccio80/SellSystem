@@ -12,7 +12,6 @@ data class SellEntity(
     val id:Int,
     val date: LocalDate,
     val clientName:String?,
-    val description: String, // items, quantities, discounts
     val paymentMethod: String,
     val total:Long,
 ) {
@@ -21,7 +20,6 @@ data class SellEntity(
             id = id,
             date = date,
             clientName = clientName.orEmpty(),
-            description = description,
             paymentMethod = paymentMethod,
             total = total
         )

@@ -24,6 +24,7 @@ import org.example.project.data.db.entities.ProductEntity
 import org.example.project.data.db.entities.ProductVariantEntity
 import org.example.project.data.db.entities.SellEntity
 import org.example.project.data.db.entities.SupplierEntity
+import org.example.project.data.db.entities.relations.SellProductEntity
 import org.example.project.domain.models.currentaccount.DailyTransactionEntity
 
 
@@ -32,8 +33,8 @@ const val DATABASE_NAME = "ss_app_database.db"
 expect object SystemCTor : RoomDatabaseConstructor<SystemDatabase>
 
 @Database(
-    entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class, ExpenseEntity::class, SupplierEntity::class, CurrentAccountEntity::class, CurrentAccountTransactionEntity::class, DailyTransactionEntity::class, SellEntity::class],
-    version = 19
+    entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class, ExpenseEntity::class, SupplierEntity::class, CurrentAccountEntity::class, CurrentAccountTransactionEntity::class, DailyTransactionEntity::class, SellEntity::class, SellProductEntity::class],
+    version = 20
 )
 @ConstructedBy(SystemCTor::class)
 @TypeConverters(Converters::class)

@@ -73,7 +73,7 @@ import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SearchTextField
 import org.example.project.ui.ext.toPrice
-import org.example.project.ui.models.ProductWithQuantity
+import org.example.project.ui.models.ProductWithQuantityPresentation
 import org.example.project.ui.screens.ItemSellActions.*
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.screens.newsell.NewSellUiState
@@ -690,7 +690,7 @@ enum class ItemSellActions {
 
 @Composable
 private fun NewItemSell(
-    productWithQuantity: ProductWithQuantity,
+    productWithQuantity: ProductWithQuantityPresentation,
     onValueChange: (Int) -> Unit,
     onActionDone: (ItemSellActions) -> Unit,
 ) {
@@ -732,7 +732,12 @@ private fun NewItemSell(
                     }
                     TextField(
                         value = productWithQuantity.quantity.toString(), onValueChange = {
-                            val value =  (it.toIntOrNull() ?: 1).coerceIn(1, productWithQuantity.product.currentStock)
+                            val value = if(productWithQuantity.product.manageStock) {
+                                (it.toIntOrNull() ?: 1).coerceIn(1, productWithQuantity.product.currentStock)
+                            } else {
+                                (it.toIntOrNull() ?: 1)
+                            }
+
                             onValueChange(value)
                         },
                         colors = TextFieldDefaults.colors(

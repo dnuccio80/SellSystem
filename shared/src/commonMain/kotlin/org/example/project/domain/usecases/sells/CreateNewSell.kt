@@ -1,6 +1,6 @@
 package org.example.project.domain.usecases.sells
 
-import org.example.project.data.db.daos.SellRepository
+import org.example.project.domain.repositories.SellRepository
 import org.example.project.domain.models.sell.SellError
 import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.usecases.utils.GetCurrentDate
@@ -17,10 +17,11 @@ class CreateNewSell(private val sellRepository: SellRepository, private val prod
         }
 
         val sell = sellPresentation.toDomain()
+        val products = sellPresentation.productQuantityList.map { it.toDomain() }
         val today = getCurrentDate()
 
         try {
-            sellRepository.addSell(sell.copy(date = today))
+            sellRepository.addSellWithProducts(sell.copy(date = today), products)
             sellPresentation.productQuantityList.forEach { productWithQuantity ->
                 if(productWithQuantity.product.manageStock) {
                     val updatedStock = productWithQuantity.product.currentStock - productWithQuantity.quantity

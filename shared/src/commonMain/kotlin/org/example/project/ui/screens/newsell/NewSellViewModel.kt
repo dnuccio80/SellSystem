@@ -27,7 +27,7 @@ import org.example.project.domain.usecases.newsell.GetTotalAmountSell
 import org.example.project.domain.usecases.newsell.PaymentMethod
 import org.example.project.domain.usecases.products.GetProducts
 import org.example.project.domain.usecases.sells.CreateNewSell
-import org.example.project.ui.models.ProductWithQuantity
+import org.example.project.ui.models.ProductWithQuantityPresentation
 import org.example.project.ui.models.SellPresentation
 import kotlin.collections.emptyList
 import kotlin.time.Duration.Companion.milliseconds
@@ -53,7 +53,7 @@ class NewSellViewModel(
         getProducts(query).map { it.filter { product -> !product.manageStock || product.currentStock > 0 } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _productWithQuantityList = MutableStateFlow<List<ProductWithQuantity>>(emptyList())
+    private val _productWithQuantityList = MutableStateFlow<List<ProductWithQuantityPresentation>>(emptyList())
 
     private val _clientSelected = MutableStateFlow<String>("")
     val clientSelected = _clientSelected.asStateFlow()
@@ -101,13 +101,13 @@ class NewSellViewModel(
 
     fun addProductToCart(list: List<Product>) {
 
-        val newList = mutableListOf<ProductWithQuantity>()
+        val newList = mutableListOf<ProductWithQuantityPresentation>()
 
         _productWithQuantityList.value.forEach {
             newList.add(it)
         }
         list.forEach { product ->
-            val productWithQuantity = ProductWithQuantity(
+            val productWithQuantity = ProductWithQuantityPresentation(
                 product = product,
                 quantity = 1,
                 amount = getSubtotalProductWithQuantity(product, 1),
