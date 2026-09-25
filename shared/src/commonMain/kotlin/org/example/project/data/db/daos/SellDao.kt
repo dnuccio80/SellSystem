@@ -48,4 +48,13 @@ interface SellDao {
     @Query("DELETE FROM SellEntity WHERE id = :id")
     suspend fun deleteSellById(id:Int)
 
+    @Query("DELETE FROM SellProductEntity WHERE sellId = :sellId")
+    suspend fun deleteProductFromSell(sellId:Int)
+
+    @Transaction
+    suspend fun deleteSellWithProducts(sellId:Int) {
+        deleteProductFromSell(sellId)
+        deleteSellById(sellId)
+    }
+
 }

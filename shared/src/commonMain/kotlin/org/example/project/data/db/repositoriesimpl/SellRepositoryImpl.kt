@@ -41,9 +41,8 @@ class SellRepositoryImpl(private val db: SystemDatabase) : SellRepository {
         )
     }
 
-
-    override suspend fun deleteSellById(id: Int) {
-        db.sellDao().deleteSellById(id)
+    override suspend fun deleteSellById(sellId: Int) {
+        db.sellDao().deleteSellWithProducts(sellId)
     }
 
     override suspend fun getProductsFromSell(sellId: Int): List<ProductWithQuantity> {

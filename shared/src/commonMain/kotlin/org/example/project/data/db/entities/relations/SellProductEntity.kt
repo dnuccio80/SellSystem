@@ -7,6 +7,4 @@ data class SellProductEntity(
     val sellId:Int,
     val productId:Int,
     val quantity:Int
-) {
-
-}
+)

@@ -9,6 +9,6 @@ interface SellRepository {
     fun getSellsByQuery(query:String): Flow<List<Sell>>
     suspend fun getSellById(id:Int): Sell
     suspend fun addSellWithProducts(sell: Sell, products:List<ProductWithQuantity>)
-    suspend fun deleteSellById(id:Int)
+    suspend fun deleteSellById(sellId:Int)
     suspend fun getProductsFromSell(sellId:Int):List<ProductWithQuantity>
 }

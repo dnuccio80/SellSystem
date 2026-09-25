@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.example.project.domain.repositories.SellRepository
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.models.sell.SellFinancialReport
+import org.example.project.domain.usecases.sells.DeleteSellWithProducts
 import org.example.project.domain.usecases.sells.GetFinancialSellReport
 import org.example.project.domain.usecases.sells.GetSellData
 import org.example.project.domain.usecases.sells.GetSells
@@ -32,9 +33,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class SellListViewModel(
     getSells: GetSells,
-    private val sellRepository: SellRepository,
     private val financialSellReport: GetFinancialSellReport,
     private val getSellData: GetSellData,
+    private val deleteSellWithProducts: DeleteSellWithProducts
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -79,7 +80,7 @@ class SellListViewModel(
 
     fun deleteSell() {
         viewModelScope.launch {
-//            sellRepository.deleteSellById(sellData.value!!.id)
+            deleteSellWithProducts(_sellData.value!!.sell.id)
             clearSellData()
         }
     }
