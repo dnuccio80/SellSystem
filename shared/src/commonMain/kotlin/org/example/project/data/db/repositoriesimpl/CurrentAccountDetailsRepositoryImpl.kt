@@ -13,11 +13,13 @@ class CurrentAccountDetailsRepositoryImpl(private val db: SystemDatabase): Curre
         }
     }
 
-    override suspend fun addTransaction(transaction: CurrentAccountTransaction) {
-        db.currentAccountTransactionDao().addTransaction(transaction.toEntity())
+    override suspend fun addTransaction(transaction: CurrentAccountTransaction):Long {
+       return db.currentAccountTransactionDao().addTransaction(transaction.toEntity())
     }
 
-    override suspend fun deleteTransaction(transaction: CurrentAccountTransaction) {
-        db.currentAccountTransactionDao().deleteTransaction(transaction.toEntity())
+    override suspend fun deleteTransaction(id: Int) {
+        db.currentAccountTransactionDao().deleteTransaction(id)
+
     }
+
 }

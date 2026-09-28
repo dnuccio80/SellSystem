@@ -32,7 +32,6 @@ class CreateNewSell(
 
 
         try {
-            sellRepository.addSellWithProducts(sell.copy(date = today), products)
             if (sellPresentation.paymentMethod == PaymentMethod.CURRENT_ACCOUNT) {
                 val transaction = CurrentAccountTransaction(
                     id = 0,
@@ -42,7 +41,10 @@ class CreateNewSell(
                     type = TransactionType.PURCHASE,
                     date = today
                 )
-                currentAccountDetailRepository.addTransaction(transaction)
+                val transactionId = currentAccountDetailRepository.addTransaction(transaction)
+                sellRepository.addSellWithProducts(sell.copy(date = today, transactionId = transactionId), products)
+            } else {
+                sellRepository.addSellWithProducts(sell.copy(date = today), products)
             }
             sellPresentation.productQuantityList.forEach { productWithQuantity ->
                 if (productWithQuantity.product.manageStock) {

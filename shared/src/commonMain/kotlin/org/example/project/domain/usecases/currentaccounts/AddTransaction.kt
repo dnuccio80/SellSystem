@@ -9,7 +9,7 @@ import org.example.project.domain.usecases.utils.GetCurrentDate
 
 class AddTransaction(private val repository: CurrentAccountDetailRepository, private val getCurrentDate: GetCurrentDate) {
 
-    suspend operator fun invoke(transaction: CurrentAccountTransaction) {
+    suspend operator fun invoke(transaction: CurrentAccountTransaction):Long {
 
         when {
             transaction.type == TransactionType.NONE -> throw CurrentAccountTransactionError.NoTransactionType
@@ -19,10 +19,8 @@ class AddTransaction(private val repository: CurrentAccountDetailRepository, pri
 
         val today: LocalDate = getCurrentDate()
 
-        repository.addTransaction(transaction.copy(date = today))
+        return repository.addTransaction(transaction.copy(date = today))
 
     }
-
-
 
 }

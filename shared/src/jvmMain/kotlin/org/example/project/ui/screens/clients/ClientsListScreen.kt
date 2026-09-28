@@ -169,7 +169,6 @@ private fun ClientCard(client: Client, onClick: () -> Unit) {
 
     val cardColor = if (isHovered) SecondaryCardBackground else PrimaryCardBackground
 
-
     Card(
         modifier = Modifier.fillMaxWidth()
             .pointerHoverIcon(PointerIcon.Hand)

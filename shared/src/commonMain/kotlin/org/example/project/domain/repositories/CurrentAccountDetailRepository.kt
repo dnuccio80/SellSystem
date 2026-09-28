@@ -7,6 +7,6 @@ import org.example.project.domain.models.currentaccount.CurrentAccountTransactio
 
 interface CurrentAccountDetailRepository {
     fun getAllTransactions(clientId:Int): Flow<List<CurrentAccountTransaction>>
-    suspend fun addTransaction(transaction: CurrentAccountTransaction)
-    suspend fun deleteTransaction(transaction: CurrentAccountTransaction)
+    suspend fun addTransaction(transaction: CurrentAccountTransaction): Long
+    suspend fun deleteTransaction(id:Int)
 }

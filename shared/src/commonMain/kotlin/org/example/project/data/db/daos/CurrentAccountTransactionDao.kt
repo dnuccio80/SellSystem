@@ -15,9 +15,9 @@ interface CurrentAccountTransactionDao {
     fun getTransactions(clientId:Int): Flow<List<CurrentAccountTransactionEntity>>
 
     @Insert(onConflict = REPLACE)
-    suspend fun addTransaction(transaction: CurrentAccountTransactionEntity)
+    suspend fun addTransaction(transaction: CurrentAccountTransactionEntity):Long
 
-    @Delete
-    suspend fun deleteTransaction(transaction: CurrentAccountTransactionEntity)
+    @Query("DELETE FROM currentaccounttransactionentity WHERE id = :id")
+    suspend fun deleteTransaction(id:Int)
 
 }
