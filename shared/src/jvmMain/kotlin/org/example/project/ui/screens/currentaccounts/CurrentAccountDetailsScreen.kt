@@ -65,12 +65,14 @@ import org.example.project.ui.GenericSelectableTextField
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.SummaryCardHeader
+import org.example.project.ui.ext.formatToDisplay
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
+import org.example.project.ui.utils.LightBlue
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
@@ -375,7 +377,7 @@ private fun TransactionDialog(
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Text(
-                            "Nueva transacción",
+                            if(isEdit) "Detalles de transacción" else "Nueva transacción",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -433,6 +435,9 @@ private fun TransactionDialog(
                     isPrice = true,
                     capitalizationMethod = NONE
                 ) { onAmountChange(it) }
+                if(isEdit) {
+                    Text("Fecha: ${transactionData.date.formatToDisplay()}", color = GrayText, style = MaterialTheme.typography.bodySmall)
+                }
                 Spacer(Modifier.size(0.dp))
                 AcceptDeclineButtons(
                     acceptColor = GreenText,
@@ -454,7 +459,7 @@ private fun CurrentAccountSummaryCard(
 
     val amountColor = when {
         amount == 0L -> WhiteText
-        amount > 0L -> GreenText
+        amount > 0L -> LightBlue
         else -> GreenText
     }
 

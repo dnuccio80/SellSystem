@@ -278,6 +278,7 @@ private fun SellDataDialog(
 ) {
 
     var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -297,7 +298,8 @@ private fun SellDataDialog(
                         color = Color.White,
                     )
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                        IconButton(modifier = Modifier.size(24.dp), onClick = { onDismiss() }) {
+                        IconButton(modifier = Modifier.size(24.dp).pointerHoverIcon(PointerIcon.Hand)
+                            .hoverable(interactionSource), onClick = { onDismiss() }) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Close dialog",

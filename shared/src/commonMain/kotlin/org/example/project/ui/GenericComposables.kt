@@ -2,8 +2,10 @@ package org.example.project.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,11 +119,16 @@ fun MainHeader() {
 }
 
 
-
 @Composable
-fun SearchTextField(value: String,capitalization: Capitalization = SENTENCES, modifier:Modifier = Modifier, onDelete: () -> Unit, onValueChange: (String) -> Unit) {
+fun SearchTextField(
+    value: String,
+    capitalization: Capitalization = SENTENCES,
+    modifier: Modifier = Modifier,
+    onDelete: () -> Unit,
+    onValueChange: (String) -> Unit,
+) {
 
-    val capitalizedValue = when(capitalization) {
+    val capitalizedValue = when (capitalization) {
         WORDS -> value.capitalizeWords()
         SENTENCES -> value.capitalizeSentences()
         NONE -> value
@@ -170,15 +178,15 @@ enum class Capitalization {
 
 @Composable
 fun GenericSelectableTextField(
-    value:String,
-    labelText:String,
+    value: String,
+    labelText: String,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
 
     TextField(
         value = value,
-        modifier = modifier.clickable{ onClick() }.pointerHoverIcon(PointerIcon.Hand),
+        modifier = modifier.clickable { onClick() }.pointerHoverIcon(PointerIcon.Hand),
         enabled = false,
         onValueChange = { },
         label = { Text(labelText) },
@@ -186,7 +194,7 @@ fun GenericSelectableTextField(
         colors = TextFieldDefaults.colors(
             disabledTextColor = Color.White,
             disabledContainerColor = Color.Transparent,
-            disabledPlaceholderColor =  Color.White,
+            disabledPlaceholderColor = Color.White,
             disabledTrailingIconColor = Color.White,
             disabledLabelColor = GrayText,
             cursorColor = GreenText,
@@ -207,7 +215,7 @@ fun GenericTextField(
     isPercentAdd: Boolean = false,
     modifier: Modifier = Modifier.fillMaxWidth(),
     capitalizationMethod: Capitalization = SENTENCES,
-    trailingIcon:@Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
 ) {
 
@@ -392,10 +400,14 @@ fun GenericButton(
     color: Color = SecondaryCardBackground,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Button(
         onClick = { onClick() },
         shape = RoundedCornerShape(4.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = color)
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource)
     ) {
         if (icon != null) {
             Row(
@@ -438,8 +450,8 @@ fun GenericScreenTitleHeaderWithButtons(
     firstButtonText: String,
     secondButtonText: String,
     buttonIcon: ImageVector? = null,
-    firstButtonColor:Color = SecondaryCardBackground,
-    secondButtonColor:Color = SecondaryCardBackground,
+    firstButtonColor: Color = SecondaryCardBackground,
+    secondButtonColor: Color = SecondaryCardBackground,
     onFirstButtonClick: () -> Unit,
     onSecondButtonClick: () -> Unit,
 ) {
@@ -465,33 +477,81 @@ fun GenericScreenTitleHeaderWithButtons(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            GenericButton(firstButtonText, buttonIcon, color = firstButtonColor) { onFirstButtonClick() }
+            GenericButton(
+                firstButtonText,
+                buttonIcon,
+                color = firstButtonColor
+            ) { onFirstButtonClick() }
             GenericButton(secondButtonText, color = secondButtonColor) { onSecondButtonClick() }
         }
     }
 }
 
 @Composable
-fun RowWithSmallBodyAndDescription(title: String, description:String) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = Color.White)
-        Text(description, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = GreenText)
+fun RowWithSmallBodyAndDescription(title: String, description: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Text(
+            description,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold,
+            color = GreenText
+        )
     }
 }
 
 @Composable
-fun RowWithMidBodyAndDescription(title: String, description:String) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = Color.White)
-        Text(description, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = GreenText)
+fun RowWithMidBodyAndDescription(title: String, description: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Text(
+            description,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = GreenText
+        )
     }
 }
 
 @Composable
-fun RowWithMidTitleAndDescription(title: String, description:String, modifier: Modifier = Modifier) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) {
-        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White)
-        Text(description, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = GreenText)
+fun RowWithMidTitleAndDescription(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Text(
+            description,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = GreenText
+        )
     }
 }
 

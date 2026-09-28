@@ -1,11 +1,13 @@
 package org.example.project.domain.usecases.currentaccounts
 
+import kotlinx.datetime.LocalDate
 import org.example.project.data.db.entities.TransactionType
 import org.example.project.domain.models.currentaccount.CurrentAccountTransaction
 import org.example.project.domain.models.currentaccount.CurrentAccountTransactionError
 import org.example.project.domain.repositories.CurrentAccountDetailRepository
+import org.example.project.domain.usecases.utils.GetCurrentDate
 
-class AddTransaction(private val repository: CurrentAccountDetailRepository) {
+class AddTransaction(private val repository: CurrentAccountDetailRepository, private val getCurrentDate: GetCurrentDate) {
 
     suspend operator fun invoke(transaction: CurrentAccountTransaction) {
 
@@ -15,7 +17,9 @@ class AddTransaction(private val repository: CurrentAccountDetailRepository) {
             transaction.amount == 0L -> throw CurrentAccountTransactionError.NoAmount
         }
 
-        repository.addTransaction(transaction)
+        val today: LocalDate = getCurrentDate()
+
+        repository.addTransaction(transaction.copy(date = today))
 
     }
 

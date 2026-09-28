@@ -64,6 +64,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import org.example.project.domain.models.client.Client
 import org.example.project.domain.models.product.Product
 import org.example.project.domain.usecases.newsell.PaymentMethod
 import org.example.project.ui.AcceptDeclineButtons
@@ -75,6 +76,7 @@ import org.example.project.ui.SearchTextField
 import org.example.project.ui.ext.toPrice
 import org.example.project.ui.models.ProductWithQuantityPresentation
 import org.example.project.ui.screens.ItemSellActions.*
+import org.example.project.ui.screens.clients.CleanClient
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.screens.newsell.NewSellUiState
 import org.example.project.ui.screens.newsell.NewSellViewModel
@@ -111,7 +113,11 @@ class NewSellScreen : Screen {
                     var showClientDialog by rememberSaveable { mutableStateOf(false) }
                     var showAddItemsDialog by rememberSaveable { mutableStateOf(false) }
                     val isUsualClient by viewModel.isUsualClient.collectAsStateWithLifecycle()
-                    var currentAccountClientSelected by rememberSaveable { mutableStateOf("") }
+                    var currentAccountClientSelected by rememberSaveable {
+                        mutableStateOf(
+                            CleanClient().getCleanClient()
+                        )
+                    }
                     val clientSelected by viewModel.clientSelected.collectAsStateWithLifecycle()
                     var adviceMsg by rememberSaveable { mutableStateOf("") }
                     var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
@@ -253,20 +259,20 @@ class NewSellScreen : Screen {
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                                 ) {
                                                     Text(
-                                                        if (clientSelected.isNotBlank()) {
+                                                        if (clientSelected != null) {
                                                             "Cliente seleccionado:"
                                                         } else {
                                                             "Selecciona un cliente"
                                                         },
                                                         fontWeight = FontWeight.SemiBold,
-                                                        color = if (clientSelected.isBlank()) AccentColor else Color.White
+                                                        color = if (clientSelected == null) AccentColor else Color.White
                                                     )
                                                     Text(
-                                                        clientSelected,
+                                                        clientSelected?.fullName.orEmpty(),
                                                         fontWeight = FontWeight.SemiBold,
                                                         color = GreenText
                                                     )
-                                                    if (clientSelected.isNotBlank()) {
+                                                    if (clientSelected != null) {
                                                         IconButton(
                                                             onClick = { viewModel.clearClientSelected() },
                                                             modifier = Modifier.size(18.dp),
@@ -300,20 +306,20 @@ class NewSellScreen : Screen {
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
                                         Text(
-                                            if (clientSelected.isNotBlank()) {
+                                            if (clientSelected != null) {
                                                 "Cliente seleccionado:"
                                             } else {
                                                 "Selecciona un cliente"
                                             },
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if (clientSelected.isBlank()) AccentColor else Color.White
+                                            color = if (clientSelected == null) AccentColor else Color.White
                                         )
                                         Text(
-                                            clientSelected,
+                                            clientSelected?.fullName.orEmpty(),
                                             fontWeight = FontWeight.SemiBold,
                                             color = GreenText
                                         )
-                                        if (clientSelected.isNotBlank()) {
+                                        if (clientSelected != null) {
                                             Card(
                                                 shape = CircleShape,
                                                 colors = CardDefaults.cardColors(
@@ -432,10 +438,10 @@ class NewSellScreen : Screen {
                                     if ((uiState as NewSellUiState.Success).clients.isNotEmpty()) {
                                         (uiState as NewSellUiState.Success).clients.forEach {
                                             ClientItem(
-                                                it.fullName,
+                                                it,
                                                 selected = currentAccountClientSelected,
                                                 onClick = {
-                                                    currentAccountClientSelected = it.fullName
+                                                    currentAccountClientSelected = it
                                                 }
                                             )
                                         }
@@ -451,17 +457,17 @@ class NewSellScreen : Screen {
                                 }
                             },
                             onAccept = {
-                                if (currentAccountClientSelected.isNotBlank()) {
+                                if (currentAccountClientSelected.fullName.isNotBlank()) {
                                     showClientDialog = false
                                     viewModel.updateClientSelected(currentAccountClientSelected)
                                     viewModel.updateClientSearchQuery("")
-                                    currentAccountClientSelected = ""
+                                    currentAccountClientSelected = CleanClient().getCleanClient()
                                 }
                             }
                         ) {
                             showClientDialog = false
                             viewModel.updateClientSearchQuery("")
-                            currentAccountClientSelected = ""
+                            currentAccountClientSelected = CleanClient().getCleanClient()
                         }
                     }
                     if (showAddItemsDialog) {
@@ -571,7 +577,7 @@ private fun DialogContent(
 
 
 @Composable
-private fun ClientItem(name: String, selected: String, onClick: () -> Unit) {
+private fun ClientItem(client: Client, selected: Client, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable {
             onClick()
@@ -589,7 +595,7 @@ private fun ClientItem(name: String, selected: String, onClick: () -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
-                    selected = name == selected,
+                    selected = client.fullName == selected.fullName,
                     onClick = { onClick() },
                     colors = RadioButtonDefaults.colors(
                         selectedColor = GreenText,
@@ -597,7 +603,7 @@ private fun ClientItem(name: String, selected: String, onClick: () -> Unit) {
                     )
                 )
                 Text(
-                    name,
+                    client.fullName,
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyLarge
@@ -732,8 +738,11 @@ private fun NewItemSell(
                     }
                     TextField(
                         value = productWithQuantity.quantity.toString(), onValueChange = {
-                            val value = if(productWithQuantity.product.manageStock) {
-                                (it.toIntOrNull() ?: 1).coerceIn(1, productWithQuantity.product.currentStock)
+                            val value = if (productWithQuantity.product.manageStock) {
+                                (it.toIntOrNull() ?: 1).coerceIn(
+                                    1,
+                                    productWithQuantity.product.currentStock
+                                )
                             } else {
                                 (it.toIntOrNull() ?: 1)
                             }

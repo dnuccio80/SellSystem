@@ -1,14 +1,13 @@
 package org.example.project.ui.models
 
-import org.example.project.data.db.entities.SellEntity
-import org.example.project.domain.models.sell.ProductWithQuantity
+import org.example.project.domain.models.client.Client
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.usecases.newsell.PaymentMethod
 
 data class SellPresentation(
     val id:Int = 0,
     val isUsualClient: Boolean,
-    val clientName: String,
+    val client: Client,
     val productQuantityList:List<ProductWithQuantityPresentation>,
     val paymentMethod: PaymentMethod,
     val totalAmount:Long
@@ -16,7 +15,7 @@ data class SellPresentation(
     fun toDomain(): Sell {
         return Sell(
             id = id,
-            clientName = clientName,
+            clientName = client.fullName,
             paymentMethod = paymentMethod.etiquette,
             total = totalAmount,
         )

@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.project.domain.models.client.Client
 import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.sell.SellError
 import org.example.project.domain.usecases.clients.GetClients
@@ -29,6 +29,7 @@ import org.example.project.domain.usecases.products.GetProducts
 import org.example.project.domain.usecases.sells.CreateNewSell
 import org.example.project.ui.models.ProductWithQuantityPresentation
 import org.example.project.ui.models.SellPresentation
+import org.example.project.ui.screens.clients.CleanClient
 import kotlin.collections.emptyList
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -55,7 +56,7 @@ class NewSellViewModel(
 
     private val _productWithQuantityList = MutableStateFlow<List<ProductWithQuantityPresentation>>(emptyList())
 
-    private val _clientSelected = MutableStateFlow<String>("")
+    private val _clientSelected = MutableStateFlow<Client?>(null)
     val clientSelected = _clientSelected.asStateFlow()
 
     private val _isUsualClient = MutableStateFlow(false)
@@ -87,7 +88,7 @@ class NewSellViewModel(
         _query.update { newValue }
     }
 
-    fun updateClientSelected(newValue: String) {
+    fun updateClientSelected(newValue: Client) {
         _clientSelected.update { newValue }
     }
 
@@ -190,7 +191,7 @@ class NewSellViewModel(
     fun addSell(onDone: () -> Unit) {
         val newSell = SellPresentation(
             isUsualClient = _isUsualClient.value,
-            clientName = clientSelected.value,
+            client = clientSelected.value ?: CleanClient().getCleanClient(),
             productQuantityList = _productWithQuantityList.value,
             paymentMethod = _paymentMethod.value,
             totalAmount = getTotalAmountSell(
@@ -211,7 +212,7 @@ class NewSellViewModel(
     }
 
     fun clearClientSelected() {
-        _clientSelected.update { "" }
+        _clientSelected.update { null }
     }
 
     fun clearSellData() {
