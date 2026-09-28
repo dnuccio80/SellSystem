@@ -124,11 +124,10 @@ class NewSellViewModel(
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
                 if (productWithQuantity.product.id == productId) {
-
-                    val newQuantity = (productWithQuantity.quantity + 1).coerceAtMost(productWithQuantity.product.currentStock)
+                    val newQuantity = (productWithQuantity.quantity + 1)
+                    if(productWithQuantity.product.manageStock) newQuantity.coerceAtMost(productWithQuantity.product.currentStock)
                     val newAmount =
                         getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
-
                     productWithQuantity.copy(quantity = newQuantity, amount = newAmount)
                 } else productWithQuantity
             }
