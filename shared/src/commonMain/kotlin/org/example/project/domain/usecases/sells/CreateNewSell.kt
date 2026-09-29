@@ -1,6 +1,7 @@
 package org.example.project.domain.usecases.sells
 
 import org.example.project.data.db.entities.TransactionType
+import org.example.project.domain.models.currentaccount.CurrentAccount
 import org.example.project.domain.models.currentaccount.CurrentAccountTransaction
 import org.example.project.domain.repositories.SellRepository
 import org.example.project.domain.models.sell.SellError
@@ -16,6 +17,7 @@ class CreateNewSell(
     private val sellRepository: SellRepository,
     private val productRepository: ProductRepository,
     private val currentAccountDetailRepository: CurrentAccountDetailRepository,
+    private val currentAccountRepository: CurrentAccountRepository,
     private val getCurrentDate: GetCurrentDate,
 ) {
 
@@ -33,6 +35,17 @@ class CreateNewSell(
 
         try {
             if (sellPresentation.paymentMethod == PaymentMethod.CURRENT_ACCOUNT) {
+
+                val currentAccountId = currentAccountRepository.getClientWithCurrentAccountByClientId(sellPresentation.client.id).currentAccount?.id
+
+                if(currentAccountId == null) {
+                    currentAccountRepository.addCurrentAccount(
+                        currentAccount = CurrentAccount(
+                            clientId = sellPresentation.client.id,
+                            amount = 0
+                        )
+                    )
+                }
                 val transaction = CurrentAccountTransaction(
                     id = 0,
                     clientId = sellPresentation.client.id,

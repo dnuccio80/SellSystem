@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -396,7 +397,7 @@ private fun TransactionDialog(
                         value = transactionData.type.etiquette,
                         labelText = "Tipo de transacción",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { showDropdownMenuCategory = true }
+                        onClick = { if(!isEdit) showDropdownMenuCategory = true }
                     )
                     DropdownMenu(
                         expanded = showDropdownMenuCategory,

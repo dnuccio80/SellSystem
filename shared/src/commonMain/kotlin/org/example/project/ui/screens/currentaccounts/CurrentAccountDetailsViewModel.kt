@@ -122,7 +122,7 @@ class CurrentAccountDetailsViewModel(
     fun deleteTransaction() {
         viewModelScope.launch {
             try {
-                transactionsRepo.deleteTransaction(_newTransactionData.value.id)
+                transactionsRepo.deleteTransaction(_newTransactionData.value)
                 cleanTransactionData()
             } catch (e: CurrentAccountTransactionError) {
                 _events.emit(e.msg)

@@ -3,6 +3,8 @@ package org.example.project.data.db.repositoriesimpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.example.project.data.db.SystemDatabase
+import org.example.project.data.db.entities.CurrentAccountTransactionEntity
+import org.example.project.data.db.entities.TransactionType
 import org.example.project.domain.models.currentaccount.CurrentAccountTransaction
 import org.example.project.domain.repositories.CurrentAccountDetailRepository
 
@@ -14,12 +16,18 @@ class CurrentAccountDetailsRepositoryImpl(private val db: SystemDatabase): Curre
     }
 
     override suspend fun addTransaction(transaction: CurrentAccountTransaction):Long {
-       return db.currentAccountTransactionDao().addTransaction(transaction.toEntity())
+        val transactionId = db.currentAccountTransactionDao().insertTransaction(transaction.toEntity())
+
+       return transactionId
     }
 
-    override suspend fun deleteTransaction(id: Int) {
-        db.currentAccountTransactionDao().deleteTransaction(id)
+    override suspend fun deleteTransaction(transaction: CurrentAccountTransaction) {
+        db.currentAccountTransactionDao().deleteTransaction(transaction.toEntity())
 
+    }
+
+    override suspend fun getTransactionById(id: Int): CurrentAccountTransaction {
+        return db.currentAccountTransactionDao().getTransactionById(id).toDomain()
     }
 
 }

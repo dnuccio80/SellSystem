@@ -8,6 +8,7 @@ import org.example.project.domain.usecases.clients.GetClients
 import org.example.project.domain.usecases.currentaccounts.AddTransaction
 import org.example.project.domain.usecases.currentaccounts.GetClientsWithNoCurrentAccounts
 import org.example.project.domain.usecases.currentaccounts.GetCurrentAccountBalance
+import org.example.project.domain.usecases.currentaccounts.GetCurrentAccountFinancialReport
 import org.example.project.domain.usecases.currentaccounts.GetCurrentAccounts
 import org.example.project.domain.usecases.currentaccounts.GetPaymentsByClient
 import org.example.project.domain.usecases.currentaccounts.GetPurchasesByClient
@@ -70,6 +71,8 @@ val domainModule = module {
     factoryOf(::GetPurchasesByClient)
     factoryOf(::GetPaymentsByClient)
     factoryOf(::GetCurrentAccountBalance)
+    factoryOf(::GetCurrentAccountFinancialReport)
+
 //    Sells
     factoryOf(::GetSubtotalProductWithQuantity)
     factoryOf(::GetTotalAmountSell)
@@ -81,5 +84,7 @@ val domainModule = module {
 
 //    Date
     factoryOf(::GetCurrentDate)
+
+
 
 }

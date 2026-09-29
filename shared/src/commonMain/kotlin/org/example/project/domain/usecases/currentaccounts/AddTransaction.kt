@@ -1,5 +1,6 @@
 package org.example.project.domain.usecases.currentaccounts
 
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
 import org.example.project.data.db.entities.TransactionType
 import org.example.project.domain.models.currentaccount.CurrentAccountTransaction
@@ -7,9 +8,13 @@ import org.example.project.domain.models.currentaccount.CurrentAccountTransactio
 import org.example.project.domain.repositories.CurrentAccountDetailRepository
 import org.example.project.domain.usecases.utils.GetCurrentDate
 
-class AddTransaction(private val repository: CurrentAccountDetailRepository, private val getCurrentDate: GetCurrentDate) {
+class AddTransaction(
+    private val repository: CurrentAccountDetailRepository,
+    private val getCurrentDate: GetCurrentDate,
+    private val getCurrentAccountBalance: GetCurrentAccountBalance,
+) {
 
-    suspend operator fun invoke(transaction: CurrentAccountTransaction):Long {
+    suspend operator fun invoke(transaction: CurrentAccountTransaction): Long {
 
         when {
             transaction.type == TransactionType.NONE -> throw CurrentAccountTransactionError.NoTransactionType
@@ -18,8 +23,9 @@ class AddTransaction(private val repository: CurrentAccountDetailRepository, pri
         }
 
         val today: LocalDate = getCurrentDate()
+        val transactionId = repository.addTransaction(transaction.copy(date = today))
 
-        return repository.addTransaction(transaction.copy(date = today))
+        return transactionId
 
     }
 

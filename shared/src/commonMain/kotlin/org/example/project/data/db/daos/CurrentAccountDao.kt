@@ -31,4 +31,5 @@ interface CurrentAccountDao {
     suspend fun addCurrentAccount(currentAccountEntity: CurrentAccountEntity)
 
 
+
 }

@@ -10,18 +10,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.Loyalty
+import androidx.compose.material.icons.outlined.Man
+import androidx.compose.material.icons.outlined.Money
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PersonPinCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Text
@@ -34,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +57,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.client.Client
 import org.example.project.domain.models.currentaccount.ClientWithCurrentAccount
+import org.example.project.domain.models.currentaccount.CurrentAccountSummary
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.Capitalization
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
@@ -52,8 +66,8 @@ import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.ext.toPrice
-import org.example.project.ui.screens.addproducts.AddProductScreen
 import org.example.project.ui.utils.GreenText
+import org.example.project.ui.utils.LightBlue
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.koin.compose.viewmodel.koinViewModel
@@ -68,6 +82,7 @@ class CurrentAccountsListScreen : Screen {
         val query by viewModel.query.collectAsStateWithLifecycle()
         val selectedClient by viewModel.selectedClient.collectAsStateWithLifecycle()
         val currentAccounts by viewModel.currentAccounts.collectAsStateWithLifecycle()
+        val financialReport by viewModel.financialReport.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.current
 
@@ -86,24 +101,47 @@ class CurrentAccountsListScreen : Screen {
                     onSearchValueChange = { viewModel.updateQuery(it) },
                     onDeleteQuerySearch = { viewModel.updateQuery("") }
                 ) { showNewCurrentAccountDialog = true }
-                if (currentAccounts.isNotEmpty()) {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        items(currentAccounts) { clientWithCurrentAccount ->
-                            CurrentAccountItem(clientWithCurrentAccount) {
-                                navigator?.push(
-                                    CurrentAccountDetailsScreen(clientWithCurrentAccount.client.id)
-                                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    if (currentAccounts.isNotEmpty()) {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.weight(4f)) {
+                            items(currentAccounts) { clientWithCurrentAccount ->
+                                CurrentAccountItem(clientWithCurrentAccount) {
+                                    navigator?.push(
+                                        CurrentAccountDetailsScreen(clientWithCurrentAccount.client.id)
+                                    )
+                                }
                             }
                         }
+                    } else {
+                        Text(
+                            "No hay cuentas corrientes en la búsqueda",
+                            color = Color.White,
+                            modifier = Modifier.weight(4f),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
-                } else {
-                    Text(
-                        "No hay cuentas corrientes en la búsqueda",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxHeight().weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        SummaryCardRowItem(
+                            modifier = Modifier.weight(1f),
+                            label = "Total de cuentas corrientes",
+                            description = financialReport.totalAccounts.toString(),
+                            icon = Icons.Outlined.AccountCircle,
+                        )
+                        SummaryCardRowItem(
+                            modifier = Modifier.weight(1f),
+                            label = "Monto total en cuentas corrientes",
+                            description = financialReport.totalAmountInAllAccounts.toPrice(),
+                            icon = Icons.Outlined.AttachMoney,
+                        )
+                        SummaryCardHighestAccountItem(
+                            modifier = Modifier.weight(1f),
+                            currentAccountSummary = financialReport.highestCurrentAccount
+                        )
+                    }
                 }
-
             }
         }
 
@@ -121,7 +159,6 @@ class CurrentAccountsListScreen : Screen {
         }
     }
 }
-
 
 @Composable
 private fun AddCurrentAccountDialog(
@@ -287,6 +324,82 @@ private fun CurrentAccountItem(
                 )
             }
 
+        }
+    }
+}
+
+@Composable
+private fun SummaryCardRowItem(
+    modifier: Modifier,
+    label: String,
+    description: String,
+    icon: ImageVector,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = SecondaryCardBackground),
+        elevation = CardDefaults.cardElevation(8.dp),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icon, contentDescription = "", tint = Color.White, modifier = Modifier.size(50.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(label, color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    description,
+                    color = LightBlue,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryCardHighestAccountItem(
+    modifier: Modifier,
+    currentAccountSummary: CurrentAccountSummary
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = SecondaryCardBackground),
+        elevation = CardDefaults.cardElevation(8.dp),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(Icons.Outlined.PersonPinCircle, contentDescription = "", tint = Color.White, modifier = Modifier.size(50.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Mayor cuenta corriente", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    currentAccountSummary.name,
+                    color = LightBlue,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    currentAccountSummary.amount.toPrice(),
+                    color = LightBlue,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

@@ -22,7 +22,8 @@ class DeleteSellWithProducts(
         }
         val sell = sellRepository.getSellById(sellId)
         if(sell.transactionId != 0L) {
-            currentAccountDetailRepository.deleteTransaction(sell.transactionId.toInt())
+            val transaction = currentAccountDetailRepository.getTransactionById(sell.transactionId.toInt())
+            currentAccountDetailRepository.deleteTransaction(transaction)
         }
         sellRepository.deleteSellById(sellId)
 
