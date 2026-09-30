@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
@@ -49,7 +50,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import org.example.project.ui.Capitalization.*
 import org.example.project.ui.ext.capitalizeSentences
@@ -124,6 +127,7 @@ fun SearchTextField(
     value: String,
     capitalization: Capitalization = SENTENCES,
     modifier: Modifier = Modifier,
+    placeHolderText:String = "Buscar...",
     onDelete: () -> Unit,
     onValueChange: (String) -> Unit,
 ) {
@@ -138,7 +142,7 @@ fun SearchTextField(
         value = capitalizedValue,
         onValueChange = { onValueChange(it) },
         modifier = modifier,
-        placeholder = { Text("Buscar...") },
+        placeholder = { Text(placeHolderText) },
         trailingIcon = {
             if (value.isBlank()) {
                 Icon(
@@ -184,9 +188,11 @@ fun GenericSelectableTextField(
     onClick: () -> Unit,
 ) {
 
+    val interactionSource = remember { MutableInteractionSource() }
+
     TextField(
         value = value,
-        modifier = modifier.clickable { onClick() }.pointerHoverIcon(PointerIcon.Hand),
+        modifier = modifier.clickable { onClick() }.hoverable(interactionSource).pointerHoverIcon(PointerIcon.Hand),
         enabled = false,
         onValueChange = { },
         label = { Text(labelText) },
@@ -485,6 +491,25 @@ fun GenericScreenTitleHeaderWithButtons(
             GenericButton(secondButtonText, color = secondButtonColor) { onSecondButtonClick() }
         }
     }
+}
+
+@Composable
+fun TextArea(value:String, onValueChange: (String) -> Unit) {
+    TextField(value = value ,modifier = Modifier.height(100.dp).fillMaxWidth(), onValueChange = { onValueChange(it.capitalizeSentences()) }, placeholder = { Text("Descripción..") }, colors = TextFieldDefaults.colors(
+        unfocusedTextColor = Color.White,
+        focusedTextColor = Color.White,
+        focusedPlaceholderColor = WhiteText,
+        unfocusedPlaceholderColor = WhiteText,
+        focusedTrailingIconColor = WhiteText,
+        unfocusedTrailingIconColor = WhiteText,
+        unfocusedContainerColor = PrimaryCardBackground,
+        focusedContainerColor = SecondaryCardBackground,
+        focusedIndicatorColor = GreenText,
+        unfocusedIndicatorColor = GrayText,
+        cursorColor = GreenText,
+        focusedLabelColor = GreenText,
+        unfocusedLabelColor = GrayText
+    ) )
 }
 
 @Composable

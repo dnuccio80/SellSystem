@@ -7,6 +7,7 @@ import org.example.project.ui.screens.currentaccounts.CurrentAccountsViewModel
 import org.example.project.ui.screens.daily.DailyViewModel
 import org.example.project.ui.screens.expenses.ExpensesViewModel
 import org.example.project.ui.screens.newsell.NewSellViewModel
+import org.example.project.ui.screens.pendingorders.PendingOrdersViewModel
 import org.example.project.ui.screens.products.ProductsViewModel
 import org.example.project.ui.screens.productvariants.ProductVariantsViewModel
 import org.example.project.ui.screens.sells.SellListViewModel
@@ -26,4 +27,5 @@ val uiModule = module {
     viewModelOf(::DailyViewModel)
     viewModelOf(::NewSellViewModel)
     viewModelOf(::SellListViewModel)
+    viewModelOf(::PendingOrdersViewModel)
 }

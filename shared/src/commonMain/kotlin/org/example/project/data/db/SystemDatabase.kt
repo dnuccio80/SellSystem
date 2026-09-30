@@ -10,6 +10,7 @@ import org.example.project.data.db.daos.CurrentAccountDao
 import org.example.project.data.db.daos.CurrentAccountTransactionDao
 import org.example.project.data.db.daos.DailyTransactionDao
 import org.example.project.data.db.daos.ExpensesDao
+import org.example.project.data.db.daos.PendingOrderDao
 import org.example.project.data.db.daos.ProductCategoryDao
 import org.example.project.data.db.daos.ProductDao
 import org.example.project.data.db.daos.ProductVariantDao
@@ -19,6 +20,7 @@ import org.example.project.data.db.entities.ClientEntity
 import org.example.project.data.db.entities.CurrentAccountEntity
 import org.example.project.data.db.entities.CurrentAccountTransactionEntity
 import org.example.project.data.db.entities.ExpenseEntity
+import org.example.project.data.db.entities.PendingOrderEntity
 import org.example.project.data.db.entities.ProductCategoryEntity
 import org.example.project.data.db.entities.ProductEntity
 import org.example.project.data.db.entities.ProductVariantEntity
@@ -33,8 +35,8 @@ const val DATABASE_NAME = "ss_app_database.db"
 expect object SystemCTor : RoomDatabaseConstructor<SystemDatabase>
 
 @Database(
-    entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class, ExpenseEntity::class, SupplierEntity::class, CurrentAccountEntity::class, CurrentAccountTransactionEntity::class, DailyTransactionEntity::class, SellEntity::class, SellProductEntity::class],
-    version = 21
+    entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class, ExpenseEntity::class, SupplierEntity::class, CurrentAccountEntity::class, CurrentAccountTransactionEntity::class, DailyTransactionEntity::class, SellEntity::class, SellProductEntity::class, PendingOrderEntity::class],
+    version = 22
 )
 @ConstructedBy(SystemCTor::class)
 @TypeConverters(Converters::class)
@@ -49,4 +51,5 @@ abstract class SystemDatabase : RoomDatabase() {
     abstract fun currentAccountTransactionDao(): CurrentAccountTransactionDao
     abstract fun dailyTransactionDao(): DailyTransactionDao
     abstract fun sellDao(): SellDao
+    abstract fun pendingOrderDao(): PendingOrderDao
 }

@@ -6,16 +6,19 @@ import org.example.project.data.db.repositoriesimpl.CurrentAccountDetailsReposit
 import org.example.project.data.db.repositoriesimpl.CurrentAccountRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.DailyTransactionRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ExpenseRepositoryImpl
+import org.example.project.data.db.repositoriesimpl.PendingOrderRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductCategoryRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.SellRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.SupplierRepositoryImpl
+import org.example.project.domain.models.pendingorders.PendingOrderPriority
 import org.example.project.domain.repositories.ClientRepository
 import org.example.project.domain.repositories.CurrentAccountDetailRepository
 import org.example.project.domain.repositories.CurrentAccountRepository
 import org.example.project.domain.repositories.DailyTransactionRepository
 import org.example.project.domain.repositories.ExpensesRepository
+import org.example.project.domain.repositories.PendingOrdersRepository
 import org.example.project.domain.repositories.ProductCategoryRepository
 import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.repositories.ProductVariantRepository
@@ -33,4 +36,5 @@ val dataModule = module {
     single<CurrentAccountDetailRepository> { CurrentAccountDetailsRepositoryImpl(get()) }
     single<DailyTransactionRepository> { DailyTransactionRepositoryImpl(get()) }
     single<SellRepository> { SellRepositoryImpl(get()) }
+    single<PendingOrdersRepository> { PendingOrderRepositoryImpl(get()) }
 }

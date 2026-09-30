@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.Color
 val FullCard = Color(0XFF233944)
 val WhiteText = Color(0XFFafc0bb)
 val GreenText = Color(0XFF268060)
+val Yellow = Color(0xFFE3E05C)
+val Yellowe = Color(0xFFA76030)
 val LightBlue = Color(0xFF13ACBF)
 val GrayText = Color(0XFF445863)
 val PrimaryBackground = Color(0XFF111f22)

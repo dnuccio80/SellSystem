@@ -17,6 +17,8 @@ import org.example.project.domain.usecases.expenses.GetExpenses
 import org.example.project.domain.usecases.expenses.GetSingleExpenseFinance
 import org.example.project.domain.usecases.newsell.GetSubtotalProductWithQuantity
 import org.example.project.domain.usecases.newsell.GetTotalAmountSell
+import org.example.project.domain.usecases.pendingorders.AddPendingOrder
+import org.example.project.domain.usecases.pendingorders.GetPendingOrders
 import org.example.project.domain.usecases.products.AddCategory
 import org.example.project.domain.usecases.products.AddProduct
 import org.example.project.domain.usecases.products.CalculatePercentageDiscountFromCashPrice
@@ -81,6 +83,10 @@ val domainModule = module {
     factoryOf(::GetFinancialSellReport)
     factoryOf(::GetSellData)
     factoryOf(::DeleteSellWithProducts)
+
+//    Pending Orders
+    factoryOf(::GetPendingOrders)
+    factoryOf(::AddPendingOrder)
 
 //    Date
     factoryOf(::GetCurrentDate)
