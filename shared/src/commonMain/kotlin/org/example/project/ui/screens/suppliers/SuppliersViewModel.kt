@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -20,6 +21,7 @@ import org.example.project.domain.models.supplier.SupplierError
 import org.example.project.domain.repositories.SupplierRepository
 import org.example.project.domain.usecases.suppliers.AddSupplier
 import org.example.project.domain.usecases.suppliers.GetSuppliers
+import org.koin.core.qualifier._q
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -35,6 +37,7 @@ class SuppliersViewModel(
 
 
     private val _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
     private val _supplierData = MutableStateFlow(ClearSupplier().getClearSupplier())
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -94,6 +97,10 @@ class SuppliersViewModel(
             _supplierData.update { supplier }
             onDone()
         }
+    }
+
+    fun updateQuery(newValue:String) {
+        _query.update { newValue }
     }
 
     fun tryAddSupplier(onDone: () -> Unit) {

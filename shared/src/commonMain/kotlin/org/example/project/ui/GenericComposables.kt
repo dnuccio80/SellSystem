@@ -280,6 +280,7 @@ fun GenericHeaderWithButtonAndSearch(
     description: String,
     buttonText: String,
     searchValue: String = "",
+    placeHolderText: String = "Buscar...",
     onSearchValueChange: (String) -> Unit = {},
     hasSearch: Boolean = true,
     buttonColor: Color = SecondaryCardBackground,
@@ -312,6 +313,7 @@ fun GenericHeaderWithButtonAndSearch(
             if (hasSearch) {
                 SearchTextField(
                     searchValue,
+                    placeHolderText = placeHolderText,
                     onDelete = { onDeleteQuerySearch() },
                     onValueChange = { onSearchValueChange(it) },
                     capitalization = querySearchCapitalization

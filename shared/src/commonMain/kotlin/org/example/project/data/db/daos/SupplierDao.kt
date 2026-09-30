@@ -14,7 +14,7 @@ interface SupplierDao {
     @Query("SELECT * FROM SupplierEntity ORDER BY name ASC")
     fun getAllSuppliers(): Flow<List<SupplierEntity>>
 
-    @Query("SELECT * FROM SUPPLIERENTITY WHERE name LIKE '%' || :query || '%' ")
+    @Query("SELECT * FROM SUPPLIERENTITY WHERE productsOffered LIKE '%' || :query || '%' ")
     fun getSuppliersByQuery(query:String):Flow<List<SupplierEntity>>
 
     @Query("SELECT * FROM SupplierEntity WHERE id = :id")

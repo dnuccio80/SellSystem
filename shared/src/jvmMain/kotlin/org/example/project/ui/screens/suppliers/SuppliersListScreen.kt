@@ -71,6 +71,7 @@ class SuppliersListScreen : Screen {
     override fun Content() {
         val viewModel = koinViewModel<SuppliersViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val query by viewModel.query.collectAsStateWithLifecycle()
         var showNewSupplierDialog by rememberSaveable { mutableStateOf(false) }
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
         var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
@@ -102,6 +103,10 @@ class SuppliersListScreen : Screen {
                     ) {
                         GenericHeaderWithButtonAndSearch(
                             title = "Proveedores",
+                            searchValue = query,
+                            onSearchValueChange = { viewModel.updateQuery(it) },
+                            onDeleteQuerySearch = { viewModel.updateQuery("") },
+                            placeHolderText = "Buscar por artículo ofrecido..",
                             description = "Listado de proveedores",
                             buttonText = "Nuevo proveedor"
                         ) {
@@ -159,7 +164,7 @@ class SuppliersListScreen : Screen {
                     show = showAdviceDialog,
                     onDismiss = { showAdviceDialog = false }
                 )
-                if(showConfirmDialog) {
+                if (showConfirmDialog) {
                     ConfirmDialog(
                         msg = "Seguro que deseas eliminar el proveedor?",
                         onAccept = {
@@ -174,6 +179,8 @@ class SuppliersListScreen : Screen {
             }
         }
     }
+
+
 }
 
 @Composable
@@ -293,9 +300,17 @@ fun supplierCardItem(supplier: SupplierPresentation, onClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Productos:", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(
+                        "Productos:",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                     supplier.productsOffered.forEach { product ->
-                        Card(shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(containerColor = GreenText)) {
+                        Card(
+                            shape = RoundedCornerShape(4.dp),
+                            colors = CardDefaults.cardColors(containerColor = GreenText)
+                        ) {
                             Text(
                                 product,
                                 style = MaterialTheme.typography.bodyMedium,
