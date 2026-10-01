@@ -4,11 +4,13 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,10 +28,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.ui.AcceptDeclineButtons
+import org.example.project.ui.CheckBoxItem
+import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
+import org.example.project.ui.GenericSelectableTextField
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.PrimaryCardBackground
 
 enum class PromotionType(val title: String) {
@@ -37,7 +43,7 @@ enum class PromotionType(val title: String) {
 }
 
 enum class PromotionCategory(val title: String) {
-    BRAND("Marca"), PRODUCT_TYPE("Tipo de producto"), SPECIFIC("Producto específico")
+    BRAND("Marca"), CATEGORY("Categoría"), SPECIFIC("Productos específicos")
 }
 
 class PromotionsScreen : Screen {
@@ -80,12 +86,13 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
 
     val promotionCategory = listOf(
         PromotionCategory.BRAND,
-        PromotionCategory.PRODUCT_TYPE,
+        PromotionCategory.CATEGORY,
         PromotionCategory.SPECIFIC
     )
 
     var promoTypeSelected by rememberSaveable { mutableStateOf(promotionType.first().title) }
     var promoCategorySelected by rememberSaveable { mutableStateOf(promotionCategory.first().title) }
+    var dateHourActive by rememberSaveable { mutableStateOf(false) }
 
 
     Dialog(onDismissRequest = { onDismiss() }) {
@@ -168,11 +175,12 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                     }
                     AnimatedContent(promoCategorySelected) {
                         when (promoCategorySelected) {
-                            PromotionCategory.PRODUCT_TYPE.title -> {
-                                GenericTextField(
+                            PromotionCategory.CATEGORY.title -> {
+                                GenericSelectableTextField(
                                     value = "",
-                                    labelText = "Tipo de producto",
-                                    onValueChange = { }
+                                    labelText = "Categoría",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { }
                                 )
                             }
 
@@ -184,14 +192,32 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                                 )
                             }
 
-                            else -> {
-                                GenericTextField(
+                            PromotionCategory.SPECIFIC.title -> {
+                                GenericSelectableTextField(
                                     value = "",
-                                    labelText = "Seleccionar producto",
-                                    onValueChange = { }
+                                    labelText = "Seleccionar productos",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { }
                                 )
                             }
                         }
+                    }
+                }
+                CheckBoxItem(
+                    name = "Colocar fecha de inicio y fin",
+                    checked = dateHourActive,
+                    onClick = { dateHourActive = !dateHourActive }
+                )
+                AnimatedContent(dateHourActive) {
+                    if(dateHourActive) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            GenericButton(
+                                text = "Seleccionar fecha y hora",
+                                onClick = { }
+                            )
+                            Text("No se ha seleccionado fecha y hora", style = MaterialTheme.typography.bodyMedium, color = AccentColor, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
+                        }
+
                     }
                 }
                 Spacer(Modifier.size(16.dp))
