@@ -10,6 +10,7 @@ import org.example.project.data.db.repositoriesimpl.PendingOrderRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductCategoryRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductVariantRepositoryImpl
+import org.example.project.data.db.repositoriesimpl.PromotionRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.SellRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.SupplierRepositoryImpl
 import org.example.project.domain.models.pendingorders.PendingOrderPriority
@@ -22,6 +23,7 @@ import org.example.project.domain.repositories.PendingOrdersRepository
 import org.example.project.domain.repositories.ProductCategoryRepository
 import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.repositories.ProductVariantRepository
+import org.example.project.domain.repositories.PromotionRepository
 import org.example.project.domain.repositories.SupplierRepository
 import org.koin.dsl.module
 
@@ -37,4 +39,5 @@ val dataModule = module {
     single<DailyTransactionRepository> { DailyTransactionRepositoryImpl(get()) }
     single<SellRepository> { SellRepositoryImpl(get()) }
     single<PendingOrdersRepository> { PendingOrderRepositoryImpl(get()) }
+    single< PromotionRepository> { PromotionRepositoryImpl(get()) }
 }

@@ -4,13 +4,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import org.example.project.domain.models.promotions.PromotionCategory.*
+import org.example.project.domain.models.promotions.PromotionType.*
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CheckBoxItem
 import org.example.project.ui.GenericButton
@@ -38,13 +38,7 @@ import org.example.project.ui.ScreenContainer
 import org.example.project.ui.utils.AccentColor
 import org.example.project.ui.utils.PrimaryCardBackground
 
-enum class PromotionType(val title: String) {
-    BUY_X_PAY_Y("Compra X, paga Y"), PERCENT("Por porcentaje")
-}
 
-enum class PromotionCategory(val title: String) {
-    BRAND("Marca"), CATEGORY("Categoría"), SPECIFIC("Productos específicos")
-}
 
 class PromotionsScreen : Screen {
     @Composable
@@ -80,14 +74,14 @@ class PromotionsScreen : Screen {
 private fun NewPromotionDialog(onDismiss: () -> Unit) {
 
     val promotionType = listOf(
-        PromotionType.BUY_X_PAY_Y,
-        PromotionType.PERCENT
+        BUY_X_PAY_Y,
+        PERCENT
     )
 
     val promotionCategory = listOf(
-        PromotionCategory.BRAND,
-        PromotionCategory.CATEGORY,
-        PromotionCategory.SPECIFIC
+        BRAND,
+        CATEGORY,
+        SPECIFIC
     )
 
     var promoTypeSelected by rememberSaveable { mutableStateOf(promotionType.first().title) }
@@ -132,7 +126,7 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                     }
                     AnimatedContent(promoTypeSelected) {
                         when (promoTypeSelected) {
-                            PromotionType.BUY_X_PAY_Y.title -> {
+                            BUY_X_PAY_Y.title -> {
                                 Column {
                                     GenericTextField(
                                         value = "",
@@ -146,7 +140,7 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                                     )
                                 }
                             }
-                            PromotionType.PERCENT.title -> {
+                            PERCENT.title -> {
                                 GenericTextField(
                                     value = "",
                                     labelText = "Porcentaje de descuento",
@@ -175,7 +169,7 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                     }
                     AnimatedContent(promoCategorySelected) {
                         when (promoCategorySelected) {
-                            PromotionCategory.CATEGORY.title -> {
+                            CATEGORY.title -> {
                                 GenericSelectableTextField(
                                     value = "",
                                     labelText = "Categoría",
@@ -184,7 +178,7 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                                 )
                             }
 
-                            PromotionCategory.BRAND.title -> {
+                            BRAND.title -> {
                                 GenericTextField(
                                     value = "",
                                     labelText = "Marca",
@@ -192,7 +186,7 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                                 )
                             }
 
-                            PromotionCategory.SPECIFIC.title -> {
+                            SPECIFIC.title -> {
                                 GenericSelectableTextField(
                                     value = "",
                                     labelText = "Seleccionar productos",
