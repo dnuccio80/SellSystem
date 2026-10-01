@@ -103,7 +103,10 @@ class CurrentAccountsListScreen : Screen {
                 ) { showNewCurrentAccountDialog = true }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     if (currentAccounts.isNotEmpty()) {
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.weight(4f)) {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.weight(4f)
+                        ) {
                             items(currentAccounts) { clientWithCurrentAccount ->
                                 CurrentAccountItem(clientWithCurrentAccount) {
                                     navigator?.push(
@@ -154,7 +157,10 @@ class CurrentAccountsListScreen : Screen {
                     viewModel.addCurrentAccount()
                     showNewCurrentAccountDialog = false
                 },
-                onDismiss = { showNewCurrentAccountDialog = false },
+                onDismiss = {
+                    showNewCurrentAccountDialog = false
+                    viewModel.clearSelectedClient()
+                },
             )
         }
     }
@@ -367,7 +373,7 @@ private fun SummaryCardRowItem(
 @Composable
 private fun SummaryCardHighestAccountItem(
     modifier: Modifier,
-    currentAccountSummary: CurrentAccountSummary
+    currentAccountSummary: CurrentAccountSummary,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -380,13 +386,22 @@ private fun SummaryCardHighestAccountItem(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(Icons.Outlined.PersonPinCircle, contentDescription = "", tint = Color.White, modifier = Modifier.size(50.dp))
+            Icon(
+                Icons.Outlined.PersonPinCircle,
+                contentDescription = "",
+                tint = Color.White,
+                modifier = Modifier.size(50.dp)
+            )
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Mayor cuenta corriente", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "Mayor cuenta corriente",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Text(
                     currentAccountSummary.name,
                     color = LightBlue,

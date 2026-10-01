@@ -82,7 +82,12 @@ class CurrentAccountsViewModel(
                 amount = 0L
             )
             currentAccountRepository.addCurrentAccount(account)
+            clearSelectedClient()
         }
+    }
+
+    fun clearSelectedClient() {
+        _selectedClient.update { CleanClient().getCleanClient() }
     }
 
     fun updateQuery(newValue: String) {
