@@ -127,7 +127,7 @@ fun SearchTextField(
     value: String,
     capitalization: Capitalization = SENTENCES,
     modifier: Modifier = Modifier,
-    placeHolderText:String = "Buscar...",
+    placeHolderText: String = "Buscar...",
     onDelete: () -> Unit,
     onValueChange: (String) -> Unit,
 ) {
@@ -192,7 +192,8 @@ fun GenericSelectableTextField(
 
     TextField(
         value = value,
-        modifier = modifier.clickable { onClick() }.hoverable(interactionSource).pointerHoverIcon(PointerIcon.Hand),
+        modifier = modifier.clickable { onClick() }.hoverable(interactionSource)
+            .pointerHoverIcon(PointerIcon.Hand),
         enabled = false,
         onValueChange = { },
         label = { Text(labelText) },
@@ -332,11 +333,17 @@ fun GenericHeaderWithButtonAndSearch(
 
 @Composable
 fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable {
             onClick()
-        }) {
+        }.hoverable(interactionSource).pointerHoverIcon(
+            PointerIcon.Hand
+        )
+    ) {
         Checkbox(
             checked = checked,
             onCheckedChange = { onClick() },
@@ -496,22 +503,28 @@ fun GenericScreenTitleHeaderWithButtons(
 }
 
 @Composable
-fun TextArea(value:String, onValueChange: (String) -> Unit) {
-    TextField(value = value ,modifier = Modifier.height(100.dp).fillMaxWidth(), onValueChange = { onValueChange(it.capitalizeSentences()) }, placeholder = { Text("Descripción..") }, colors = TextFieldDefaults.colors(
-        unfocusedTextColor = Color.White,
-        focusedTextColor = Color.White,
-        focusedPlaceholderColor = WhiteText,
-        unfocusedPlaceholderColor = WhiteText,
-        focusedTrailingIconColor = WhiteText,
-        unfocusedTrailingIconColor = WhiteText,
-        unfocusedContainerColor = PrimaryCardBackground,
-        focusedContainerColor = SecondaryCardBackground,
-        focusedIndicatorColor = GreenText,
-        unfocusedIndicatorColor = GrayText,
-        cursorColor = GreenText,
-        focusedLabelColor = GreenText,
-        unfocusedLabelColor = GrayText
-    ) )
+fun TextArea(value: String, onValueChange: (String) -> Unit) {
+    TextField(
+        value = value,
+        modifier = Modifier.height(100.dp).fillMaxWidth(),
+        onValueChange = { onValueChange(it.capitalizeSentences()) },
+        placeholder = { Text("Descripción..") },
+        colors = TextFieldDefaults.colors(
+            unfocusedTextColor = Color.White,
+            focusedTextColor = Color.White,
+            focusedPlaceholderColor = WhiteText,
+            unfocusedPlaceholderColor = WhiteText,
+            focusedTrailingIconColor = WhiteText,
+            unfocusedTrailingIconColor = WhiteText,
+            unfocusedContainerColor = PrimaryCardBackground,
+            focusedContainerColor = SecondaryCardBackground,
+            focusedIndicatorColor = GreenText,
+            unfocusedIndicatorColor = GrayText,
+            cursorColor = GreenText,
+            focusedLabelColor = GreenText,
+            unfocusedLabelColor = GrayText
+        )
+    )
 }
 
 @Composable

@@ -1,49 +1,74 @@
 package org.example.project.ui.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory.*
 import org.example.project.domain.models.promotions.PromotionType.*
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CheckBoxItem
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
-import org.example.project.ui.GenericSelectableTextField
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
+import org.example.project.ui.RowWithMidBodyAndDescription
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.models.PromotionPresentation
+import org.example.project.ui.screens.promotions.PromotionsViewModel
+import org.example.project.ui.screens.promotions.UpdatePromotionAction
 import org.example.project.ui.utils.AccentColor
+import org.example.project.ui.utils.GreenText
 import org.example.project.ui.utils.PrimaryCardBackground
-
+import org.example.project.ui.utils.SecondaryCardBackground
+import org.koin.compose.viewmodel.koinViewModel
 
 
 class PromotionsScreen : Screen {
     @Composable
     override fun Content() {
         var showNewPromotionDialog by rememberSaveable { mutableStateOf(false) }
+        val viewModel = koinViewModel<PromotionsViewModel>()
+        val promotionData by viewModel.promotionData.collectAsStateWithLifecycle()
+        val categories by viewModel.categories.collectAsStateWithLifecycle()
 
         ScreenContainer {
             Column(
@@ -61,17 +86,25 @@ class PromotionsScreen : Screen {
 
             if (showNewPromotionDialog) {
                 NewPromotionDialog(
-                    onDismiss = { showNewPromotionDialog = false }
+                    promotionData,
+                    categories,
+                    onDismiss = { showNewPromotionDialog = false },
+                    onActionDone = { action, value ->
+                        viewModel.updatePromotionData(action, value)
+                    }
                 )
             }
         }
     }
 }
 
-
-
 @Composable
-private fun NewPromotionDialog(onDismiss: () -> Unit) {
+private fun NewPromotionDialog(
+    promotionData: PromotionPresentation,
+    categories: List<ProductCategory>,
+    onActionDone: (UpdatePromotionAction, String) -> Unit,
+    onDismiss: () -> Unit,
+) {
 
     val promotionType = listOf(
         BUY_X_PAY_Y,
@@ -84,10 +117,7 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
         SPECIFIC
     )
 
-    var promoTypeSelected by rememberSaveable { mutableStateOf(promotionType.first().title) }
-    var promoCategorySelected by rememberSaveable { mutableStateOf(promotionCategory.first().title) }
-    var dateHourActive by rememberSaveable { mutableStateOf(false) }
-
+    var showCategoryDialog by rememberSaveable { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -119,32 +149,56 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                         promotionType.forEach { promo ->
                             RadioButtonRowWithText(
                                 promo.title,
-                                selected = promoTypeSelected,
-                                onClick = { promoTypeSelected = promo.title },
+                                selected = promotionData.promotionType.title,
+                                onClick = {
+                                    onActionDone(
+                                        UpdatePromotionAction.PROMOTION_TYPE,
+                                        promo.title
+                                    )
+                                },
                             )
                         }
                     }
-                    AnimatedContent(promoTypeSelected) {
-                        when (promoTypeSelected) {
+                    AnimatedContent(promotionData.promotionType) {
+                        when (promotionData.promotionType.title) {
                             BUY_X_PAY_Y.title -> {
                                 Column {
                                     GenericTextField(
-                                        value = "",
+                                        value = if (promotionData.buyX == null) "" else promotionData.buyX.toString(),
                                         labelText = "Compra",
-                                        onValueChange = { }
+                                        onlyNumbers = true,
+                                        onValueChange = {
+                                            onActionDone(
+                                                UpdatePromotionAction.BUY_X,
+                                                it
+                                            )
+                                        }
                                     )
                                     GenericTextField(
-                                        value = "",
+                                        value = if (promotionData.payY == null) "" else promotionData.payY.toString(),
                                         labelText = "Paga",
-                                        onValueChange = { }
+                                        onValueChange = {
+                                            onActionDone(
+                                                UpdatePromotionAction.PAY_Y,
+                                                it
+                                            )
+                                        }
                                     )
                                 }
                             }
+
                             PERCENT.title -> {
                                 GenericTextField(
-                                    value = "",
+                                    value = if (promotionData.percent == null) "" else promotionData.percent.toString(),
                                     labelText = "Porcentaje de descuento",
-                                    onValueChange = { }
+                                    onlyNumbers = true,
+                                    isPercentOff = true,
+                                    onValueChange = {
+                                        onActionDone(
+                                            UpdatePromotionAction.PERCENT,
+                                            it
+                                        )
+                                    }
                                 )
                             }
                         }
@@ -162,62 +216,178 @@ private fun NewPromotionDialog(onDismiss: () -> Unit) {
                         promotionCategory.forEach { category ->
                             RadioButtonRowWithText(
                                 name = category.title,
-                                selected = promoCategorySelected,
-                                onClick = { promoCategorySelected = category.title }
+                                selected = promotionData.promoteBy.title,
+                                onClick = {
+                                    onActionDone(
+                                        UpdatePromotionAction.PROMOTION_CATEGORY,
+                                        category.title
+                                    )
+                                }
                             )
                         }
                     }
-                    AnimatedContent(promoCategorySelected) {
-                        when (promoCategorySelected) {
+                    AnimatedContent(promotionData.promoteBy.title) {
+                        when (promotionData.promoteBy.title) {
                             CATEGORY.title -> {
-                                GenericSelectableTextField(
-                                    value = "",
-                                    labelText = "Categoría",
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = { }
+                                GenericButton(
+                                    text = "Seleccionar categorías",
+                                    icon = Icons.Outlined.KeyboardDoubleArrowRight,
+                                    color = GreenText,
+                                    onClick = { showCategoryDialog = true }
                                 )
+                                AnimatedContent(promotionData.categoryListSelected) {
+                                    if (promotionData.categoryListSelected != null) {
+                                        Text("Categorías seleccionadas:")
+                                    }
+                                }
                             }
 
                             BRAND.title -> {
                                 GenericTextField(
-                                    value = "",
+                                    value = promotionData.brandSelected.orEmpty(),
                                     labelText = "Marca",
-                                    onValueChange = { }
+                                    onValueChange = {
+                                        onActionDone(
+                                            UpdatePromotionAction.BRAND,
+                                            it
+                                        )
+                                    }
                                 )
                             }
 
                             SPECIFIC.title -> {
-                                GenericSelectableTextField(
-                                    value = "",
-                                    labelText = "Seleccionar productos",
-                                    modifier = Modifier.fillMaxWidth(),
+                                GenericButton(
+                                    text = "Seleccionar productos",
+                                    icon = Icons.Outlined.KeyboardDoubleArrowRight,
+                                    color = GreenText,
                                     onClick = { }
                                 )
+                                AnimatedContent(promotionData.categoryListSelected) {
+                                    if (promotionData.categoryListSelected != null) {
+                                        Text("Productos seleccionados:")
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 CheckBoxItem(
                     name = "Colocar fecha de inicio y fin",
-                    checked = dateHourActive,
-                    onClick = { dateHourActive = !dateHourActive }
+                    checked = promotionData.hasDate,
+                    onClick = { onActionDone(UpdatePromotionAction.TOGGLE_DATE, "") }
                 )
-                AnimatedContent(dateHourActive) {
-                    if(dateHourActive) {
+                AnimatedContent(promotionData.hasDate) {
+                    if (promotionData.hasDate) {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             GenericButton(
                                 text = "Seleccionar fecha y hora",
                                 onClick = { }
                             )
-                            Text("No se ha seleccionado fecha y hora", style = MaterialTheme.typography.bodyMedium, color = AccentColor, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
+                            Text(
+                                "No se ha seleccionado fecha y hora",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = AccentColor,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
                         }
 
                     }
+                }
+
+                if (showCategoryDialog) {
+                    CategoriesDialog(
+                        categories, onDismiss = { showCategoryDialog = false },
+                        onAddCategories = { }
+                    )
                 }
                 Spacer(Modifier.size(16.dp))
                 AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
             }
         }
 
+    }
+}
+
+@Composable
+private fun CategoriesDialog(categories: List<ProductCategory>, onDismiss: () -> Unit, onAddCategories:(List<ProductCategory>) -> Unit) {
+
+    val categoriesListSelected = remember { mutableStateListOf<ProductCategory>() }
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = SecondaryCardBackground),
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Box(Modifier.fillMaxWidth()) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        IconButton(
+                            onClick = { onDismiss() },
+                            modifier = Modifier.hoverable(interactionSource).pointerHoverIcon(
+                                PointerIcon.Hand
+                            )
+                        ) {
+                            Icon(
+                                Icons.Outlined.Close,
+                                contentDescription = "Close dialog",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Listado de categorías",
+                            modifier = Modifier.padding(top = 12.dp),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.heightIn(max = 350.dp)
+                ) {
+                    if (categories.isNotEmpty()) {
+                        items(categories) { category ->
+                            CheckBoxItem(
+                                name = category.name,
+                                checked = categoriesListSelected.any { category.id == it.id },
+                                onClick = {
+                                    if (categoriesListSelected.any { category.id == it.id }) categoriesListSelected.remove(
+                                        category
+                                    )
+                                    else categoriesListSelected.add(category)
+                                    println(categoriesListSelected)
+                                },
+
+                            )
+                        }
+                    } else {
+                        item {
+                            Text(
+                                "No hay categorías disponibles",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+                AcceptDeclineButtons(
+                    acceptText = "Aceptar",
+                    declineText = "Cancelar",
+                    acceptColor = GreenText,
+                    onDismiss = { onDismiss() },
+                    onAccept = { onAddCategories}
+                )
+            }
+        }
     }
 }
