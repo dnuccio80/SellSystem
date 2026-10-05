@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory
 import org.example.project.domain.models.promotions.PromotionType
 import org.example.project.domain.usecases.products.GetCategories
@@ -17,7 +18,7 @@ enum class UpdatePromotionAction {
     PROMOTION_TYPE, BUY_X, PAY_Y, PERCENT, PROMOTION_CATEGORY, BRAND, CATEGORY, SPECIFIC_PRODUCTS, TOGGLE_DATE, DATE
 }
 
-class PromotionsViewModel(private val getCategories: GetCategories) : ViewModel() {
+class PromotionsViewModel(getCategories: GetCategories) : ViewModel() {
 
     private val _promotionData = MutableStateFlow(
         PromotionPresentation(
@@ -70,6 +71,10 @@ class PromotionsViewModel(private val getCategories: GetCategories) : ViewModel(
 
             DATE -> {}
         }
+    }
+
+    fun updatePromotionListSelected(list:List<ProductCategory>) {
+        _promotionData.update { it.copy(categoryListSelected = list) }
     }
 
     fun cleanPromotionData() {

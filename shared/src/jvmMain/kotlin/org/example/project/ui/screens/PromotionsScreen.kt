@@ -1,18 +1,24 @@
 package org.example.project.ui.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Grid
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.IconButton
@@ -40,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory.*
@@ -50,7 +57,6 @@ import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
-import org.example.project.ui.RowWithMidBodyAndDescription
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.models.PromotionPresentation
 import org.example.project.ui.screens.promotions.PromotionsViewModel
@@ -91,6 +97,9 @@ class PromotionsScreen : Screen {
                     onDismiss = { showNewPromotionDialog = false },
                     onActionDone = { action, value ->
                         viewModel.updatePromotionData(action, value)
+                    },
+                    onAddCategories = { list ->
+                        viewModel.updatePromotionListSelected(list)
                     }
                 )
             }
@@ -103,6 +112,7 @@ private fun NewPromotionDialog(
     promotionData: PromotionPresentation,
     categories: List<ProductCategory>,
     onActionDone: (UpdatePromotionAction, String) -> Unit,
+    onAddCategories: (List<ProductCategory>) -> Unit,
     onDismiss: () -> Unit,
 ) {
 
@@ -229,15 +239,45 @@ private fun NewPromotionDialog(
                     AnimatedContent(promotionData.promoteBy.title) {
                         when (promotionData.promoteBy.title) {
                             CATEGORY.title -> {
-                                GenericButton(
-                                    text = "Seleccionar categorías",
-                                    icon = Icons.Outlined.KeyboardDoubleArrowRight,
-                                    color = GreenText,
-                                    onClick = { showCategoryDialog = true }
-                                )
-                                AnimatedContent(promotionData.categoryListSelected) {
-                                    if (promotionData.categoryListSelected != null) {
-                                        Text("Categorías seleccionadas:")
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    GenericButton(
+                                        text = "Seleccionar categorías",
+                                        icon = Icons.Outlined.KeyboardDoubleArrowRight,
+                                        color = GreenText,
+                                        onClick = { showCategoryDialog = true }
+                                    )
+                                    AnimatedContent(promotionData.categoryListSelected) {
+                                        if (promotionData.categoryListSelected != null) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                Text(
+                                                    "Categorías seleccionadas:",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color.White
+                                                )
+                                                LazyVerticalGrid(
+                                                    columns = GridCells.Adaptive(100.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    items(promotionData.categoryListSelected) {
+                                                        Box(
+                                                            contentAlignment = Alignment.Center,
+                                                            modifier = Modifier.background(GreenText)
+                                                        ) {
+                                                            Text(
+                                                                it.name,
+                                                                modifier = Modifier.padding(4.dp),
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                color = Color.White,
+                                                                fontWeight = FontWeight.SemiBold,
+                                                                maxLines = 1
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -297,22 +337,29 @@ private fun NewPromotionDialog(
 
                 if (showCategoryDialog) {
                     CategoriesDialog(
-                        categories, onDismiss = { showCategoryDialog = false },
-                        onAddCategories = { }
+                        categories,
+                        onDismiss = { showCategoryDialog = false },
+                        onAddCategories = {
+                            onAddCategories(it)
+                            showCategoryDialog = false
+                        },
                     )
                 }
                 Spacer(Modifier.size(16.dp))
                 AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
             }
         }
-
     }
 }
 
 @Composable
-private fun CategoriesDialog(categories: List<ProductCategory>, onDismiss: () -> Unit, onAddCategories:(List<ProductCategory>) -> Unit) {
+private fun CategoriesDialog(
+    categories: List<ProductCategory>,
+    onDismiss: () -> Unit,
+    onAddCategories: (List<ProductCategory>) -> Unit,
+) {
 
-    val categoriesListSelected = remember { mutableStateListOf<ProductCategory>() }
+    val categoriesSelected = remember { mutableStateListOf<ProductCategory>() }
     val interactionSource = remember { MutableInteractionSource() }
 
     Dialog(onDismissRequest = { onDismiss() }) {
@@ -358,16 +405,15 @@ private fun CategoriesDialog(categories: List<ProductCategory>, onDismiss: () ->
                         items(categories) { category ->
                             CheckBoxItem(
                                 name = category.name,
-                                checked = categoriesListSelected.any { category.id == it.id },
+                                checked = categoriesSelected.any { category.id == it.id },
                                 onClick = {
-                                    if (categoriesListSelected.any { category.id == it.id }) categoriesListSelected.remove(
+                                    if (categoriesSelected.any { category.id == it.id }) categoriesSelected.remove(
                                         category
                                     )
-                                    else categoriesListSelected.add(category)
-                                    println(categoriesListSelected)
+                                    else categoriesSelected.add(category)
                                 },
 
-                            )
+                                )
                         }
                     } else {
                         item {
@@ -385,7 +431,7 @@ private fun CategoriesDialog(categories: List<ProductCategory>, onDismiss: () ->
                     declineText = "Cancelar",
                     acceptColor = GreenText,
                     onDismiss = { onDismiss() },
-                    onAccept = { onAddCategories}
+                    onAccept = { onAddCategories(categoriesSelected) }
                 )
             }
         }
