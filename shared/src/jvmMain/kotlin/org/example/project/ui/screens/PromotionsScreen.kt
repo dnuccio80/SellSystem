@@ -7,8 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Grid
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -43,11 +40,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
+import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory.*
 import org.example.project.domain.models.promotions.PromotionType.*
@@ -75,6 +73,7 @@ class PromotionsScreen : Screen {
         val viewModel = koinViewModel<PromotionsViewModel>()
         val promotionData by viewModel.promotionData.collectAsStateWithLifecycle()
         val categories by viewModel.categories.collectAsStateWithLifecycle()
+        val products by viewModel.products.collectAsStateWithLifecycle()
 
         ScreenContainer {
             Column(
@@ -92,14 +91,18 @@ class PromotionsScreen : Screen {
 
             if (showNewPromotionDialog) {
                 NewPromotionDialog(
-                    promotionData,
-                    categories,
+                    promotionData = promotionData,
+                    categories = categories,
+                    products = products,
                     onDismiss = { showNewPromotionDialog = false },
                     onActionDone = { action, value ->
                         viewModel.updatePromotionData(action, value)
                     },
                     onAddCategories = { list ->
                         viewModel.updatePromotionListSelected(list)
+                    },
+                    onAddProducts = { list ->
+                        viewModel.updateProductsListSelected(list)
                     }
                 )
             }
@@ -111,8 +114,10 @@ class PromotionsScreen : Screen {
 private fun NewPromotionDialog(
     promotionData: PromotionPresentation,
     categories: List<ProductCategory>,
+    products: List<Product>,
     onActionDone: (UpdatePromotionAction, String) -> Unit,
     onAddCategories: (List<ProductCategory>) -> Unit,
+    onAddProducts: (List<Product>) -> Unit,
     onDismiss: () -> Unit,
 ) {
 
@@ -128,6 +133,7 @@ private fun NewPromotionDialog(
     )
 
     var showCategoryDialog by rememberSaveable { mutableStateOf(false) }
+    var showProductDialog by rememberSaveable { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -296,15 +302,46 @@ private fun NewPromotionDialog(
                             }
 
                             SPECIFIC.title -> {
-                                GenericButton(
-                                    text = "Seleccionar productos",
-                                    icon = Icons.Outlined.KeyboardDoubleArrowRight,
-                                    color = GreenText,
-                                    onClick = { }
-                                )
-                                AnimatedContent(promotionData.categoryListSelected) {
-                                    if (promotionData.categoryListSelected != null) {
-                                        Text("Productos seleccionados:")
+                                Column {
+                                    GenericButton(
+                                        text = "Seleccionar productos",
+                                        icon = Icons.Outlined.KeyboardDoubleArrowRight,
+                                        color = GreenText,
+                                        onClick = { showProductDialog = true }
+                                    )
+                                    AnimatedContent(promotionData.categoryListSelected) {
+                                        if (promotionData.specificProducts != null) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                Text(
+                                                    "Productos seleccionados:",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color.White
+                                                )
+                                                LazyVerticalGrid(
+                                                    columns = GridCells.Adaptive(100.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    items(promotionData.specificProducts) {
+                                                        Box(
+                                                            contentAlignment = Alignment.Center,
+                                                            modifier = Modifier.background(GreenText)
+                                                        ) {
+                                                            Text(
+                                                                "${it.name} '${it.brand}' ${it.description}",
+                                                                modifier = Modifier.padding(4.dp),
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                color = Color.White,
+                                                                fontWeight = FontWeight.SemiBold,
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -345,8 +382,105 @@ private fun NewPromotionDialog(
                         },
                     )
                 }
+                if (showProductDialog) {
+                    ProductsDialog(
+                        products = products,
+                        onDismiss = { showProductDialog = false },
+                        onAddProducts = {
+                            onAddProducts(it)
+                            showProductDialog = false
+                        }
+                    )
+                }
+
                 Spacer(Modifier.size(16.dp))
                 AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProductsDialog(
+    products: List<Product>,
+    onDismiss: () -> Unit,
+    onAddProducts: (List<Product>) -> Unit,
+) {
+
+    val productsSelected = remember { mutableStateListOf<Product>() }
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = SecondaryCardBackground),
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Box(Modifier.fillMaxWidth()) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        IconButton(
+                            onClick = { onDismiss() },
+                            modifier = Modifier.hoverable(interactionSource).pointerHoverIcon(
+                                PointerIcon.Hand
+                            )
+                        ) {
+                            Icon(
+                                Icons.Outlined.Close,
+                                contentDescription = "Close dialog",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Listado de productos",
+                            modifier = Modifier.padding(top = 12.dp),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.heightIn(max = 350.dp)
+                ) {
+                    if (products.isNotEmpty()) {
+                        items(products) { product ->
+                            CheckBoxItem(
+                                name = "${product.name} '${product.brand}' ${product.description}",
+                                checked = productsSelected.any { product.id == it.id },
+                                onClick = {
+                                    if (productsSelected.any { product.id == it.id }) productsSelected.remove(
+                                        product
+                                    )
+                                    else productsSelected.add(product)
+                                },
+
+                                )
+                        }
+                    } else {
+                        item {
+                            Text(
+                                "No hay productos",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+                AcceptDeclineButtons(
+                    acceptText = "Aceptar",
+                    declineText = "Cancelar",
+                    acceptColor = GreenText,
+                    onDismiss = { onDismiss() },
+                    onAccept = { onAddProducts(productsSelected) }
+                )
             }
         }
     }

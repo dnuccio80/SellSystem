@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory
 import org.example.project.domain.models.promotions.PromotionType
 import org.example.project.domain.usecases.products.GetCategories
+import org.example.project.domain.usecases.products.GetProducts
 import org.example.project.ui.models.PromotionPresentation
 import org.example.project.ui.screens.promotions.UpdatePromotionAction.*
 
@@ -18,7 +20,11 @@ enum class UpdatePromotionAction {
     PROMOTION_TYPE, BUY_X, PAY_Y, PERCENT, PROMOTION_CATEGORY, BRAND, CATEGORY, SPECIFIC_PRODUCTS, TOGGLE_DATE, DATE
 }
 
-class PromotionsViewModel(getCategories: GetCategories) : ViewModel() {
+class PromotionsViewModel(
+    getCategories: GetCategories,
+    getAllProducts: GetProducts
+
+) : ViewModel() {
 
     private val _promotionData = MutableStateFlow(
         PromotionPresentation(
@@ -30,6 +36,8 @@ class PromotionsViewModel(getCategories: GetCategories) : ViewModel() {
 
     private val _categories = getCategories("").stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val categories = _categories
+    private val _products = getAllProducts("").stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val products = _products
 
     fun updatePromotionData(action: UpdatePromotionAction, value: String) {
         when (action) {
@@ -75,6 +83,10 @@ class PromotionsViewModel(getCategories: GetCategories) : ViewModel() {
 
     fun updatePromotionListSelected(list:List<ProductCategory>) {
         _promotionData.update { it.copy(categoryListSelected = list) }
+    }
+
+    fun updateProductsListSelected(list:List<Product>) {
+        _promotionData.update { it.copy(specificProducts = list) }
     }
 
     fun cleanPromotionData() {
