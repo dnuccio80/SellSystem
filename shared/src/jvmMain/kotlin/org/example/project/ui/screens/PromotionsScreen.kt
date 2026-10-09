@@ -40,6 +40,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -75,6 +76,7 @@ import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.ext.formatToDisplay
 import org.example.project.ui.models.PromotionPresentation
+import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.screens.promotions.PromotionsViewModel
 import org.example.project.ui.screens.promotions.UpdatePromotionAction
 import org.example.project.ui.utils.AccentColor
@@ -97,6 +99,15 @@ class PromotionsScreen : Screen {
         val promotionData by viewModel.promotionData.collectAsStateWithLifecycle()
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val products by viewModel.products.collectAsStateWithLifecycle()
+        var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
+        var adviceMsg by rememberSaveable { mutableStateOf("") }
+
+        LaunchedEffect(viewModel.events) {
+            viewModel.events.collect { msg ->
+                adviceMsg = msg
+                showAdviceDialog = true
+            }
+        }
 
         ScreenContainer {
             Column(
@@ -117,6 +128,7 @@ class PromotionsScreen : Screen {
                     promotionData = promotionData,
                     categories = categories,
                     products = products,
+                    onAccept = { viewModel.addPromo() },
                     onDismiss = {
                         showNewPromotionDialog = false
                         viewModel.cleanPromotionData()
@@ -133,9 +145,14 @@ class PromotionsScreen : Screen {
                     onAddDatePromoInit = { viewModel.updatePromoDateInit(it) },
                     onAddDatePromoEnd = { viewModel.updatePromoDateEnd(it) },
                     onToggleDateInit = { viewModel.toggleHasPromoDateInit() },
-                    onToggleDateEnd = { viewModel.toggleHasPromoDateEnd() }
+                    onToggleDateEnd = { viewModel.toggleHasPromoDateEnd() },
                 )
             }
+            SimpleAdviceDialog(
+                msg = adviceMsg,
+                show = showAdviceDialog,
+                onDismiss = { showAdviceDialog = false }
+            )
         }
     }
 }
@@ -152,6 +169,7 @@ private fun NewPromotionDialog(
     onAddDatePromoEnd: (LocalDateTime) -> Unit,
     onToggleDateInit: () -> Unit,
     onToggleDateEnd: () -> Unit,
+    onAccept:() -> Unit,
     onDismiss: () -> Unit,
 ) {
 
@@ -463,7 +481,7 @@ private fun NewPromotionDialog(
                     )
                 }
                 Spacer(Modifier.size(16.dp))
-                AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
+                AcceptDeclineButtons(onAccept = { onAccept() }, onDismiss = { onDismiss() })
             }
         }
     }
@@ -492,7 +510,7 @@ fun DateTimePicker(
 
                             selectedDate = Instant
                                 .fromEpochMilliseconds(millis)
-                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .toLocalDateTime(TimeZone.UTC)
                                 .date
 
                             showDatePicker = false
