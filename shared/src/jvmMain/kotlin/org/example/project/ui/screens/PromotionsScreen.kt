@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -18,15 +19,26 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.IconButton
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.KeyboardDoubleArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -45,6 +57,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory.*
@@ -56,14 +73,20 @@ import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
 import org.example.project.ui.ScreenContainer
+import org.example.project.ui.ext.formatToDisplay
 import org.example.project.ui.models.PromotionPresentation
 import org.example.project.ui.screens.promotions.PromotionsViewModel
 import org.example.project.ui.screens.promotions.UpdatePromotionAction
 import org.example.project.ui.utils.AccentColor
+import org.example.project.ui.utils.GrayText
 import org.example.project.ui.utils.GreenText
+import org.example.project.ui.utils.LightBlue
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
+import org.example.project.ui.utils.WhiteText
+import org.example.project.ui.utils.Yellowe
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Instant
 
 
 class PromotionsScreen : Screen {
@@ -94,7 +117,10 @@ class PromotionsScreen : Screen {
                     promotionData = promotionData,
                     categories = categories,
                     products = products,
-                    onDismiss = { showNewPromotionDialog = false },
+                    onDismiss = {
+                        showNewPromotionDialog = false
+                        viewModel.cleanPromotionData()
+                    },
                     onActionDone = { action, value ->
                         viewModel.updatePromotionData(action, value)
                     },
@@ -103,7 +129,11 @@ class PromotionsScreen : Screen {
                     },
                     onAddProducts = { list ->
                         viewModel.updateProductsListSelected(list)
-                    }
+                    },
+                    onAddDatePromoInit = { viewModel.updatePromoDateInit(it) },
+                    onAddDatePromoEnd = { viewModel.updatePromoDateEnd(it) },
+                    onToggleDateInit = { viewModel.toggleHasPromoDateInit() },
+                    onToggleDateEnd = { viewModel.toggleHasPromoDateEnd() }
                 )
             }
         }
@@ -118,6 +148,10 @@ private fun NewPromotionDialog(
     onActionDone: (UpdatePromotionAction, String) -> Unit,
     onAddCategories: (List<ProductCategory>) -> Unit,
     onAddProducts: (List<Product>) -> Unit,
+    onAddDatePromoInit: (LocalDateTime) -> Unit,
+    onAddDatePromoEnd: (LocalDateTime) -> Unit,
+    onToggleDateInit: () -> Unit,
+    onToggleDateEnd: () -> Unit,
     onDismiss: () -> Unit,
 ) {
 
@@ -134,6 +168,8 @@ private fun NewPromotionDialog(
 
     var showCategoryDialog by rememberSaveable { mutableStateOf(false) }
     var showProductDialog by rememberSaveable { mutableStateOf(false) }
+    var showDateTimePickerBegins by rememberSaveable { mutableStateOf(false) }
+    var showDateTimePickerEnds by rememberSaveable { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -355,20 +391,42 @@ private fun NewPromotionDialog(
                 )
                 AnimatedContent(promotionData.hasDate) {
                     if (promotionData.hasDate) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            GenericButton(
-                                text = "Seleccionar fecha y hora",
-                                onClick = { }
-                            )
-                            Text(
-                                "No se ha seleccionado fecha y hora",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = AccentColor,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                GenericButton(
+                                    text = if (promotionData.dateInit != null) promotionData.dateInit.formatToDisplay() else "Seleccionar inicio",
+                                    modifier = Modifier.weight(1f),
+                                    enabled = promotionData.hasDateInit,
+                                    onClick = { showDateTimePickerBegins = true }
+                                )
+                                CheckBoxItem(
+                                    name = "Sin fecha de inicio",
+                                    checked = !promotionData.hasDateInit,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onToggleDateInit() }
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                GenericButton(
+                                    text = if (promotionData.dateEnd != null) promotionData.dateEnd.formatToDisplay() else "Seleccionar Finalización",
+                                    enabled = promotionData.hasDateEnd,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { showDateTimePickerEnds = true }
+                                )
+                                CheckBoxItem(
+                                    name = "Sin fecha de finalización",
+                                    checked = !promotionData.hasDateEnd,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onToggleDateEnd() }
+                                )
+                            }
                         }
-
                     }
                 }
 
@@ -392,11 +450,174 @@ private fun NewPromotionDialog(
                         }
                     )
                 }
-
+                if (showDateTimePickerBegins) {
+                    DateTimePicker(
+                        onDateTimeSelected = { onAddDatePromoInit(it) },
+                        onDismiss = { showDateTimePickerBegins = false }
+                    )
+                }
+                if (showDateTimePickerEnds) {
+                    DateTimePicker(
+                        onDateTimeSelected = { onAddDatePromoEnd(it) },
+                        onDismiss = { showDateTimePickerEnds = false }
+                    )
+                }
                 Spacer(Modifier.size(16.dp))
                 AcceptDeclineButtons(onAccept = { }, onDismiss = { onDismiss() })
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateTimePicker(
+    onDateTimeSelected: (LocalDateTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var showDatePicker by remember { mutableStateOf(true) }
+    var showTimePicker by remember { mutableStateOf(false) }
+
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+
+        DatePickerDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+
+                            selectedDate = Instant
+                                .fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .date
+
+                            showDatePicker = false
+                            showTimePicker = true
+                        }
+                    },
+                ) {
+                    Text("Aceptar", color = GreenText)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancelar", color = GrayText)
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = PrimaryCardBackground
+            )
+        ) {
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    containerColor = PrimaryCardBackground,
+                    titleContentColor = WhiteText,
+                    headlineContentColor = WhiteText,
+                    weekdayContentColor = WhiteText,
+                    subheadContentColor = WhiteText,
+                    navigationContentColor = WhiteText,
+                    yearContentColor = WhiteText,
+                    currentYearContentColor = GreenText,
+                    selectedYearContentColor = Color.White,
+                    selectedYearContainerColor = GreenText,
+                    dayContentColor = WhiteText,
+                    selectedDayContentColor = Color.White,
+                    disabledDayContentColor = GrayText,
+                    disabledYearContentColor = GrayText,
+                    selectedDayContainerColor = GreenText,
+                    todayContentColor = WhiteText,
+                    todayDateBorderColor = GrayText,
+                    dividerColor = GrayText,
+                    dateTextFieldColors = TextFieldDefaults.colors(
+                        unfocusedTextColor = Color.White,
+                        focusedTextColor = Color.White,
+                        focusedPlaceholderColor = WhiteText,
+                        unfocusedPlaceholderColor = WhiteText,
+                        focusedTrailingIconColor = WhiteText,
+                        unfocusedTrailingIconColor = WhiteText,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = GreenText,
+                        unfocusedIndicatorColor = GrayText,
+                        cursorColor = GreenText,
+                        focusedLabelColor = GreenText,
+                        unfocusedLabelColor = GrayText,
+                        errorTextColor = WhiteText,
+                        errorLabelColor = GreenText,
+                        errorCursorColor = AccentColor,
+                        errorSupportingTextColor = AccentColor,
+                        errorContainerColor = PrimaryCardBackground,
+                    ),
+                )
+            )
+        }
+    }
+
+    if (showTimePicker) {
+
+        val timePickerState = rememberTimePickerState(
+            initialHour = 12,
+            initialMinute = 0,
+            is24Hour = true
+        )
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            backgroundColor = PrimaryCardBackground,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        selectedDate?.let { date ->
+
+                            val dateTime = LocalDateTime(
+                                date = date,
+                                time = LocalTime(
+                                    hour = timePickerState.hour,
+                                    minute = timePickerState.minute
+                                )
+                            )
+
+                            onDateTimeSelected(dateTime)
+                        }
+
+                        onDismiss()
+                    },
+                ) {
+                    Text("Aceptar", color = GreenText, fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancelar", color = GrayText, fontWeight = FontWeight.SemiBold)
+                }
+            },
+            text = {
+                TimePicker(
+                    state = timePickerState,
+                    colors = TimePickerDefaults.colors(
+                        clockDialColor = GreenText.copy(.6f),
+                        clockDialSelectedContentColor = Color.White,
+                        clockDialUnselectedContentColor = Color.Black,
+                        selectorColor = GreenText,
+                        containerColor = AccentColor,
+                        periodSelectorBorderColor = Yellowe,
+                        periodSelectorSelectedContainerColor = GrayText,
+                        periodSelectorUnselectedContainerColor = Color.Magenta,
+                        periodSelectorSelectedContentColor = LightBlue,
+                        periodSelectorUnselectedContentColor = Color.Blue,
+                        timeSelectorSelectedContainerColor = GreenText.copy(.6f),
+                        timeSelectorUnselectedContainerColor = GrayText,
+                        timeSelectorSelectedContentColor = Color.White,
+                        timeSelectorUnselectedContentColor = Color.Black,
+                    )
+                )
+            }
+        )
     }
 }
 

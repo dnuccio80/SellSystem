@@ -332,13 +332,13 @@ fun GenericHeaderWithButtonAndSearch(
 }
 
 @Composable
-fun CheckBoxItem(name: String, checked: Boolean, onClick: () -> Unit) {
+fun CheckBoxItem(name: String, checked: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
 
     val interactionSource = remember { MutableInteractionSource() }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable {
+        modifier = modifier.clickable {
             onClick()
         }.hoverable(interactionSource).pointerHoverIcon(
             PointerIcon.Hand
@@ -413,6 +413,8 @@ fun GenericButton(
     text: String,
     icon: ImageVector? = null,
     color: Color = SecondaryCardBackground,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -420,8 +422,9 @@ fun GenericButton(
     Button(
         onClick = { onClick() },
         shape = RoundedCornerShape(4.dp),
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(containerColor = color),
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+        modifier = modifier.pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interactionSource)
     ) {
         if (icon != null) {

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.LocalDateTime
 import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory
@@ -87,6 +88,26 @@ class PromotionsViewModel(
 
     fun updateProductsListSelected(list:List<Product>) {
         _promotionData.update { it.copy(specificProducts = list) }
+    }
+
+    fun updatePromoDateInit(newValue: LocalDateTime) {
+        _promotionData.update { it.copy(dateInit = newValue) }
+    }
+
+    fun toggleHasPromoDateInit() {
+        _promotionData.update { it.copy(hasDateInit = !it.hasDateInit) }
+    }
+
+    fun toggleHasPromoDateEnd() {
+        _promotionData.update { it.copy(hasDateEnd = !it.hasDateEnd) }
+    }
+
+    fun updatePromoDateEnd(newValue: LocalDateTime) {
+        _promotionData.update { it.copy(dateEnd = newValue) }
+    }
+
+    fun addPromotion() {
+
     }
 
     fun cleanPromotionData() {
