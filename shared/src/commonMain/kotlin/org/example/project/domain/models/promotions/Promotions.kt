@@ -1,7 +1,10 @@
 package org.example.project.domain.models.promotions
 
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import org.example.project.data.db.entities.PromotionEntity
+import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductCategory
+import org.example.project.ui.models.PromotionPresentation
 
 
 enum class PromotionType(val title: String) {
@@ -16,14 +19,47 @@ data class Promotion(
     val id:Int = 0,
     val promotionType: PromotionType,
     val promotionBy: PromotionCategory,
-    val date: LocalDate? = null
+    val buyX:Int? = null,
+    val payY:Int? = null,
+    val percent:Int? = null,
+    val productListIds:List<Int>? = null,
+    val categoryListIds:List<Int>? = null,
+    val brandList:List<String>? = null,
+    val promoStart: LocalDateTime? = null,
+    val promoEnd: LocalDateTime? = null
 ) {
     fun toEntity(): PromotionEntity {
         return PromotionEntity(
             id = id,
             promotionType = promotionType.title,
             promotionBy = promotionBy.title,
-            date = date
+            buyX = buyX,
+            payY = payY,
+            percent = percent,
+            productListIds = productListIds,
+            categoryListIds = categoryListIds,
+            brandList = brandList,
+            promoStart = promoStart,
+            promoEnd = promoEnd
+        )
+    }
+
+    fun toPresentation(): PromotionPresentation {
+        return PromotionPresentation(
+            id = id,
+            buyX = buyX,
+            payY = payY,
+            percent = percent,
+            promoteBy = promotionBy,
+            promotionType = promotionType,
+            brandSelected = brandList.toString(),
+            categoryListSelected = emptyList(),
+            specificProducts = emptyList(),
+            hasDate = promoStart != null || promoEnd != null,
+            hasDateInit = promoStart != null,
+            hasDateEnd = promoEnd != null,
+            promoStart = promoStart,
+            promoEnd = promoEnd
         )
     }
 }

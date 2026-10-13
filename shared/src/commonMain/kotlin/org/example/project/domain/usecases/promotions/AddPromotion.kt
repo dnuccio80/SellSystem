@@ -15,7 +15,7 @@ class AddPromotion(private val repository: PromotionRepository) {
                 if(promotion.buyX == 0 || promotion.buyX == null) throw PromotionsError.NoBuyAmount
                 else if(promotion.payY == 0 || promotion.payY == null) throw PromotionsError.NoPayAmount
 
-                if(promotion.payY > promotion.buyX) throw PromotionsError.PayMoreThanBuy
+                if(promotion.payY >= promotion.buyX) throw PromotionsError.PayMoreThanBuy
             }
             PromotionType.PERCENT -> {
                 if(promotion.percent == null || promotion.percent <= 0) throw PromotionsError.NoPercentAmount
@@ -29,14 +29,15 @@ class AddPromotion(private val repository: PromotionRepository) {
         }
 
         if(promotion.hasDate) {
-            if(promotion.hasDateInit && promotion.dateInit == null) throw PromotionsError.NoPromoDataInit
-            if(promotion.hasDateEnd && promotion.dateEnd == null) throw PromotionsError.NoPromoDataEnd
+            if(promotion.hasDateInit && promotion.promoStart == null) throw PromotionsError.NoPromoDataInit
+            if(promotion.hasDateEnd && promotion.promoEnd == null) throw PromotionsError.NoPromoDataEnd
             if(promotion.hasDateInit && promotion.hasDateEnd) {
-                if(promotion.dateInit!! > promotion.dateEnd!!) { throw PromotionsError.IncompatiblePromoDateInitEnd }
+                if(promotion.promoStart!! > promotion.promoEnd!!) { throw PromotionsError.IncompatiblePromoDateInitEnd }
             }
             if(!promotion.hasDateInit && !promotion.hasDateEnd) throw PromotionsError.NoPromoDataInitAndEndWithHasDateSelected
         }
 
+        repository.addPromotion(promotion.toDomain())
 
     }
 

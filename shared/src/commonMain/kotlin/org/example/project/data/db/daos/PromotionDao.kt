@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.example.project.data.db.entities.PromotionEntity
 
@@ -21,4 +22,5 @@ interface PromotionDao {
 
     @Query("DELETE FROM PromotionEntity WHERE id = :id")
     suspend fun deletePromotionById(id:Int)
+
 }

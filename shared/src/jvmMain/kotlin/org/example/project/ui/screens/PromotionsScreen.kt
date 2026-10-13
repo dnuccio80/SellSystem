@@ -1,23 +1,29 @@
 package org.example.project.ui.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.IconButton
@@ -52,7 +58,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import sellsystem.shared.generated.resources.Res
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -73,9 +81,13 @@ import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericHeaderWithButtonAndSearch
 import org.example.project.ui.GenericTextField
 import org.example.project.ui.RadioButtonRowWithText
+import org.example.project.ui.RowWithMidTitleAndDescription
 import org.example.project.ui.ScreenContainer
 import org.example.project.ui.ext.formatToDisplay
+import org.example.project.ui.ext.toPercentOff
+import org.example.project.ui.models.PromotionActive
 import org.example.project.ui.models.PromotionPresentation
+import org.example.project.ui.screens.clients.ConfirmDialog
 import org.example.project.ui.screens.clients.SimpleAdviceDialog
 import org.example.project.ui.screens.promotions.PromotionsViewModel
 import org.example.project.ui.screens.promotions.UpdatePromotionAction
@@ -87,7 +99,10 @@ import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
 import org.example.project.ui.utils.Yellowe
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import sellsystem.shared.generated.resources.buyX_payY_promo
+import sellsystem.shared.generated.resources.percent_promo
 import kotlin.time.Instant
 
 
@@ -98,9 +113,13 @@ class PromotionsScreen : Screen {
         val viewModel = koinViewModel<PromotionsViewModel>()
         val promotionData by viewModel.promotionData.collectAsStateWithLifecycle()
         val categories by viewModel.categories.collectAsStateWithLifecycle()
+        val promotions by viewModel.promotionList.collectAsStateWithLifecycle()
         val products by viewModel.products.collectAsStateWithLifecycle()
         var showAdviceDialog by rememberSaveable { mutableStateOf(false) }
         var adviceMsg by rememberSaveable { mutableStateOf("") }
+        var isEdit by rememberSaveable { mutableStateOf(false) }
+        var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
+        var confirmMsg by rememberSaveable { mutableStateOf("") }
 
         LaunchedEffect(viewModel.events) {
             viewModel.events.collect { msg ->
@@ -120,7 +139,25 @@ class PromotionsScreen : Screen {
                     description = "Listado de todas las promociones, vigentes y no vigentes",
                     buttonText = "Nueva promoción",
                     hasSearch = false
-                ) { showNewPromotionDialog = true }
+                ) {
+                    isEdit = false
+                    showNewPromotionDialog = true
+                }
+                if (promotions.isNotEmpty()) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(350.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(promotions) {
+                            PromotionCardItem(it) {
+                                viewModel.updatePromotionDataById(it.promotion.id)
+                                showNewPromotionDialog = true
+                                isEdit = true
+                            }
+                        }
+                    }
+                }
             }
 
             if (showNewPromotionDialog) {
@@ -128,7 +165,8 @@ class PromotionsScreen : Screen {
                     promotionData = promotionData,
                     categories = categories,
                     products = products,
-                    onAccept = { viewModel.addPromo() },
+                    isEdit = isEdit,
+                    onAccept = { viewModel.addPromo { showNewPromotionDialog = false } },
                     onDismiss = {
                         showNewPromotionDialog = false
                         viewModel.cleanPromotionData()
@@ -146,6 +184,10 @@ class PromotionsScreen : Screen {
                     onAddDatePromoEnd = { viewModel.updatePromoDateEnd(it) },
                     onToggleDateInit = { viewModel.toggleHasPromoDateInit() },
                     onToggleDateEnd = { viewModel.toggleHasPromoDateEnd() },
+                    onDelete = {
+                        showConfirmDialog = true
+                        confirmMsg = "Seguro que deseas eliminar la promoción?"
+                    }
                 )
             }
             SimpleAdviceDialog(
@@ -153,6 +195,114 @@ class PromotionsScreen : Screen {
                 show = showAdviceDialog,
                 onDismiss = { showAdviceDialog = false }
             )
+            if (showConfirmDialog) {
+                ConfirmDialog(
+                    msg = confirmMsg,
+                    onAccept = {
+                        showConfirmDialog = false
+                        showNewPromotionDialog = false
+                        viewModel.deletePromotion()
+                    },
+                    onDismiss = {
+                        showConfirmDialog = false
+                    }
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun PromotionCardItem(promoActive: PromotionActive, onClick: () -> Unit) {
+
+    val promoType = when (promoActive.promotion.promotionType) {
+        BUY_X_PAY_Y -> "Compra 'X', paga 'Y'"
+        PERCENT -> "Por porcentaje"
+    }
+
+    val promoBy = when (promoActive.promotion.promoteBy) {
+        BRAND -> "Marca"
+        CATEGORY -> "Categoría"
+        SPECIFIC -> "Productos específicos"
+    }
+
+    val image = when (promoActive.promotion.promotionType) {
+        BUY_X_PAY_Y -> painterResource(Res.drawable.buyX_payY_promo)
+        PERCENT -> painterResource(Res.drawable.percent_promo)
+    }
+
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Card(
+        modifier = Modifier.width(300.dp).hoverable(interactionSource)
+            .pointerHoverIcon(PointerIcon.Hand).clickable {
+                onClick()
+            }, colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                Image(
+                    image,
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null
+                )
+                Card(
+                    shape = CircleShape,
+                    colors = CardDefaults.cardColors(containerColor = if (promoActive.isActive) GreenText else AccentColor),
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        if (promoActive.isActive) "Activa" else "Inactiva",
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+            RowWithMidTitleAndDescription("Tipo de promoción:", promoType)
+            RowWithMidTitleAndDescription("Promoción por:", promoBy)
+            when (promoActive.promotion.promotionType) {
+                BUY_X_PAY_Y -> RowWithMidTitleAndDescription(
+                    "Lleva ${promoActive.promotion.buyX},",
+                    "Paga ${promoActive.promotion.payY}"
+                )
+
+                PERCENT -> RowWithMidTitleAndDescription(
+                    "Porcentaje de descuento:",
+                    promoActive.promotion.percent?.toLong()?.toPercentOff().orEmpty()
+                )
+            }
+            when (promoActive.promotion.promoteBy) {
+                BRAND -> RowWithMidTitleAndDescription(
+                    "Marcas seleccionadas:",
+                    promoActive.promotion.brandSelected.toString()
+                )
+
+                CATEGORY -> RowWithMidTitleAndDescription(
+                    "Categorías seleccionadas:",
+                    promoActive.promotion.categoryListSelected.toString()
+                )
+
+                SPECIFIC -> RowWithMidTitleAndDescription(
+                    "Productos seleccionados:",
+                    promoActive.promotion.specificProducts.toString()
+                )
+            }
+            if (promoActive.promotion.promoStart != null || promoActive.promotion.promoEnd != null) {
+                RowWithMidTitleAndDescription(
+                    "Fecha de inicio:",
+                    promoActive.promotion.promoStart?.formatToDisplay() ?: "No posee"
+                )
+                RowWithMidTitleAndDescription(
+                    "Fecha de finalización:",
+                    promoActive.promotion.promoEnd?.formatToDisplay() ?: "No posee"
+                )
+            }
+
         }
     }
 }
@@ -162,6 +312,7 @@ private fun NewPromotionDialog(
     promotionData: PromotionPresentation,
     categories: List<ProductCategory>,
     products: List<Product>,
+    isEdit: Boolean,
     onActionDone: (UpdatePromotionAction, String) -> Unit,
     onAddCategories: (List<ProductCategory>) -> Unit,
     onAddProducts: (List<Product>) -> Unit,
@@ -169,9 +320,11 @@ private fun NewPromotionDialog(
     onAddDatePromoEnd: (LocalDateTime) -> Unit,
     onToggleDateInit: () -> Unit,
     onToggleDateEnd: () -> Unit,
-    onAccept:() -> Unit,
+    onDelete: () -> Unit,
+    onAccept: () -> Unit,
     onDismiss: () -> Unit,
-) {
+
+    ) {
 
     val promotionType = listOf(
         BUY_X_PAY_Y,
@@ -199,14 +352,25 @@ private fun NewPromotionDialog(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(
-                        "Gestionar nueva promoción",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Gestionar nueva promoción",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                    if (isEdit) {
+                        GenericButton(
+                            text = "Eliminar",
+                            onClick = { onDelete() },
+                            color = AccentColor
+                        )
+                    }
+
                 }
+
                 Column {
                     Text(
                         "Tipo de promoción",
@@ -415,7 +579,7 @@ private fun NewPromotionDialog(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 GenericButton(
-                                    text = if (promotionData.dateInit != null) promotionData.dateInit.formatToDisplay() else "Seleccionar inicio",
+                                    text = if (promotionData.promoStart != null) promotionData.promoStart.formatToDisplay() else "Seleccionar inicio",
                                     modifier = Modifier.weight(1f),
                                     enabled = promotionData.hasDateInit,
                                     onClick = { showDateTimePickerBegins = true }
@@ -432,7 +596,7 @@ private fun NewPromotionDialog(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 GenericButton(
-                                    text = if (promotionData.dateEnd != null) promotionData.dateEnd.formatToDisplay() else "Seleccionar Finalización",
+                                    text = if (promotionData.promoEnd != null) promotionData.promoEnd.formatToDisplay() else "Seleccionar Finalización",
                                     enabled = promotionData.hasDateEnd,
                                     modifier = Modifier.weight(1f),
                                     onClick = { showDateTimePickerEnds = true }
