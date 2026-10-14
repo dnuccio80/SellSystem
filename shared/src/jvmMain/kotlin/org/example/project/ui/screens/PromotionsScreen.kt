@@ -208,7 +208,6 @@ class PromotionsScreen : Screen {
                     }
                 )
             }
-
         }
     }
 }
@@ -279,33 +278,33 @@ private fun PromotionCardItem(promoActive: PromotionActive, onClick: () -> Unit)
             when (promoActive.promotion.promoteBy) {
                 BRAND -> RowWithMidTitleAndDescription(
                     "Marcas seleccionadas:",
-                    promoActive.promotion.brandSelected.toString()
+                    promoActive.promotion.brandSelected.orEmpty()
                 )
 
                 CATEGORY -> RowWithMidTitleAndDescription(
                     "Categorías seleccionadas:",
-                    promoActive.promotion.categoryListSelected.toString()
+                    promoActive.promotion.categoryListSelected?.joinToString(", ") { it.name }.orEmpty()
                 )
 
                 SPECIFIC -> RowWithMidTitleAndDescription(
                     "Productos seleccionados:",
-                    promoActive.promotion.specificProducts.toString()
+                    promoActive.promotion.specificProducts?.joinToString (", " ) { it.name }.orEmpty()
                 )
             }
-            if (promoActive.promotion.promoStart != null || promoActive.promotion.promoEnd != null) {
-                RowWithMidTitleAndDescription(
-                    "Fecha de inicio:",
-                    promoActive.promotion.promoStart?.formatToDisplay() ?: "No posee"
-                )
-                RowWithMidTitleAndDescription(
-                    "Fecha de finalización:",
-                    promoActive.promotion.promoEnd?.formatToDisplay() ?: "No posee"
-                )
-            }
+            RowWithMidTitleAndDescription(
+                "Fecha de inicio:",
+                promoActive.promotion.promoStart?.formatToDisplay() ?: "No posee"
+            )
+            RowWithMidTitleAndDescription(
+                "Fecha de finalización:",
+                promoActive.promotion.promoEnd?.formatToDisplay() ?: "No posee"
+            )
 
         }
     }
 }
+
+
 
 @Composable
 private fun NewPromotionDialog(

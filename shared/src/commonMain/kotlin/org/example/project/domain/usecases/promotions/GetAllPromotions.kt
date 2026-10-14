@@ -5,21 +5,38 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.project.domain.models.promotions.Promotion
+import org.example.project.domain.models.promotions.PromotionCategory
 import org.example.project.domain.repositories.PromotionRepository
 import org.example.project.ui.models.PromotionActive
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-class GetAllPromotions(private val repository: PromotionRepository) {
+class GetAllPromotions(private val repository: PromotionRepository, private val getProductsForPromotions: GetProductsForPromotions, private val getCategoriesForPromotions: GetCategoriesForPromotions) {
 
     operator fun invoke(): Flow<List<PromotionActive>> {
 
         return repository.getAllPromotions().map { list ->
             list.map { promotion ->
-                PromotionActive(
-                    promotion = promotion.toPresentation(),
-                    isActive = getIsActive(promotion)
-                )
+                when(promotion.promotionBy) {
+                    PromotionCategory.BRAND -> {
+                        PromotionActive(
+                            promotion = promotion.toPresentation(),
+                            isActive = getIsActive(promotion)
+                        )
+                    }
+                    PromotionCategory.CATEGORY -> {
+                        PromotionActive(
+                            promotion = promotion.toPresentation(categoryList = getCategoriesForPromotions(promotion.categoryListIds.orEmpty())),
+                            isActive = getIsActive(promotion)
+                        )
+                    }
+                    PromotionCategory.SPECIFIC -> {
+                        PromotionActive(
+                            promotion = promotion.toPresentation(specificProducts =  getProductsForPromotions(promotion.productListIds.orEmpty())),
+                            isActive = getIsActive(promotion)
+                        )
+                    }
+                }
             }.sortedByDescending { it.isActive }
 
         }

@@ -44,7 +44,7 @@ data class Promotion(
         )
     }
 
-    fun toPresentation(): PromotionPresentation {
+    fun toPresentation(specificProducts:List<Product>? = null, categoryList:List<ProductCategory>? = null): PromotionPresentation {
         return PromotionPresentation(
             id = id,
             buyX = buyX,
@@ -52,9 +52,9 @@ data class Promotion(
             percent = percent,
             promoteBy = promotionBy,
             promotionType = promotionType,
-            brandSelected = brandList.toString(),
-            categoryListSelected = emptyList(),
-            specificProducts = emptyList(),
+            brandSelected = brandList?.joinToString(","),
+            categoryListSelected = categoryList,
+            specificProducts = specificProducts,
             hasDate = promoStart != null || promoEnd != null,
             hasDateInit = promoStart != null,
             hasDateEnd = promoEnd != null,
