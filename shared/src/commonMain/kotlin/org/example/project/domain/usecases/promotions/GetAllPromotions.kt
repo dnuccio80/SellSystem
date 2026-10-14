@@ -9,7 +9,6 @@ import org.example.project.domain.models.promotions.PromotionCategory
 import org.example.project.domain.repositories.PromotionRepository
 import org.example.project.ui.models.PromotionActive
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 class GetAllPromotions(private val repository: PromotionRepository, private val getProductsForPromotions: GetProductsForPromotions, private val getCategoriesForPromotions: GetCategoriesForPromotions) {
 
@@ -21,19 +20,19 @@ class GetAllPromotions(private val repository: PromotionRepository, private val 
                     PromotionCategory.BRAND -> {
                         PromotionActive(
                             promotion = promotion.toPresentation(),
-                            isActive = getIsActive(promotion)
+                            isActive = getPromoIsActive(promotion)
                         )
                     }
                     PromotionCategory.CATEGORY -> {
                         PromotionActive(
                             promotion = promotion.toPresentation(categoryList = getCategoriesForPromotions(promotion.categoryListIds.orEmpty())),
-                            isActive = getIsActive(promotion)
+                            isActive = getPromoIsActive(promotion)
                         )
                     }
                     PromotionCategory.SPECIFIC -> {
                         PromotionActive(
                             promotion = promotion.toPresentation(specificProducts =  getProductsForPromotions(promotion.productListIds.orEmpty())),
-                            isActive = getIsActive(promotion)
+                            isActive = getPromoIsActive(promotion)
                         )
                     }
                 }
@@ -44,7 +43,7 @@ class GetAllPromotions(private val repository: PromotionRepository, private val 
 
 }
 
-private fun getIsActive(promotion: Promotion): Boolean {
+private fun getPromoIsActive(promotion: Promotion): Boolean {
 
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 

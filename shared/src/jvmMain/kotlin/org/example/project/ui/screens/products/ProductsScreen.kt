@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
@@ -57,8 +58,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import coil3.compose.AsyncImage
-import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductCategory
+import org.example.project.domain.models.product.ProductWithPromotion
+import org.example.project.domain.models.promotions.PromotionType
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.Capitalization.SENTENCES
 import org.example.project.ui.GenericButton
@@ -323,7 +325,7 @@ private fun CategoriesContent(categories: List<ProductCategory>, onClick: (Int) 
 
 
 @Composable
-private fun ProductContent(products: List<Product>, onNavigateToItem: (Int) -> Unit) {
+private fun ProductContent(products: List<ProductWithPromotion>, onNavigateToItem: (Int) -> Unit) {
 
     val visualTypeList = listOf(
         "list",
@@ -377,9 +379,9 @@ private fun ProductContent(products: List<Product>, onNavigateToItem: (Int) -> U
 
                 if (visualTypeSelected == visualTypeList.first()) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(products) { item ->
-                            ProductInListCardItem(item) {
-                                onNavigateToItem(item.id)
+                        items(products) { productWithPromo ->
+                            ProductInListCardItem(productWithPromo) {
+                                onNavigateToItem(productWithPromo.product.id)
                             }
                         }
                     }
@@ -389,10 +391,9 @@ private fun ProductContent(products: List<Product>, onNavigateToItem: (Int) -> U
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(products) { item ->
-                            ProductInLazyGridCardItem(item) {
-                                onNavigateToItem(item.id)
-
+                        items(products) { productWithPromo ->
+                            ProductInLazyGridCardItem(productWithPromo) {
+                                onNavigateToItem(productWithPromo.product.id)
                             }
                         }
                     }
@@ -489,8 +490,9 @@ private fun Header(
 
 
 @Composable
-private fun ProductInLazyGridCardItem(product: Product, onClick: () -> Unit) {
-    val stockManage = if (product.currentStock > 0 && product.adviceStock > 0) "Si" else "No"
+private fun ProductInLazyGridCardItem(productWithPromo: ProductWithPromotion, onClick: () -> Unit) {
+    val stockManage =
+        if (productWithPromo.product.currentStock > 0 && productWithPromo.product.adviceStock > 0) "Si" else "No"
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -508,33 +510,74 @@ private fun ProductInLazyGridCardItem(product: Product, onClick: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ProductImage(
-                    product.imagePath,
-                    product.name,
-                    modifier = Modifier.fillMaxWidth().aspectRatio(1f)
-                )
-                if(product.currentStock == 0 && product.manageStock) {
-                    Box(Modifier.fillMaxWidth().background(AccentColor), contentAlignment = Alignment.Center) {
-                        Text("Sin stock", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                    ProductImage(
+                        productWithPromo.product.imagePath,
+                        productWithPromo.product.name,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+                    )
+                    if (productWithPromo.promotion != null) {
+                        val textValue = when (productWithPromo.promotion.promotionType) {
+                            PromotionType.BUY_X_PAY_Y -> {
+                                "${productWithPromo.promotion.buyX} x ${productWithPromo.promotion.payY}"
+                            }
+
+                            PromotionType.PERCENT -> {
+                                "${productWithPromo.promotion.percent}%Off"
+                            }
+                        }
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = AccentColor),
+                            shape = RoundedCornerShape(4.dp),
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Text(
+                                textValue,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (productWithPromo.product.currentStock == 0 && productWithPromo.product.manageStock) {
+                    Box(
+                        Modifier.fillMaxWidth().background(AccentColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Sin stock",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    product.name,
+                    productWithPromo.product.name,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White
                 )
             }
-            RowWithSmallBodyAndDescription("Marca:", product.brand)
-            RowWithSmallBodyAndDescription("Precio de lista:", product.listPrice.toPrice())
+            RowWithSmallBodyAndDescription("Marca:", productWithPromo.product.brand)
+            RowWithSmallBodyAndDescription(
+                "Precio de lista:",
+                productWithPromo.product.listPrice.toPrice()
+            )
             RowWithSmallBodyAndDescription(
                 "Efectivo/Transf:",
-                product.cashPrice.toPrice()
+                productWithPromo.product.cashPrice.toPrice()
             )
-            if (product.manageStock) {
-                RowWithSmallBodyAndDescription("En stock:", product.currentStock.toString())
+            if (productWithPromo.product.manageStock) {
+                RowWithSmallBodyAndDescription(
+                    "En stock:",
+                    productWithPromo.product.currentStock.toString()
+                )
             } else {
                 RowWithSmallBodyAndDescription("Con control de stock:", stockManage)
             }
@@ -543,9 +586,10 @@ private fun ProductInLazyGridCardItem(product: Product, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ProductInListCardItem(product: Product, onClick: () -> Unit) {
+private fun ProductInListCardItem(productWithPromo: ProductWithPromotion, onClick: () -> Unit) {
 
-    val stockManage = if (product.currentStock > 0 && product.adviceStock > 0) "Si" else "No"
+    val stockManage =
+        if (productWithPromo.product.currentStock > 0 && productWithPromo.product.adviceStock > 0) "Si" else "No"
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -562,19 +606,25 @@ private fun ProductInListCardItem(product: Product, onClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            RowWithMidBodyAndDescription("Producto:", product.name)
-            RowWithMidBodyAndDescription("Categoría:", product.category)
-            RowWithMidBodyAndDescription("Marca:", product.brand)
-            RowWithMidBodyAndDescription("Precio de lista:", product.listPrice.toPrice())
+            RowWithMidBodyAndDescription("Producto:", productWithPromo.product.name)
+            RowWithMidBodyAndDescription("Categoría:", productWithPromo.product.category)
+            RowWithMidBodyAndDescription("Marca:", productWithPromo.product.brand)
+            RowWithMidBodyAndDescription(
+                "Precio de lista:",
+                productWithPromo.product.listPrice.toPrice()
+            )
             RowWithMidBodyAndDescription(
                 "Precio en transferencia/efectivo:",
-                product.cashPrice.toPrice()
+                productWithPromo.product.cashPrice.toPrice()
             )
-            if (product.manageStock) {
-                RowWithMidBodyAndDescription("En stock:", product.currentStock.toString())
+            if (productWithPromo.product.manageStock) {
+                RowWithMidBodyAndDescription(
+                    "En stock:",
+                    productWithPromo.product.currentStock.toString()
+                )
                 RowWithMidBodyAndDescription(
                     "Advertencia de poco stock:",
-                    product.adviceStock.toString()
+                    productWithPromo.product.adviceStock.toString()
                 )
             } else {
                 RowWithMidBodyAndDescription("Con control de stock:", stockManage)

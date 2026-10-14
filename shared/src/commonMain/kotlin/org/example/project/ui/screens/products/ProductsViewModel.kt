@@ -24,11 +24,13 @@ import org.example.project.domain.repositories.ProductCategoryRepository
 import org.example.project.domain.usecases.products.AddCategory
 import org.example.project.domain.usecases.products.GetCategories
 import org.example.project.domain.usecases.products.GetProducts
+import org.example.project.domain.usecases.products.GetProductsWithPromotion
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class ProductsViewModel(
-    getProducts: GetProducts,
+//    getProducts: GetProducts,
+    getProductsWithPromotion: GetProductsWithPromotion,
     getCategories: GetCategories,
     private val addCategory: AddCategory,
     private val repository: ProductCategoryRepository,
@@ -38,7 +40,7 @@ class ProductsViewModel(
     val query = _query.asStateFlow()
 
     private val _products = _query.debounce(300.milliseconds).flatMapLatest { query ->
-        getProducts(query)
+        getProductsWithPromotion(query)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _categories = _query.debounce(300.milliseconds).flatMapLatest { query ->

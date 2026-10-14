@@ -121,8 +121,10 @@ class PromotionsViewModel(
                     if (!newValue) {
                         data.copy(
                             hasDate = newValue,
-                            hasDateInit = true,
-                            hasDateEnd = true
+                            hasDateInit = false,
+                            hasDateEnd = false,
+                            promoStart = null,
+                            promoEnd = null
                         )
                     } else {
                         data.copy(

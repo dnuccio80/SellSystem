@@ -27,6 +27,7 @@ import org.example.project.domain.usecases.products.CalculatePriceFromPercentage
 import org.example.project.domain.usecases.products.CalculatePriceFromPercentageDiscount
 import org.example.project.domain.usecases.products.GetCategories
 import org.example.project.domain.usecases.products.GetProducts
+import org.example.project.domain.usecases.products.GetProductsWithPromotion
 import org.example.project.domain.usecases.productvariants.AddProductVariant
 import org.example.project.domain.usecases.productvariants.GetProductVariantById
 import org.example.project.domain.usecases.productvariants.GetProductVariants
@@ -34,6 +35,7 @@ import org.example.project.domain.usecases.promotions.AddPromotion
 import org.example.project.domain.usecases.promotions.GetAllPromotions
 import org.example.project.domain.usecases.promotions.GetCategoriesForPromotions
 import org.example.project.domain.usecases.promotions.GetProductsForPromotions
+import org.example.project.domain.usecases.promotions.GetPromotionsForProduct
 import org.example.project.domain.usecases.sells.CreateNewSell
 import org.example.project.domain.usecases.sells.DeleteSellWithProducts
 import org.example.project.domain.usecases.sells.GetFinancialSellReport
@@ -55,6 +57,7 @@ val domainModule = module {
     factoryOf(::GetProductVariantById)
 //    Products
     factoryOf(::GetProducts)
+    factoryOf(::GetProductsWithPromotion)
     factoryOf(::AddProduct)
     factoryOf(::CalculatePercentageProfitFromSellPrice)
     factoryOf(::CalculatePriceFromPercentageAdd)
@@ -100,6 +103,7 @@ val domainModule = module {
     factoryOf(::GetAllPromotions)
     factoryOf(::GetProductsForPromotions)
     factoryOf(::GetCategoriesForPromotions)
+    factoryOf(::GetPromotionsForProduct)
 
 
 }
