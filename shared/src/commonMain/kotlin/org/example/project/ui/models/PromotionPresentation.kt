@@ -1,7 +1,7 @@
 package org.example.project.ui.models
 
 import kotlinx.datetime.LocalDateTime
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.Promotion
 import org.example.project.domain.models.promotions.PromotionCategory
@@ -16,7 +16,7 @@ data class PromotionPresentation(
     val promotionType: PromotionType,
     val brandSelected: String? = null,
     val categoryListSelected: List<ProductCategory>? = null,
-    val specificProducts: List<Product>? = null,
+    val specificProducts: List<ProductWithPromo>? = null,
     val hasDate: Boolean = false,
     val hasDateInit: Boolean = true,
     val hasDateEnd: Boolean = true,

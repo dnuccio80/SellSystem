@@ -1,12 +1,12 @@
 package org.example.project.domain.usecases.products
 
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductError
 import org.example.project.domain.repositories.ProductRepository
 
 class AddProduct(private val repo: ProductRepository) {
 
-    suspend operator fun invoke(product: Product) {
+    suspend operator fun invoke(product: ProductWithPromo) {
 
         when {
             product.listPrice < product.buyPrice -> throw ProductError.ListPriceLessThanBuyPrice

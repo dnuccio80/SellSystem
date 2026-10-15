@@ -1,10 +1,10 @@
 package org.example.project.ui.screens.products
 
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 
 class CleanProduct {
-    fun getCleanProduct(): Product {
-       return Product(
+    fun getCleanProduct(): ProductWithPromo {
+       return ProductWithPromo(
            id = 0,
            name = "",
            category = "",

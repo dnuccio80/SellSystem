@@ -30,9 +30,11 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -65,7 +67,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.example.project.domain.models.client.Client
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromotion
+import org.example.project.domain.models.promotions.PromotionType
 import org.example.project.domain.usecases.newsell.PaymentMethod
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.GenericButton
@@ -134,7 +137,7 @@ class NewSellScreen : Screen {
                     Column(
                         modifier = Modifier.fillMaxWidth()
                             .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         GenericHeaderWithButtonAndSearch(
                             title = "Nueva venta",
@@ -147,7 +150,7 @@ class NewSellScreen : Screen {
                         Card(
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             border = BorderStroke(2.dp, color = GrayText),
-                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                            colors = cardColors(containerColor = Color.Transparent),
                         ) {
                             AnimatedContent((uiState as NewSellUiState.Success).productWithQuantityList.isNotEmpty()) { notEmpty ->
                                 if (notEmpty) {
@@ -160,22 +163,22 @@ class NewSellScreen : Screen {
                                                 productWithQuantity,
                                                 onValueChange = { newValue ->
                                                     viewModel.manualQuantityChange(
-                                                        productWithQuantity.product.id,
+                                                        productWithQuantity.productWithPromo.product.id,
                                                         newValue
                                                     )
                                                 }
                                             ) { action ->
                                                 when (action) {
                                                     INCREASE_QUANTITY -> viewModel.increaseProductQuantity(
-                                                        productWithQuantity.product.id
+                                                        productWithQuantity.productWithPromo.product.id
                                                     )
 
                                                     DECREASE_QUANTITY -> viewModel.decreaseProductQuantity(
-                                                        productWithQuantity.product.id
+                                                        productWithQuantity.productWithPromo.product.id
                                                     )
 
                                                     DELETE_ITEM -> viewModel.deleteProductWithQuantity(
-                                                        productWithQuantity.product.id
+                                                        productWithQuantity.productWithPromo.product.id
                                                     )
                                                 }
                                             }
@@ -322,7 +325,7 @@ class NewSellScreen : Screen {
                                         if (clientSelected != null) {
                                             Card(
                                                 shape = CircleShape,
-                                                colors = CardDefaults.cardColors(
+                                                colors = cardColors(
                                                     containerColor = AccentColor,
                                                     contentColor = Color.White
                                                 )
@@ -347,47 +350,90 @@ class NewSellScreen : Screen {
                                 }
                             }
                         }
-
-                        AnimatedContent((uiState as NewSellUiState.Success).paymentMethod) {
-
-                            when (it) {
-                                PaymentMethod.CASH, PaymentMethod.TRANSFER -> {
-                                    Column {
-                                        Box(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                                Text(
-                                                    "Subtotal:",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = Color.White,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                                Text(
-                                                    (uiState as NewSellUiState.Success).amounts.subtotal.toPrice(),
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = GreenText,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Box(
+                                Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Card(
+                                    shape = RoundedCornerShape(8.dp),
+                                    elevation = CardDefaults.cardElevation(8.dp),
+                                    colors = cardColors(containerColor = SecondaryCardBackground),
+                                    modifier = Modifier.width(500.dp)
+                                ) {
+                                    Column(
+                                        Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(
+                                                "Subtotal:",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            Text(
+                                                (uiState as NewSellUiState.Success).amounts.subtotal.toPrice(),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = GreenText,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
-
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(
+                                                "Descuento pago en efectivo/transferencia:",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            Text(
+                                                (uiState as NewSellUiState.Success).amounts.paymentDiscounts.toPrice(),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = GreenText,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(
+                                                "Descuento por promociones vigentes:",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            Text(
+                                                (uiState as NewSellUiState.Success).amounts.promoDiscounts.toPrice(),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = GreenText,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.size(0.dp))
+                                        HorizontalDivider(
+                                            thickness = 1.5.dp,
+                                            color = GrayText
+                                        )
+                                        Spacer(modifier = Modifier.size(0.dp))
                                         Box(
-                                            modifier = Modifier.fillMaxWidth(),
+                                            Modifier.fillMaxWidth(),
                                             contentAlignment = Alignment.Center
                                         ) {
-
-                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(
+                                                    8.dp
+                                                )
+                                            ) {
                                                 Text(
-                                                    "Descuento pago en efectivo/transferencia:",
-                                                    style = MaterialTheme.typography.titleMedium,
+                                                    "Total:",
+                                                    style = MaterialTheme.typography.headlineSmall,
                                                     color = Color.White,
                                                     fontWeight = FontWeight.Bold
                                                 )
                                                 Text(
-                                                    (uiState as NewSellUiState.Success).amounts.discounts.toPrice(),
-                                                    style = MaterialTheme.typography.titleMedium,
+                                                    (uiState as NewSellUiState.Success).amounts.total.toPrice(),
+                                                    style = MaterialTheme.typography.headlineSmall,
                                                     color = GreenText,
                                                     fontWeight = FontWeight.Bold
                                                 )
@@ -397,33 +443,15 @@ class NewSellScreen : Screen {
                                     }
                                 }
 
-                                else -> {}
                             }
-
-                        }
-
-                        Column(
-                            Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(
-                                    "Total:",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    (uiState as NewSellUiState.Success).amounts.total.toPrice(),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = GreenText,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            Box(
+                                Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AcceptDeclineButtons(
+                                    onDismiss = { navigator?.pop() },
+                                    onAccept = { viewModel.addSell() { navigator?.pop() } })
                             }
-                            AcceptDeclineButtons(
-                                onDismiss = { navigator?.pop() },
-                                onAccept = { viewModel.addSell() { navigator?.pop() } })
                         }
                     }
 
@@ -472,7 +500,7 @@ class NewSellScreen : Screen {
                     }
                     if (showAddItemsDialog) {
 
-                        val productsList = mutableListOf<Product>()
+                        val productsWithPromoList = mutableListOf<ProductWithPromotion>()
 
                         DialogContent(
                             textFieldValue = (uiState as NewSellUiState.Success).productQuery,
@@ -480,12 +508,12 @@ class NewSellScreen : Screen {
                             content = {
                                 if ((uiState as NewSellUiState.Success).productList.isNotEmpty()) {
                                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        items((uiState as NewSellUiState.Success).productList) { product ->
-                                            ProductItem(product) { added ->
+                                        items((uiState as NewSellUiState.Success).productList) { productWithPromo ->
+                                            ProductItem(productWithPromo) { added ->
                                                 if (added) {
-                                                    productsList.add(product)
+                                                    productsWithPromoList.add(productWithPromo)
                                                 } else {
-                                                    productsList.remove(product)
+                                                    productsWithPromoList.remove(productWithPromo)
                                                 }
                                             }
                                         }
@@ -500,7 +528,7 @@ class NewSellScreen : Screen {
                                 }
                             },
                             onAccept = {
-                                viewModel.addProductToCart(productsList)
+                                viewModel.addProductToCart(productsWithPromoList)
                                 showAddItemsDialog = false
                                 viewModel.updateQuery("")
 
@@ -535,7 +563,7 @@ private fun DialogContent(
     ) {
         Card(
             modifier = Modifier.fillMaxWidth().height(700.dp),
-            colors = CardDefaults.cardColors(containerColor = PrimaryCardBackground),
+            colors = cardColors(containerColor = PrimaryCardBackground),
             shape = RoundedCornerShape(8.dp)
         ) {
             Box(
@@ -583,7 +611,7 @@ private fun ClientItem(client: Client, selected: Client, onClick: () -> Unit) {
             onClick()
         },
         shape = RoundedCornerShape(4.dp),
-        colors = CardDefaults.cardColors(
+        colors = cardColors(
             containerColor = SecondaryCardBackground,
             contentColor = Color.White
         )
@@ -633,7 +661,7 @@ private fun ClientItem(client: Client, selected: Client, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ProductItem(product: Product, onProductAdd: (Boolean) -> Unit) {
+private fun ProductItem(productWithPromo: ProductWithPromotion, onProductAdd: (Boolean) -> Unit) {
 
     var productAdded by rememberSaveable { mutableStateOf(false) }
 
@@ -649,7 +677,7 @@ private fun ProductItem(product: Product, onProductAdd: (Boolean) -> Unit) {
                 onProductAdd(productAdded)
             },
         shape = RoundedCornerShape(4.dp),
-        colors = CardDefaults.cardColors(
+        colors = cardColors(
             containerColor = cardBackgroundColor,
             contentColor = Color.White
         )
@@ -674,14 +702,14 @@ private fun ProductItem(product: Product, onProductAdd: (Boolean) -> Unit) {
                     )
                 )
                 Text(
-                    "${product.name} '${product.brand}' ${product.description}",
+                    "${productWithPromo.product.name} '${productWithPromo.product.brand}' ${productWithPromo.product.description}",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
             Text(
-                product.listPrice.toPrice(),
+                productWithPromo.product.listPrice.toPrice(),
                 color = GreenText,
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.bodyMedium
@@ -710,13 +738,41 @@ private fun NewItemSell(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.weight(5f)
         ) {
-            Text(
-                "${productWithQuantity.product.name} '${productWithQuantity.product.brand}' ${productWithQuantity.product.description}",
-                color = WhiteText,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(5f)
-            )
+            ) {
+                Text(
+                    "${productWithQuantity.productWithPromo.product.name} '${productWithQuantity.productWithPromo.product.brand}' ${productWithQuantity.productWithPromo.product.description}",
+                    color = WhiteText,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                )
+                if (productWithQuantity.productWithPromo.promotion != null) {
+                    val textValue =
+                        when (productWithQuantity.productWithPromo.promotion.promotionType) {
+                            PromotionType.BUY_X_PAY_Y -> {
+                                "${productWithQuantity.productWithPromo.promotion.buyX} x ${productWithQuantity.productWithPromo.promotion.payY}"
+                            }
+
+                            PromotionType.PERCENT -> {
+                                "${productWithQuantity.productWithPromo.promotion.percent}% off"
+                            }
+                        }
+                    Card(
+                        shape = RoundedCornerShape(4.dp),
+                        colors = cardColors(containerColor = AccentColor)
+                    ) {
+                        Text(
+                            textValue,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(4.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
             Row(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -738,14 +794,15 @@ private fun NewItemSell(
                     }
                     TextField(
                         value = productWithQuantity.quantity.toString(), onValueChange = {
-                            val value = if (productWithQuantity.product.manageStock) {
-                                (it.toIntOrNull() ?: 1).coerceIn(
-                                    1,
-                                    productWithQuantity.product.currentStock
-                                )
-                            } else {
-                                (it.toIntOrNull() ?: 1)
-                            }
+                            val value =
+                                if (productWithQuantity.productWithPromo.product.manageStock) {
+                                    (it.toIntOrNull() ?: 1).coerceIn(
+                                        1,
+                                        productWithQuantity.productWithPromo.product.currentStock
+                                    )
+                                } else {
+                                    (it.toIntOrNull() ?: 1)
+                                }
 
                             onValueChange(value)
                         },

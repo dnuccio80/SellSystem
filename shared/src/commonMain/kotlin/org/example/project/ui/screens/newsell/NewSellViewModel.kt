@@ -19,13 +19,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.domain.models.client.Client
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromotion
 import org.example.project.domain.models.sell.SellError
 import org.example.project.domain.usecases.clients.GetClients
 import org.example.project.domain.usecases.newsell.GetSubtotalProductWithQuantity
 import org.example.project.domain.usecases.newsell.GetTotalAmountSell
 import org.example.project.domain.usecases.newsell.PaymentMethod
-import org.example.project.domain.usecases.products.GetProducts
+import org.example.project.domain.usecases.products.GetProductsWithPromotion
 import org.example.project.domain.usecases.sells.CreateNewSell
 import org.example.project.ui.models.ProductWithQuantityPresentation
 import org.example.project.ui.models.SellPresentation
@@ -35,7 +35,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class NewSellViewModel(
-    private val getProducts: GetProducts,
+    private val getProductsWithPromotion: GetProductsWithPromotion,
     getClients: GetClients,
     private val getSubtotalProductWithQuantity: GetSubtotalProductWithQuantity,
     private val getTotalAmountSell: GetTotalAmountSell,
@@ -46,12 +46,12 @@ class NewSellViewModel(
     private val _clientSearchQuery = MutableStateFlow("")
     val clientSearchQuery = _clientSearchQuery.asStateFlow()
 
-    private val _paymentMethod = MutableStateFlow<PaymentMethod>(PaymentMethod.CASH)
+    private val _paymentMethod = MutableStateFlow(PaymentMethod.CASH)
     private val _clients = _clientSearchQuery.debounce(300.milliseconds).flatMapLatest { query ->
         getClients(query).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
     private val _productList = _query.debounce(300.milliseconds).flatMapLatest { query ->
-        getProducts(query).map { it.filter { product -> !product.manageStock || product.currentStock > 0 } }
+        getProductsWithPromotion(query).map { it.filter { productWithPromo -> !productWithPromo.product.manageStock || productWithPromo.product.currentStock > 0 } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _productWithQuantityList = MutableStateFlow<List<ProductWithQuantityPresentation>>(emptyList())
@@ -92,28 +92,24 @@ class NewSellViewModel(
         _clientSelected.update { newValue }
     }
 
-    fun updateIsUsualClient(newValue: Boolean) {
-        _isUsualClient.update { newValue }
-    }
-
     fun toggleIsUsualClient() {
         _isUsualClient.update { !it }
     }
 
-    fun addProductToCart(list: List<Product>) {
+    fun addProductToCart(list: List<ProductWithPromotion>) {
 
         val newList = mutableListOf<ProductWithQuantityPresentation>()
 
         _productWithQuantityList.value.forEach {
             newList.add(it)
         }
-        list.forEach { product ->
+        list.forEach { productWithPromo ->
             val productWithQuantity = ProductWithQuantityPresentation(
-                product = product,
+                productWithPromo = productWithPromo,
                 quantity = 1,
-                amount = getSubtotalProductWithQuantity(product, 1),
+                amount = getSubtotalProductWithQuantity(productWithPromo, 1),
             )
-            if (newList.none { it.product.id == product.id }) {
+            if (newList.none { it.productWithPromo.product.id == productWithPromo.product.id }) {
                 newList.add(productWithQuantity)
             }
         }
@@ -123,11 +119,11 @@ class NewSellViewModel(
     fun increaseProductQuantity(productId: Int) {
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
-                if (productWithQuantity.product.id == productId) {
+                if (productWithQuantity.productWithPromo.product.id == productId) {
                     val newQuantity = (productWithQuantity.quantity + 1)
-                    if(productWithQuantity.product.manageStock) newQuantity.coerceAtMost(productWithQuantity.product.currentStock)
+                    if(productWithQuantity.productWithPromo.product.manageStock) newQuantity.coerceAtMost(productWithQuantity.productWithPromo.product.currentStock)
                     val newAmount =
-                        getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
+                        getSubtotalProductWithQuantity(productWithQuantity.productWithPromo, newQuantity)
                     productWithQuantity.copy(quantity = newQuantity, amount = newAmount)
                 } else productWithQuantity
             }
@@ -137,9 +133,9 @@ class NewSellViewModel(
     fun manualQuantityChange(productId: Int, value: Int) {
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
-                if (productWithQuantity.product.id == productId) {
+                if (productWithQuantity.productWithPromo.product.id == productId) {
                     val newAmount =
-                        getSubtotalProductWithQuantity(productWithQuantity.product, value)
+                        getSubtotalProductWithQuantity(productWithQuantity.productWithPromo, value)
                     productWithQuantity.copy(quantity = value, amount = newAmount)
                 } else productWithQuantity
             }
@@ -171,10 +167,10 @@ class NewSellViewModel(
     fun decreaseProductQuantity(productId: Int) {
         _productWithQuantityList.update { currentList ->
             currentList.map { productWithQuantity ->
-                if (productWithQuantity.product.id == productId) {
+                if (productWithQuantity.productWithPromo.product.id == productId) {
                     val newQuantity = productWithQuantity.quantity - 1
                     val newAmount =
-                        getSubtotalProductWithQuantity(productWithQuantity.product, newQuantity)
+                        getSubtotalProductWithQuantity(productWithQuantity.productWithPromo, newQuantity)
                     productWithQuantity.copy(quantity = newQuantity, amount = newAmount)
                 } else productWithQuantity
             }
@@ -183,7 +179,7 @@ class NewSellViewModel(
 
     fun deleteProductWithQuantity(productId: Int) {
         _productWithQuantityList.update { currentList ->
-            currentList.filterNot { it.product.id == productId }
+            currentList.filterNot { it.productWithPromo.product.id == productId }
         }
     }
 

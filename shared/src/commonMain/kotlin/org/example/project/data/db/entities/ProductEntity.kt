@@ -3,7 +3,7 @@ package org.example.project.data.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDate
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 
 @Entity
 data class ProductEntity(
@@ -22,8 +22,8 @@ data class ProductEntity(
     val expireDate: LocalDate?,
     val imagePath:String? = null
 ) {
-    fun toDomain(): Product {
-        return Product(
+    fun toDomain(): ProductWithPromo {
+        return ProductWithPromo(
             id = id,
             name = name,
             category = category,

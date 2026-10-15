@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory
 import org.example.project.domain.models.promotions.PromotionType
@@ -145,7 +145,7 @@ class PromotionsViewModel(
         _promotionData.update { it.copy(categoryListSelected = list) }
     }
 
-    fun updateProductsListSelected(list: List<Product>) {
+    fun updateProductsListSelected(list: List<ProductWithPromo>) {
         _promotionData.update { it.copy(specificProducts = list) }
     }
 

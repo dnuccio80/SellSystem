@@ -3,7 +3,7 @@ package org.example.project.domain.models.product
 import kotlinx.datetime.LocalDate
 import org.example.project.data.db.entities.ProductEntity
 
-data class Product(
+data class ProductWithPromo(
     val id: Int = 0,
     val name: String,
     val category: String,

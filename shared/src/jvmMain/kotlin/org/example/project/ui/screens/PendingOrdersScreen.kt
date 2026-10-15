@@ -68,7 +68,7 @@ import org.example.project.ui.utils.LightBlue
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
-import org.example.project.ui.utils.Yellowe
+import org.example.project.ui.utils.Orange
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -243,7 +243,7 @@ private fun PendingOrderSheet(order: PendingOrder, onClick: () -> Unit) {
 
     val normalColor = when (order.priority) {
         HIGH -> AccentColor
-        MID -> Yellowe
+        MID -> Orange
         LOW -> LightBlue
     }
 

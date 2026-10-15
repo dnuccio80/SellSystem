@@ -60,10 +60,10 @@ class CreateNewSell(
                 sellRepository.addSellWithProducts(sell.copy(date = today), products)
             }
             sellPresentation.productQuantityList.forEach { productWithQuantity ->
-                if (productWithQuantity.product.manageStock) {
+                if (productWithQuantity.productWithPromo.product.manageStock) {
                     val updatedStock =
-                        productWithQuantity.product.currentStock - productWithQuantity.quantity
-                    productRepository.updateProduct(productWithQuantity.product.copy(currentStock = updatedStock))
+                        productWithQuantity.productWithPromo.product.currentStock - productWithQuantity.quantity
+                    productRepository.updateProduct(productWithQuantity.productWithPromo.product.copy(currentStock = updatedStock))
                 }
             }
         } catch (e: Throwable) {

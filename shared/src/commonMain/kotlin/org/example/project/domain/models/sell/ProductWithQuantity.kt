@@ -1,8 +1,8 @@
 package org.example.project.domain.models.sell
 
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromotion
 
 data class ProductWithQuantity(
-    val product: Product,
+    val productWithPromo: ProductWithPromotion,
     val quantity: Int
 )

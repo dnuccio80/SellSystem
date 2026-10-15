@@ -2,8 +2,6 @@ package org.example.project.domain.usecases.products
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductWithPromotion
 import org.example.project.domain.repositories.ProductRepository
 import org.example.project.domain.repositories.PromotionRepository

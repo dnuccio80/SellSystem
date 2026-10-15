@@ -6,5 +6,6 @@ import androidx.room.Entity
 data class SellProductEntity(
     val sellId:Int,
     val productId:Int,
+    val promoId:Int?,
     val quantity:Int
 )

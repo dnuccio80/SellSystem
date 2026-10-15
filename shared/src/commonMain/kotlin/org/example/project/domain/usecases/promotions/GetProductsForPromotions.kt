@@ -1,18 +1,15 @@
 package org.example.project.domain.usecases.promotions
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.flow.filter
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.repositories.ProductRepository
 
 class GetProductsForPromotions(private val productRepository: ProductRepository) {
 
-    suspend operator fun invoke(productIds:List<Int>):List<Product> {
+    suspend operator fun invoke(productIds:List<Int>):List<ProductWithPromo> {
 
         if(productIds.isEmpty()) return emptyList()
 
-        val productsList = mutableListOf<Product>()
+        val productsList = mutableListOf<ProductWithPromo>()
 
         productIds.forEach { id ->
             productsList.add(productRepository.getProductById(id))

@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Loyalty
@@ -48,10 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -378,7 +374,7 @@ private fun ProductWithQuantityText(productWithQuantity: ProductWithQuantity) {
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            "${productWithQuantity.product.name} '${productWithQuantity.product.brand}' ${productWithQuantity.product.description}",
+            "${productWithQuantity.productWithPromo.product.name} '${productWithQuantity.productWithPromo.product.brand}' ${productWithQuantity.productWithPromo.product.description}",
             style = MaterialTheme.typography.bodyMedium,
             color = Color.White,
             fontWeight = FontWeight.Bold

@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.example.project.data.db.SystemDatabase
 import org.example.project.data.db.entities.relations.SellProductEntity
+import org.example.project.domain.models.product.ProductWithPromotion
+import org.example.project.domain.models.promotions.Promotion
 import org.example.project.domain.models.sell.ProductWithQuantity
 import org.example.project.domain.models.sell.Sell
 import org.example.project.domain.repositories.SellRepository
@@ -34,7 +36,8 @@ class SellRepositoryImpl(private val db: SystemDatabase) : SellRepository {
             products = products.map {
                 SellProductEntity(
                     sellId = 0,
-                    productId = it.product.id,
+                    productId = it.productWithPromo.product.id,
+                    promoId = it.productWithPromo.promotion?.id,
                     quantity = it.quantity
                 )
             }
@@ -47,10 +50,16 @@ class SellRepositoryImpl(private val db: SystemDatabase) : SellRepository {
 
     override suspend fun getProductsFromSell(sellId: Int): List<ProductWithQuantity> {
         return db.sellDao().getProductsFromSell(sellId).map { sellProductEntity ->
-            val product = db.productDao().getProductById(id = sellProductEntity.productId).toDomain()
+            val product =
+                db.productDao().getProductById(id = sellProductEntity.productId).toDomain()
+            val promo: Promotion =
+                db.promotionDao().getPromotionById(sellProductEntity.sellId).toDomain()
 
             ProductWithQuantity(
-                product = product,
+                productWithPromo = ProductWithPromotion(
+                    product,
+                    promo
+                ),
                 quantity = sellProductEntity.quantity,
             )
         }

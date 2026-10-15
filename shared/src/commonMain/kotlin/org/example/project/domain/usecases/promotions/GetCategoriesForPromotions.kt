@@ -1,6 +1,5 @@
 package org.example.project.domain.usecases.promotions
 
-import org.example.project.domain.models.product.Product
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.repositories.ProductCategoryRepository
 

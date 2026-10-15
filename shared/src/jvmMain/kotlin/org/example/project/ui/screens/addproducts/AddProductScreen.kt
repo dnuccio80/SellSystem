@@ -62,7 +62,7 @@ import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.ui.AcceptDeclineButtons
 import org.example.project.ui.CardTitleCentered
@@ -364,7 +364,7 @@ class AddProductScreen(val productId: Int = 0) : Screen {
 
 @Composable
 fun StockAndVariantItem(
-    product: Product,
+    product: ProductWithPromo,
     viewModel: AddProductViewModel,
     manageStock: Boolean,
     isVariableProduct: Boolean,
@@ -687,7 +687,7 @@ private fun PriceItem(
 
 @Composable
 private fun DataItem(
-    product: Product,
+    product: ProductWithPromo,
     categories:List<ProductCategory>,
     onActionDone: (UpdateProductAction, String) -> Unit,
 ) {
@@ -862,7 +862,7 @@ private fun ProfitResumeItem(state: AddProductUiState.Success) {
 
 @Composable
 private fun ImageCardItem(
-    product: Product,
+    product: ProductWithPromo,
     onSelectImageClick: () -> Unit,
     onDeleteImage: () -> Unit,
 ) {

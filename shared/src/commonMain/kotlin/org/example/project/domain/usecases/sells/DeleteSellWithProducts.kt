@@ -14,10 +14,10 @@ class DeleteSellWithProducts(
         val productsInSell = sellRepository.getProductsFromSell(sellId)
 
         productsInSell.forEach { productWithQuantity ->
-            if (productWithQuantity.product.manageStock) {
+            if (productWithQuantity.productWithPromo.product.manageStock) {
                 val newStock =
-                    productWithQuantity.product.currentStock + productWithQuantity.quantity
-                productRepository.updateProduct(productWithQuantity.product.copy(currentStock = newStock))
+                    productWithQuantity.productWithPromo.product.currentStock + productWithQuantity.quantity
+                productRepository.updateProduct(productWithQuantity.productWithPromo.product.copy(currentStock = newStock))
             }
         }
         val sell = sellRepository.getSellById(sellId)

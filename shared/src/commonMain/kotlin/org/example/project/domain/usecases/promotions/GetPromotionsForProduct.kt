@@ -2,7 +2,7 @@ package org.example.project.domain.usecases.promotions
 
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.Promotion
 import org.example.project.domain.models.promotions.PromotionCategory.BRAND
@@ -15,7 +15,7 @@ class GetPromotionsForProduct(
     private val getCategoriesForPromotions: GetCategoriesForPromotions,
 ) {
 
-    suspend operator fun invoke(product: Product, promotions: List<Promotion>): Promotion? {
+    suspend operator fun invoke(product: ProductWithPromo, promotions: List<Promotion>): Promotion? {
 
         val now = Clock.System.now()
 

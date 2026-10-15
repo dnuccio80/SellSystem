@@ -2,7 +2,7 @@ package org.example.project.domain.models.promotions
 
 import kotlinx.datetime.LocalDateTime
 import org.example.project.data.db.entities.PromotionEntity
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.ui.models.PromotionPresentation
 
@@ -44,7 +44,7 @@ data class Promotion(
         )
     }
 
-    fun toPresentation(specificProducts:List<Product>? = null, categoryList:List<ProductCategory>? = null): PromotionPresentation {
+    fun toPresentation(specificProducts:List<ProductWithPromo>? = null, categoryList:List<ProductCategory>? = null): PromotionPresentation {
         return PromotionPresentation(
             id = id,
             buyX = buyX,

@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,7 +70,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.project.domain.models.product.Product
+import org.example.project.domain.models.product.ProductWithPromo
 import org.example.project.domain.models.product.ProductCategory
 import org.example.project.domain.models.promotions.PromotionCategory.*
 import org.example.project.domain.models.promotions.PromotionType.*
@@ -98,7 +97,7 @@ import org.example.project.ui.utils.LightBlue
 import org.example.project.ui.utils.PrimaryCardBackground
 import org.example.project.ui.utils.SecondaryCardBackground
 import org.example.project.ui.utils.WhiteText
-import org.example.project.ui.utils.Yellowe
+import org.example.project.ui.utils.Orange
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import sellsystem.shared.generated.resources.buyX_payY_promo
@@ -310,11 +309,11 @@ private fun PromotionCardItem(promoActive: PromotionActive, onClick: () -> Unit)
 private fun NewPromotionDialog(
     promotionData: PromotionPresentation,
     categories: List<ProductCategory>,
-    products: List<Product>,
+    products: List<ProductWithPromo>,
     isEdit: Boolean,
     onActionDone: (UpdatePromotionAction, String) -> Unit,
     onAddCategories: (List<ProductCategory>) -> Unit,
-    onAddProducts: (List<Product>) -> Unit,
+    onAddProducts: (List<ProductWithPromo>) -> Unit,
     onAddDatePromoInit: (LocalDateTime) -> Unit,
     onAddDatePromoEnd: (LocalDateTime) -> Unit,
     onToggleDateInit: () -> Unit,
@@ -786,7 +785,7 @@ fun DateTimePicker(
                         clockDialUnselectedContentColor = Color.Black,
                         selectorColor = GreenText,
                         containerColor = AccentColor,
-                        periodSelectorBorderColor = Yellowe,
+                        periodSelectorBorderColor = Orange,
                         periodSelectorSelectedContainerColor = GrayText,
                         periodSelectorUnselectedContainerColor = Color.Magenta,
                         periodSelectorSelectedContentColor = LightBlue,
@@ -804,12 +803,12 @@ fun DateTimePicker(
 
 @Composable
 private fun ProductsDialog(
-    products: List<Product>,
+    products: List<ProductWithPromo>,
     onDismiss: () -> Unit,
-    onAddProducts: (List<Product>) -> Unit,
+    onAddProducts: (List<ProductWithPromo>) -> Unit,
 ) {
 
-    val productsSelected = remember { mutableStateListOf<Product>() }
+    val productsSelected = remember { mutableStateListOf<ProductWithPromo>() }
     val interactionSource = remember { MutableInteractionSource() }
 
     Dialog(onDismissRequest = { onDismiss() }) {
