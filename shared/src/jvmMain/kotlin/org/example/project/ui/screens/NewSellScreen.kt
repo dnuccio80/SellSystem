@@ -99,6 +99,8 @@ class NewSellScreen : Screen {
         val viewModel = koinViewModel<NewSellViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val clientSearchQuery by viewModel.clientSearchQuery.collectAsStateWithLifecycle()
+        val countPromoDiscount by viewModel.countPromoDiscount.collectAsStateWithLifecycle()
+        val countPaymentDiscount by viewModel.countPaymentDiscount.collectAsStateWithLifecycle()
 
         when (uiState) {
             is NewSellUiState.Error -> {}
@@ -380,7 +382,20 @@ class NewSellScreen : Screen {
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Row(
+                                            modifier = Modifier.clickable {
+                                                viewModel.toggleCountPaymentDiscount()
+                                            }.pointerHoverIcon(PointerIcon.Hand),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Checkbox(
+                                                checked = countPaymentDiscount,
+                                                onCheckedChange = { viewModel.toggleCountPaymentDiscount() },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkedColor = GreenText,
+                                                    uncheckedColor = GrayText
+                                                )
+                                            )
                                             Text(
                                                 "Descuento pago en efectivo/transferencia:",
                                                 style = MaterialTheme.typography.titleSmall,
@@ -395,7 +410,20 @@ class NewSellScreen : Screen {
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Row(
+                                            modifier = Modifier.clickable {
+                                                viewModel.toggleCountPromoDiscount()
+                                            }.pointerHoverIcon(PointerIcon.Hand),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Checkbox(
+                                                checked = countPromoDiscount,
+                                                onCheckedChange = { viewModel.toggleCountPromoDiscount() },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkedColor = GreenText,
+                                                    uncheckedColor = GrayText
+                                                )
+                                            )
                                             Text(
                                                 "Descuento por promociones vigentes:",
                                                 style = MaterialTheme.typography.titleSmall,

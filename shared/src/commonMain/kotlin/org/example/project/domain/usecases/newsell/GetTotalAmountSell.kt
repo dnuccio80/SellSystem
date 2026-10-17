@@ -1,8 +1,6 @@
 package org.example.project.domain.usecases.newsell
 
-import org.example.project.domain.models.promotions.PromotionCategory
 import org.example.project.domain.models.promotions.PromotionType
-import org.example.project.domain.models.sell.ProductWithQuantity
 import org.example.project.ui.models.ProductWithQuantityPresentation
 
 enum class PaymentMethod(val etiquette:String) {
@@ -19,6 +17,8 @@ class GetTotalAmountSell {
     operator fun invoke(
         paymentMethod: PaymentMethod,
         productWithQuantityList: List<ProductWithQuantityPresentation>,
+        countPaymentDiscount: Boolean,
+        countPromoDiscount: Boolean
     ): SellAmounts {
 
         return when (paymentMethod) {
@@ -27,32 +27,40 @@ class GetTotalAmountSell {
                 val subTotal = productWithQuantityList.sumOf { productWithQuantity ->
                     productWithQuantity.productWithPromo.product.listPrice * productWithQuantity.quantity
                 }
-                val cashPrice = productWithQuantityList.sumOf { productWithQuantity ->
-                    productWithQuantity.productWithPromo.product.cashPrice * productWithQuantity.quantity
+                val price = productWithQuantityList.sumOf { productWithQuantity ->
+                    if(countPaymentDiscount) productWithQuantity.productWithPromo.product.cashPrice * productWithQuantity.quantity
+                    else productWithQuantity.productWithPromo.product.listPrice * productWithQuantity.quantity
                 }
 
-                val promoDiscount = productWithQuantityList.sumOf { productWithQuantity ->
+                val promoDiscount = if(countPromoDiscount) productWithQuantityList.sumOf { productWithQuantity ->
                     getPromoDiscount(productWithQuantity)
-                }
+                } else 0L
+
+                val paymentDiscounts = subTotal - price
 
                 SellAmounts(
                     subtotal = subTotal,
-                    paymentDiscounts = subTotal - cashPrice,
+                    paymentDiscounts = paymentDiscounts,
                     promoDiscounts = promoDiscount,
-                    total = cashPrice
+                    total = subTotal - paymentDiscounts - promoDiscount
                 )
 
             }
             PaymentMethod.CURRENT_ACCOUNT,PaymentMethod.CARD  -> {
+
                 val subTotal = productWithQuantityList.sumOf { productWithQuantity ->
                     productWithQuantity.productWithPromo.product.listPrice * productWithQuantity.quantity
                 }
 
+                val promoDiscount = if(countPromoDiscount) productWithQuantityList.sumOf { productWithQuantity ->
+                    getPromoDiscount(productWithQuantity)
+                } else 0L
+
                 SellAmounts(
                     subtotal = subTotal,
-                    promoDiscounts = 0L,
-                    paymentDiscounts = 0,
-                    total = subTotal
+                    promoDiscounts = promoDiscount,
+                    paymentDiscounts = 0L,
+                    total = subTotal - promoDiscount
                 )
             }
         }
