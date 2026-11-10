@@ -14,6 +14,9 @@ data class SellEntity(
     val clientName:String?,
     val transactionId:Long,
     val paymentMethod: String,
+    val subtotal: Long,
+    val paymentDiscounts:Long,
+    val promoDiscounts:Long,
     val total:Long,
 ) {
     fun toDomain(): Sell {
@@ -23,6 +26,9 @@ data class SellEntity(
             clientName = clientName.orEmpty(),
             transactionId = transactionId,
             paymentMethod = paymentMethod,
+            subtotal = subtotal,
+            paymentDiscounts = paymentDiscounts,
+            promoDiscounts = promoDiscounts,
             total = total
         )
     }

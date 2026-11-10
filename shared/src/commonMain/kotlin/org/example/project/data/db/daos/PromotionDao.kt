@@ -15,7 +15,7 @@ interface PromotionDao {
     fun getAllPromotions(): Flow<List<PromotionEntity>>
 
     @Query("SELECT * FROM PromotionEntity WHERE id = :id")
-    suspend fun getPromotionById(id:Int): PromotionEntity
+    suspend fun getPromotionById(id:Int): PromotionEntity?
 
     @Insert(onConflict = REPLACE)
     suspend fun addPromotion(promotion: PromotionEntity)

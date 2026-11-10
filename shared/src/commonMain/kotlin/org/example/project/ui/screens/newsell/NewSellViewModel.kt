@@ -244,17 +244,23 @@ class NewSellViewModel(
     }
 
     fun addSell(onDone: () -> Unit) {
+
+        val sellAmounts = getTotalAmountSell(
+            _paymentMethod.value,
+            _productWithQuantityList.value,
+            countPaymentDiscount = _countPaymentDiscount.value,
+            countPromoDiscount = _countPromoDiscount.value
+        )
+
         val newSell = SellPresentation(
             isUsualClient = _isUsualClient.value,
             client = clientSelected.value ?: CleanClient().getCleanClient(),
             productQuantityList = _productWithQuantityList.value,
             paymentMethod = _paymentMethod.value,
-            totalAmount = getTotalAmountSell(
-                _paymentMethod.value,
-                _productWithQuantityList.value,
-                countPaymentDiscount = _countPaymentDiscount.value,
-                countPromoDiscount = _countPromoDiscount.value
-            ).total
+            totalAmount = sellAmounts.total,
+            subtotal = sellAmounts.subtotal,
+            paymentDiscounts = sellAmounts.paymentDiscounts,
+            promoDiscounts = sellAmounts.promoDiscounts
         )
         viewModelScope.launch {
             try {

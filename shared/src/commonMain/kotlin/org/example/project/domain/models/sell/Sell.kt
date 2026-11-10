@@ -10,6 +10,9 @@ data class Sell(
     val transactionId:Long = 0L,
     val clientName:String,
     val paymentMethod: String,
+    val subtotal: Long,
+    val paymentDiscounts:Long,
+    val promoDiscounts:Long,
     val total:Long,
 ) {
     fun toEntity(): SellEntity {
@@ -19,6 +22,9 @@ data class Sell(
             clientName = clientName.ifBlank { null },
             transactionId = transactionId,
             paymentMethod = paymentMethod,
+            subtotal = subtotal,
+            paymentDiscounts = paymentDiscounts,
+            promoDiscounts = promoDiscounts,
             total = total
         )
     }

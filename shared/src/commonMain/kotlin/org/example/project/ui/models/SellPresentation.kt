@@ -10,6 +10,9 @@ data class SellPresentation(
     val client: Client,
     val productQuantityList:List<ProductWithQuantityPresentation>,
     val paymentMethod: PaymentMethod,
+    val subtotal: Long,
+    val paymentDiscounts:Long,
+    val promoDiscounts:Long,
     val totalAmount:Long
 ) {
     fun toDomain(): Sell {
@@ -17,6 +20,9 @@ data class SellPresentation(
             id = id,
             clientName = client.fullName,
             paymentMethod = paymentMethod.etiquette,
+            subtotal = subtotal,
+            paymentDiscounts = paymentDiscounts,
+            promoDiscounts = promoDiscounts,
             total = totalAmount,
         )
     }

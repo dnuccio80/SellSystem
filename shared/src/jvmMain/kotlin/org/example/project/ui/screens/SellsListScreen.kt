@@ -315,6 +315,10 @@ private fun SellDataDialog(
                     "Método de pago:",
                     description = sellWithProducts.sell.paymentMethod
                 )
+                RowWithMidTitleAndDescription("Subtotal:", sellWithProducts.sell.subtotal.toPrice())
+                RowWithMidTitleAndDescription("Descuento por promociones:", sellWithProducts.sell.promoDiscounts.toPrice())
+                RowWithMidTitleAndDescription("Descuento por método de pago:", sellWithProducts.sell.paymentDiscounts.toPrice())
+                RowWithMidTitleAndDescription("Total:", sellWithProducts.sell.total.toPrice())
                 Text(
                     "Listado de productos",
                     modifier = Modifier.fillMaxWidth(),
@@ -338,9 +342,6 @@ private fun SellDataDialog(
                             )
                         }
                     }
-                }
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    RowWithMidTitleAndDescription("Total:", sellWithProducts.sell.total.toPrice())
                 }
                 AcceptDeclineButtons(
                     "Aceptar",
@@ -433,7 +434,6 @@ private fun SellCardItem(sell: Sell, onClick: () -> Unit) {
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val cardColor = if (isHovered) SecondaryCardBackground else PrimaryCardBackground
-
 
     Card(
         modifier = Modifier.fillMaxWidth()

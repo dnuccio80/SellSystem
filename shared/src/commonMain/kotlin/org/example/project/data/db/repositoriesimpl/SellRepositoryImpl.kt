@@ -52,8 +52,8 @@ class SellRepositoryImpl(private val db: SystemDatabase) : SellRepository {
         return db.sellDao().getProductsFromSell(sellId).map { sellProductEntity ->
             val product =
                 db.productDao().getProductById(id = sellProductEntity.productId).toDomain()
-            val promo: Promotion =
-                db.promotionDao().getPromotionById(sellProductEntity.sellId).toDomain()
+            val promo: Promotion? =
+                db.promotionDao().getPromotionById(sellProductEntity.sellId)?.toDomain()
 
             ProductWithQuantity(
                 productWithPromo = ProductWithPromotion(

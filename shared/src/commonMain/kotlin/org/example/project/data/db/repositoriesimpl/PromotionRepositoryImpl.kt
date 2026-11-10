@@ -13,8 +13,8 @@ class PromotionRepositoryImpl(private val db: SystemDatabase): PromotionReposito
         }
     }
 
-    override suspend fun getPromotionById(id: Int): Promotion {
-        return db.promotionDao().getPromotionById(id).toDomain()
+    override suspend fun getPromotionById(id: Int): Promotion? {
+        return db.promotionDao().getPromotionById(id)?.toDomain()
     }
 
     override suspend fun addPromotion(promotion: Promotion) {

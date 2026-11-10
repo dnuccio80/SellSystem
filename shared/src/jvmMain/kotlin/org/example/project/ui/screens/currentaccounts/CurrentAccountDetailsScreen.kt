@@ -60,6 +60,7 @@ import org.example.project.ui.Capitalization
 import org.example.project.ui.Capitalization.NONE
 import org.example.project.ui.Capitalization.SENTENCES
 import org.example.project.ui.Capitalization.WORDS
+import org.example.project.ui.CheckBoxItem
 import org.example.project.ui.GenericButton
 import org.example.project.ui.GenericScreenTitleHeaderWithButtons
 import org.example.project.ui.GenericSelectableTextField
@@ -196,7 +197,10 @@ class CurrentAccountDetailsScreen(val clientId: Int) : Screen {
                             },
                             onDescriptionChange = { viewModel.updateDescriptionTransactionData(it) },
                             onAmountChange = { viewModel.updateAmountTransactionData(it) },
-                            onTransactionTypeChange = { viewModel.updateTransactionType(it) }
+                            onTransactionTypeChange = { viewModel.updateTransactionType(it) },
+                            onAllPaymentCheck = { viewModel.updateAmountTransactionData(
+                                (uiState as Success).balance.balance.toString()
+                            ) }
                         )
                     }
                     SimpleAdviceDialog(
@@ -353,6 +357,7 @@ private fun TransactionDialog(
     onTransactionTypeChange: (TransactionType) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onAmountChange: (String) -> Unit,
+    onAllPaymentCheck:() -> Unit,
 ) {
 
     val transactionType = listOf(
@@ -361,6 +366,7 @@ private fun TransactionDialog(
     )
 
     var showDropdownMenuCategory by rememberSaveable { mutableStateOf(false) }
+    var totalPayment by rememberSaveable { mutableStateOf(false) }
     var transactionTypeSelected by rememberSaveable { mutableStateOf("") }
 
     val amount = if (transactionData.amount == 0L) "" else transactionData.amount.toString()
@@ -436,6 +442,16 @@ private fun TransactionDialog(
                     isPrice = true,
                     capitalizationMethod = NONE
                 ) { onAmountChange(it) }
+                if(!isEdit && transactionData.type.etiquette == TransactionType.PAYMENT.etiquette) {
+                    CheckBoxItem(
+                        name = "Pago total de la deuda",
+                        checked = totalPayment,
+                        onClick = {
+                            totalPayment = !totalPayment
+                            if(totalPayment) onAllPaymentCheck()
+                        }
+                    )
+                }
                 if(isEdit) {
                     Text("Fecha: ${transactionData.date.formatToDisplay()}", color = GrayText, style = MaterialTheme.typography.bodySmall)
                 }
