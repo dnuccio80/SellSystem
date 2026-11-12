@@ -6,6 +6,7 @@ import org.example.project.data.db.repositoriesimpl.CurrentAccountDetailsReposit
 import org.example.project.data.db.repositoriesimpl.CurrentAccountRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.DailyTransactionRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ExpenseRepositoryImpl
+import org.example.project.data.db.repositoriesimpl.LoyaltyRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.PendingOrderRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductCategoryRepositoryImpl
 import org.example.project.data.db.repositoriesimpl.ProductRepositoryImpl
@@ -19,6 +20,7 @@ import org.example.project.domain.repositories.CurrentAccountDetailRepository
 import org.example.project.domain.repositories.CurrentAccountRepository
 import org.example.project.domain.repositories.DailyTransactionRepository
 import org.example.project.domain.repositories.ExpensesRepository
+import org.example.project.domain.repositories.LoyaltyRepository
 import org.example.project.domain.repositories.PendingOrdersRepository
 import org.example.project.domain.repositories.ProductCategoryRepository
 import org.example.project.domain.repositories.ProductRepository
@@ -40,4 +42,5 @@ val dataModule = module {
     single<SellRepository> { SellRepositoryImpl(get()) }
     single<PendingOrdersRepository> { PendingOrderRepositoryImpl(get()) }
     single< PromotionRepository> { PromotionRepositoryImpl(get()) }
+    single< LoyaltyRepository> { LoyaltyRepositoryImpl(get()) }
 }

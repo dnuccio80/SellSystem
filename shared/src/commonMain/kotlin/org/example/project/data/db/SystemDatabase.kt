@@ -10,6 +10,7 @@ import org.example.project.data.db.daos.CurrentAccountDao
 import org.example.project.data.db.daos.CurrentAccountTransactionDao
 import org.example.project.data.db.daos.DailyTransactionDao
 import org.example.project.data.db.daos.ExpensesDao
+import org.example.project.data.db.daos.LoyaltyDao
 import org.example.project.data.db.daos.PendingOrderDao
 import org.example.project.data.db.daos.ProductCategoryDao
 import org.example.project.data.db.daos.ProductDao
@@ -28,6 +29,7 @@ import org.example.project.data.db.entities.ProductVariantEntity
 import org.example.project.data.db.entities.PromotionEntity
 import org.example.project.data.db.entities.SellEntity
 import org.example.project.data.db.entities.SupplierEntity
+import org.example.project.data.db.entities.relations.LoyaltyEntity
 import org.example.project.data.db.entities.relations.SellProductEntity
 import org.example.project.domain.models.currentaccount.DailyTransactionEntity
 
@@ -37,8 +39,8 @@ const val DATABASE_NAME = "ss_app_database.db"
 expect object SystemCTor : RoomDatabaseConstructor<SystemDatabase>
 
 @Database(
-    entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class, ExpenseEntity::class, SupplierEntity::class, CurrentAccountEntity::class, CurrentAccountTransactionEntity::class, DailyTransactionEntity::class, SellEntity::class, SellProductEntity::class, PendingOrderEntity::class, PromotionEntity::class],
-    version = 27
+    entities = [ClientEntity::class, ProductVariantEntity::class, ProductEntity::class, ProductCategoryEntity::class, ExpenseEntity::class, SupplierEntity::class, CurrentAccountEntity::class, CurrentAccountTransactionEntity::class, DailyTransactionEntity::class, SellEntity::class, SellProductEntity::class, PendingOrderEntity::class, PromotionEntity::class, LoyaltyEntity::class],
+    version = 28
 )
 @ConstructedBy(SystemCTor::class)
 @TypeConverters(Converters::class)
@@ -55,4 +57,5 @@ abstract class SystemDatabase : RoomDatabase() {
     abstract fun sellDao(): SellDao
     abstract fun pendingOrderDao(): PendingOrderDao
     abstract fun promotionDao(): PromotionDao
+    abstract fun loyaltyDao(): LoyaltyDao
 }

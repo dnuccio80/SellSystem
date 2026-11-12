@@ -54,7 +54,7 @@ import org.example.project.ui.screens.daily.DailyScreen
 import org.example.project.ui.screens.DashboardScreen
 import org.example.project.ui.screens.expenses.ExpensesScreen
 import org.example.project.ui.screens.FinancialReportsScreen
-import org.example.project.ui.screens.LoyaltySystemScreen
+import org.example.project.ui.screens.loyalty.LoyaltySystemScreen
 import org.example.project.ui.screens.PendingOrdersScreen
 import org.example.project.ui.screens.productvariants.ProductVariantsScreen
 import org.example.project.ui.screens.products.ProductsScreen

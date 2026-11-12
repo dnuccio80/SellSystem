@@ -105,5 +105,4 @@ val domainModule = module {
     factoryOf(::GetCategoriesForPromotions)
     factoryOf(::GetPromotionsForProduct)
 
-
 }
